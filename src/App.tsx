@@ -12,6 +12,7 @@ import Aurora from './Aurora';
 import SimpleBlurText from '@components/SimpleBlurText';
 import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar';
+import LanguageMorphingTitle from '@components/LanguageMorphingTitle';
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -138,16 +139,11 @@ const SectionContent = styled.div`
 `;
 
 // Language Selector position
-const LanguageSelectorStyled = styled(LanguageSelector)<{ visible: boolean }>`
+const LanguageSelectorStyled = styled(LanguageSelector)`
   position: fixed;
   top: 1.5rem;
   right: 1.5rem;
   z-index: 100;
-  opacity: ${({ visible }) => (visible ? 1 : 0)};
-  transform: translateY(${({ visible }) => (visible ? 0 : -10)}px);
-  transition:
-    opacity 0.5s ease,
-    transform 0.5s ease;
 `;
 
 // NavBar estilizada con la misma transición pero manteniendo el centrado original
@@ -161,29 +157,46 @@ const NavBarStyled = styled(NavBar)<{ visible: boolean }>`
   }
 `;
 
+// Estilo para los títulos de sección con animación morphing
+const StyledMorphingTitle = styled(LanguageMorphingTitle)`
+  font-size: clamp(2.5rem, 5vw, 7rem);
+  font-weight: 900;
+  margin-bottom: 2.5rem;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+
+  @media (min-width: 768px) {
+    font-size: clamp(3.5rem, 8vw, 10rem);
+  }
+`;
+
 const AppContent = () => {
-  // Estado para controlar la visibilidad del navbar y selector de idioma
-  const [visible, setVisible] = useState(false);
+  // Estado para controlar la visibilidad solo de la navbar
+  const [navbarVisible, setNavbarVisible] = useState(false);
   const { t, i18n } = useTranslation();
   const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
 
-  // Establecer visible a true después de 1000ms cuando se inicia
+  // Establecer navbarVisible a true después de 1000ms cuando se inicia
   useEffect(() => {
     const timer = setTimeout(() => {
-      setVisible(true);
+      setNavbarVisible(true);
     }, 1000);
 
     // Limpiar el timeout cuando el componente se desmonte
     return () => clearTimeout(timer);
   }, []);
 
-  // Escuchar el evento de inicio de cambio de idioma
+  // Escuchar el evento de cambio de idioma para ocultar solo la navbar
   useEffect(() => {
-    const handleInitiateLanguageChange = (event: CustomEvent<{ newLanguage: string }>) => {
-      // Almacenar el nuevo idioma en el estado pendiente
+    const handleInitiateLanguageChange = (
+      event: CustomEvent<{ previousLanguage: string; newLanguage: string }>
+    ) => {
+      // Guardar el idioma que queremos cambiar
       setPendingLanguage(event.detail.newLanguage);
-      // Ocultar los componentes
-      setVisible(false);
+
+      // Ocultar la navbar primero (con el texto en el idioma original)
+      setNavbarVisible(false);
     };
 
     // Escuchar el evento personalizado
@@ -200,25 +213,26 @@ const AppContent = () => {
     };
   }, []);
 
-  // Efecto para cambiar el idioma después de que los componentes estén ocultos
+  // Efecto para cambiar el idioma después de que la navbar esté oculta
   useEffect(() => {
-    if (!visible && pendingLanguage) {
-      // Esperar a que la animación de desvanecimiento termine antes de cambiar el idioma
+    if (!navbarVisible && pendingLanguage) {
+      // Esperar a que la animación de ocultamiento termine antes de cambiar el idioma
       const timer = setTimeout(() => {
-        // Cambiar el idioma
+        // Ahora cambiamos el idioma
         i18n.changeLanguage(pendingLanguage);
+
         // Limpiar el idioma pendiente
         setPendingLanguage(null);
 
-        // Esperar un momento antes de mostrar los componentes nuevamente
+        // Mostrar la navbar nuevamente después de un breve retraso para dar tiempo a que se actualice el UI
         setTimeout(() => {
-          setVisible(true);
-        }, 400);
-      }, 500); // Tiempo suficiente para que la navbar desaparezca completamente
+          setNavbarVisible(true);
+        }, 300);
+      }, 400); // Tiempo suficiente para que la navbar desaparezca completamente
 
       return () => clearTimeout(timer);
     }
-  }, [visible, pendingLanguage, i18n]);
+  }, [navbarVisible, pendingLanguage, i18n]);
 
   // Colores para cada sección
   const sectionColors = {
@@ -337,8 +351,8 @@ const AppContent = () => {
       <AuroraWrapper>
         <Aurora colorStops={currentColors} blend={0.5} amplitude={1.0} speed={0.5} />
       </AuroraWrapper>
-      <NavBarStyled t={t} visible={visible} />
-      <LanguageSelectorStyled visible={visible} />
+      <NavBarStyled t={t} visible={navbarVisible} />
+      <LanguageSelectorStyled initialDelay={1300} />
 
       <Container>
         {/* Sección Home */}
@@ -356,15 +370,16 @@ const AppContent = () => {
 
         {/* Sección About */}
         <Section id="about">
-          <ScrollFloat
+          <StyledMorphingTitle
+            translationKey="navbar.about"
             animationDuration={1}
             ease="back.inOut(2)"
             scrollStart="center bottom+=50%"
             scrollEnd="bottom bottom-=40%"
             stagger={0.03}
-          >
-            {t('navbar.about')}
-          </ScrollFloat>
+            morphTime={0.8}
+            cooldownTime={0.2}
+          />
           <SectionContent>
             <p>
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl vel
@@ -375,15 +390,16 @@ const AppContent = () => {
 
         {/* Sección Projects */}
         <Section id="projects">
-          <ScrollFloat
+          <StyledMorphingTitle
+            translationKey="navbar.projects"
             animationDuration={1}
             ease="back.inOut(2)"
             scrollStart="center bottom+=50%"
             scrollEnd="bottom bottom-=40%"
             stagger={0.03}
-          >
-            {t('navbar.projects')}
-          </ScrollFloat>
+            morphTime={0.8}
+            cooldownTime={0.2}
+          />
           <SectionContent>
             <p>
               Aquí irán tus proyectos. Esta sección puede ser expandida con tarjetas, imágenes, etc.
@@ -393,15 +409,16 @@ const AppContent = () => {
 
         {/* Sección Resume */}
         <Section id="resume">
-          <ScrollFloat
+          <StyledMorphingTitle
+            translationKey="navbar.resume"
             animationDuration={1}
             ease="back.inOut(2)"
             scrollStart="center bottom+=50%"
             scrollEnd="bottom bottom-=40%"
             stagger={0.03}
-          >
-            {t('navbar.resume')}
-          </ScrollFloat>
+            morphTime={0.8}
+            cooldownTime={0.2}
+          />
           <SectionContent>
             <p>Información sobre tu experiencia, educación, habilidades, etc.</p>
           </SectionContent>

@@ -35,19 +35,38 @@ const resources = {
   },
 };
 
+// Obtener el idioma guardado en localStorage o usar el idioma del navegador
+const getDefaultLanguage = () => {
+  const savedLanguage = localStorage.getItem('i18nextLng');
+  if (savedLanguage && (savedLanguage.startsWith('es') || savedLanguage.startsWith('en'))) {
+    return savedLanguage.startsWith('es') ? 'es' : 'en';
+  }
+
+  // Si no hay un idioma guardado, intentar detectar el idioma del navegador
+  const browserLang = navigator.language;
+  return browserLang && browserLang.startsWith('es') ? 'es' : 'en';
+};
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     resources,
     fallbackLng: 'en',
+    lng: getDefaultLanguage(), // Establecer el idioma inicial explícitamente
     interpolation: {
       escapeValue: false,
     },
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
+      lookupLocalStorage: 'i18nextLng',
     },
   });
+
+// Asegurarse de que el idioma seleccionado se guarde correctamente en localStorage
+i18n.on('languageChanged', lng => {
+  localStorage.setItem('i18nextLng', lng);
+});
 
 export default i18n;
