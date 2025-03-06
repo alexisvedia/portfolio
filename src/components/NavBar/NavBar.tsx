@@ -29,6 +29,8 @@ const NavContainer = styled.div`
     bottom: 0;
     margin-bottom: 1.5rem;
     top: auto;
+    width: 85%; /* Aumentamos el ancho en mobile */
+    max-width: 400px;
   }
 
   @media (min-width: 769px) {
@@ -49,6 +51,12 @@ const NavContent = styled.div`
   box-shadow:
     0 10px 25px -5px rgba(0, 0, 0, 0.2),
     0 10px 10px -5px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    justify-content: space-around;
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
 `;
 
 // Elemento de navegación
@@ -70,7 +78,16 @@ const NavLink = styled(Link)<{ $isActive: boolean }>`
   }
 
   @media (max-width: 768px) {
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.25rem;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+    /* Efecto mejorado al tocar en mobile */
+    &:active {
+      transform: scale(0.95);
+      background-color: rgba(255, 255, 255, 0);
+    }
 
     > span.text {
       display: none;
@@ -151,6 +168,10 @@ const IconWrapper = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem; /* Iconos más grandes en mobile */
+  }
 `;
 
 export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
@@ -188,7 +209,7 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
             <NavLink key={item.name} to={item.url} $isActive={isActive}>
               <span className="text">{t(item.nameKey)}</span>
               <IconWrapper className="icon">
-                <Icon size={18} strokeWidth={2.5} />
+                <Icon size={isMobile ? 22 : 18} strokeWidth={2.5} />
               </IconWrapper>
               {isActive && (
                 <Lamp

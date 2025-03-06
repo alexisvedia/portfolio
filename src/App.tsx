@@ -37,6 +37,13 @@ const AuroraWrapper = styled.div`
   height: 100vh;
   z-index: 0;
   overflow: hidden;
+
+  /* Aseguramos que en mobile el Aurora tenga suficiente espacio */
+  @media (max-width: 768px) {
+    width: 100%;
+    height: 100dvh; /* Usar dvh para mejor soporte en mobile */
+    transform: scale(1.2); /* Escalar Aurora para que no se vea comprimido */
+  }
 `;
 
 // Contenedor de páginas
@@ -158,8 +165,15 @@ const NavBarStyled = styled(NavBar)<{ visible: boolean }>`
     opacity: ${({ visible }) => (visible ? 1 : 0)};
     transform: translateX(-50%) translateY(${({ visible }) => (visible ? 0 : -10)}px);
     transition:
-      opacity 0.5s ease,
-      transform 0.5s ease;
+      opacity 0.5s cubic-bezier(0.215, 0.61, 0.355, 1),
+      transform 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
+
+    @media (max-width: 768px) {
+      transform: translateX(-50%) translateY(${({ visible }) => (visible ? 0 : 10)}px);
+      transition:
+        opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
   }
 `;
 
@@ -279,8 +293,14 @@ const AppContent = () => {
 
         return () => clearTimeout(timer);
       } else {
-        // En móvil, ya cambiamos el idioma y simplemente limpiamos el estado pendiente
-        setPendingLanguage(null);
+        // En móvil, añadimos un pequeño efecto de "pulso" al cambiar el idioma
+        const timer = setTimeout(() => {
+          i18n.changeLanguage(pendingLanguage).then(() => {
+            setPendingLanguage(null);
+          });
+        }, 100);
+
+        return () => clearTimeout(timer);
       }
     }
   }, [pendingLanguage, navbarVisible, i18n, isMobile]);
