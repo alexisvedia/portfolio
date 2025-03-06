@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import ScrollFloat from '@components/ScrollFloat';
 import { Provider } from 'react-redux';
@@ -11,8 +11,14 @@ import styled from 'styled-components';
 import Aurora from './Aurora';
 import SimpleBlurText from '@components/SimpleBlurText';
 import LanguageSelector from '@components/LanguageSelector';
-import NavBar from '@components/NavBar';
+import NavBar from '@components/NavBar/NavBar';
 import LanguageMorphingTitle from '@components/LanguageMorphingTitle';
+
+// Importar páginas
+import Home from './pages/Home';
+import About from './pages/About';
+import Projects from './pages/Projects';
+import Resume from './pages/Resume';
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -33,7 +39,7 @@ const AuroraWrapper = styled.div`
   overflow: hidden;
 `;
 
-// Contenedor de secciones
+// Contenedor de páginas
 const Container = styled.div`
   position: relative;
   min-height: 100vh;
@@ -176,6 +182,10 @@ const AppContent = () => {
   const [navbarVisible, setNavbarVisible] = useState(false);
   const { t, i18n } = useTranslation();
   const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
+  const location = useLocation();
+
+  // Estado para los colores de Aurora
+  const [currentColors, setCurrentColors] = useState<string[]>(['#646cff', '#82e9de', '#a6c1ff']);
 
   // Establecer navbarVisible a true después de 1000ms cuando se inicia
   useEffect(() => {
@@ -199,12 +209,13 @@ const AppContent = () => {
       setNavbarVisible(false);
     };
 
-    // Escuchar el evento personalizado
+    // Registrar oyente para el evento custom
     window.addEventListener(
       'initiateLanguageChange',
       handleInitiateLanguageChange as EventListener
     );
 
+    // Limpiar oyentes cuando el componente se desmonte
     return () => {
       window.removeEventListener(
         'initiateLanguageChange',
@@ -213,136 +224,47 @@ const AppContent = () => {
     };
   }, []);
 
-  // Efecto para cambiar el idioma después de que la navbar esté oculta
+  // Escuchar el evento de actualización de colores de Aurora
   useEffect(() => {
-    if (!navbarVisible && pendingLanguage) {
-      // Esperar a que la animación de ocultamiento termine antes de cambiar el idioma
-      const timer = setTimeout(() => {
-        // Ahora cambiamos el idioma
-        i18n.changeLanguage(pendingLanguage);
-
-        // Limpiar el idioma pendiente
-        setPendingLanguage(null);
-
-        // Mostrar la navbar nuevamente después de un breve retraso para dar tiempo a que se actualice el UI
-        setTimeout(() => {
-          setNavbarVisible(true);
-        }, 300);
-      }, 400); // Tiempo suficiente para que la navbar desaparezca completamente
-
-      return () => clearTimeout(timer);
-    }
-  }, [navbarVisible, pendingLanguage, i18n]);
-
-  // Colores para cada sección
-  const sectionColors = {
-    home: ['#3A29FF', '#FF94B4', '#FF3232'],
-    about: ['#21D4FD', '#2152FF', '#21D4FD'],
-    projects: ['#8E33FF', '#FF33A8', '#8E33FF'],
-    resume: ['#00F5A0', '#00D9F5', '#00F5A0'],
-  };
-
-  // Estados para la sección activa y los colores actuales
-  const [activeSection, setActiveSection] = useState('home');
-  const [currentColors, setCurrentColors] = useState(sectionColors.home);
-
-  // Referencia para la animación
-  const animationRef = useRef<number | null>(null);
-
-  // Función para interpolar entre colores
-  const interpolateColor = (color1: string, color2: string, factor: number): string => {
-    const hex1 = color1.replace('#', '');
-    const hex2 = color2.replace('#', '');
-
-    const r = Math.round(
-      parseInt(hex1.substring(0, 2), 16) * (1 - factor) +
-        parseInt(hex2.substring(0, 2), 16) * factor
-    );
-    const g = Math.round(
-      parseInt(hex1.substring(2, 4), 16) * (1 - factor) +
-        parseInt(hex2.substring(2, 4), 16) * factor
-    );
-    const b = Math.round(
-      parseInt(hex1.substring(4, 6), 16) * (1 - factor) +
-        parseInt(hex2.substring(4, 6), 16) * factor
-    );
-
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-  };
-
-  // Función para animar la transición de color
-  const animateColorTransition = (startColors: string[], targetColors: string[]) => {
-    const duration = 1000; // duración en milisegundos
-    const startTime = performance.now();
-
-    const updateColors = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      if (progress < 1) {
-        const interpolatedColors = startColors.map((startColor, index) =>
-          interpolateColor(startColor, targetColors[index], progress)
-        );
-
-        setCurrentColors(interpolatedColors);
-        animationRef.current = requestAnimationFrame(updateColors);
-      } else {
-        setCurrentColors(targetColors);
-        animationRef.current = null;
-      }
+    const handleUpdateAuroraColors = (event: CustomEvent<{ colors: string[] }>) => {
+      setCurrentColors(event.detail.colors);
     };
 
-    if (animationRef.current) {
-      cancelAnimationFrame(animationRef.current);
-    }
+    // Registrar oyente para el evento custom
+    window.addEventListener('updateAuroraColors', handleUpdateAuroraColors as EventListener);
 
-    animationRef.current = requestAnimationFrame(updateColors);
-  };
-
-  // Efecto para iniciar animación cuando cambia la sección activa
-  useEffect(() => {
-    if (activeSection in sectionColors) {
-      const targetColors = sectionColors[activeSection as keyof typeof sectionColors];
-      animateColorTransition(currentColors, targetColors);
-    }
-
+    // Limpiar oyentes cuando el componente se desmonte
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-        animationRef.current = null;
-      }
-    };
-  }, [activeSection, currentColors]);
-
-  // Detectar sección activa durante el scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      const sections = ['home', 'about', 'projects', 'resume'];
-
-      for (const sectionId of sections) {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          // Si la sección está visible en la ventana
-          if (rect.top <= window.innerHeight / 2 && rect.bottom >= window.innerHeight / 2) {
-            setActiveSection(sectionId);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    // Comprobar la sección inicial
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('updateAuroraColors', handleUpdateAuroraColors as EventListener);
     };
   }, []);
 
+  // Efectuar el cambio de idioma solo cuando todas las animaciones iniciales y ocultar navbar hayan terminado
+  useEffect(() => {
+    // Si tenemos un idioma pendiente y la navbar está oculta, podemos proceder
+    if (pendingLanguage && !navbarVisible) {
+      const timer = setTimeout(() => {
+        // Cambiar realmente el idioma en i18n SOLO después de que la navbar esté oculta
+        i18n.changeLanguage(pendingLanguage).then(() => {
+          // Después de un tiempo para que el cambio de idioma surta efecto, mostrar navbar nuevamente
+          const showTimer = setTimeout(() => {
+            setNavbarVisible(true);
+            // Limpiar el idioma pendiente
+            setPendingLanguage(null);
+          }, 300);
+
+          return () => clearTimeout(showTimer);
+        });
+      }, 300); // Dar tiempo para que la navbar termine de ocultarse
+
+      return () => clearTimeout(timer);
+    }
+  }, [pendingLanguage, navbarVisible, i18n]);
+
+  // Función para manejar la finalización de las animaciones
   const handleAnimationComplete = () => {
-    console.log('Animation completed!');
+    // Este callback se llama cuando la animación de bienvenida está completa
+    console.log('Animación de bienvenida completada');
     store.dispatch(setLoaded(true));
   };
 
@@ -355,77 +277,11 @@ const AppContent = () => {
       <LanguageSelectorStyled initialDelay={1300} />
 
       <Container>
-        {/* Sección Home */}
-        <Section id="home">
-          <Content>
-            <Title>
-              <SimpleBlurText
-                key={i18n.language}
-                text={t('welcome')}
-                onAnimationComplete={handleAnimationComplete}
-              />
-            </Title>
-          </Content>
-        </Section>
-
-        {/* Sección About */}
-        <Section id="about">
-          <StyledMorphingTitle
-            translationKey="navbar.about"
-            animationDuration={1}
-            ease="back.inOut(2)"
-            scrollStart="center bottom+=50%"
-            scrollEnd="bottom bottom-=40%"
-            stagger={0.03}
-            morphTime={0.8}
-            cooldownTime={0.2}
-          />
-          <SectionContent>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl vel
-              ultricies lacinia, nisl nisl aliquet nisl, nec aliquet nisl nisl sit amet lorem.
-            </p>
-          </SectionContent>
-        </Section>
-
-        {/* Sección Projects */}
-        <Section id="projects">
-          <StyledMorphingTitle
-            translationKey="navbar.projects"
-            animationDuration={1}
-            ease="back.inOut(2)"
-            scrollStart="center bottom+=50%"
-            scrollEnd="bottom bottom-=40%"
-            stagger={0.03}
-            morphTime={0.8}
-            cooldownTime={0.2}
-          />
-          <SectionContent>
-            <p>
-              Aquí irán tus proyectos. Esta sección puede ser expandida con tarjetas, imágenes, etc.
-            </p>
-          </SectionContent>
-        </Section>
-
-        {/* Sección Resume */}
-        <Section id="resume">
-          <StyledMorphingTitle
-            translationKey="navbar.resume"
-            animationDuration={1}
-            ease="back.inOut(2)"
-            scrollStart="center bottom+=50%"
-            scrollEnd="bottom bottom-=40%"
-            stagger={0.03}
-            morphTime={0.8}
-            cooldownTime={0.2}
-          />
-          <SectionContent>
-            <p>Información sobre tu experiencia, educación, habilidades, etc.</p>
-          </SectionContent>
-        </Section>
-
         <Routes>
-          <Route path="/" element={<></>} />
+          <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/projects" element={<Projects />} />
+          <Route path="/resume" element={<Resume />} />
         </Routes>
       </Container>
     </AppWrapper>

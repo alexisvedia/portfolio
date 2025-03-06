@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { Home, User, Briefcase, FileText } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 interface NavItem {
   name: string;
@@ -51,7 +52,7 @@ const NavContent = styled.div`
 `;
 
 // Elemento de navegación
-const NavLink = styled.a<{ $isActive: boolean }>`
+const NavLink = styled(Link)<{ $isActive: boolean }>`
   position: relative;
   cursor: pointer;
   font-size: 0.875rem;
@@ -61,6 +62,7 @@ const NavLink = styled.a<{ $isActive: boolean }>`
   transition: all 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
   color: ${({ $isActive }) => ($isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.53)')};
   background-color: ${({ $isActive }) => ($isActive ? 'rgba(100, 108, 255, 0.01)' : 'transparent')};
+  text-decoration: none;
 
   &:hover {
     color: #ffffff;
@@ -95,7 +97,7 @@ const Lamp = styled(motion.div)`
   position: absolute;
   inset: 0;
   width: 100%;
-  background-color: rgba(255, 255, 255, 0);
+  background-color: rgba(255, 255, 255, 0.15);
   border-radius: 9999px;
   z-index: -10;
 `;
@@ -154,14 +156,14 @@ const IconWrapper = styled.span`
 export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
   // Definir los elementos de navegación con sus nombres y URLs
   const items: NavItem[] = [
-    { name: 'Home', nameKey: 'navbar.home', url: '#home', icon: Home },
-    { name: 'About', nameKey: 'navbar.about', url: '#about', icon: User },
-    { name: 'Projects', nameKey: 'navbar.projects', url: '#projects', icon: Briefcase },
-    { name: 'Resume', nameKey: 'navbar.resume', url: '#resume', icon: FileText },
+    { name: 'Home', nameKey: 'navbar.home', url: '/', icon: Home },
+    { name: 'About', nameKey: 'navbar.about', url: '/about', icon: User },
+    { name: 'Projects', nameKey: 'navbar.projects', url: '/projects', icon: Briefcase },
+    { name: 'Resume', nameKey: 'navbar.resume', url: '/resume', icon: FileText },
   ];
 
-  const [activeTab, setActiveTab] = useState(items[0].name);
   const [isMobile, setIsMobile] = useState(false);
+  const location = useLocation();
 
   // Configurar detector de tamaño de pantalla
   useEffect(() => {
@@ -174,76 +176,16 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Función para determinar la sección activa en función del scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      // Obtener la posición actual del scroll
-      const scrollPosition = window.scrollY + window.innerHeight / 3;
-
-      // Comprobar cada sección y determinar cuál está activa
-      const sections = items
-        .map(item => {
-          const element = document.querySelector(item.url);
-          if (element) {
-            const rect = element.getBoundingClientRect();
-            const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            // Calcular la posición absoluta de la sección
-            const offsetTop = rect.top + scrollTop;
-            const offsetBottom = offsetTop + rect.height;
-
-            return {
-              name: item.name,
-              offsetTop,
-              offsetBottom,
-            };
-          }
-          return null;
-        })
-        .filter(Boolean);
-
-      // Encontrar la sección visible en la ventana
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = sections[i];
-        if (section && scrollPosition >= section.offsetTop) {
-          if (activeTab !== section.name) {
-            setActiveTab(section.name);
-          }
-          break;
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    // Llamar a handleScroll inmediatamente para establecer la sección activa inicial
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [activeTab, items]);
-
   return (
     <NavContainer className={className}>
       <NavContent>
         {items.map(item => {
           const Icon = item.icon;
-          const isActive = activeTab === item.name;
+          const isActive =
+            location.pathname === item.url || (location.pathname === '' && item.url === '/');
 
           return (
-            <NavLink
-              key={item.name}
-              href={item.url}
-              onClick={e => {
-                e.preventDefault();
-                setActiveTab(item.name);
-                // Desplazar a la sección correspondiente con animación
-                const element = document.querySelector(item.url);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth' });
-                }
-              }}
-              $isActive={isActive}
-            >
+            <NavLink key={item.name} to={item.url} $isActive={isActive}>
               <span className="text">{t(item.nameKey)}</span>
               <IconWrapper className="icon">
                 <Icon size={18} strokeWidth={2.5} />
@@ -258,11 +200,10 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
                     damping: 30,
                   }}
                 >
-                  <LampTop>
-                    <LampGlow1 />
-                    <LampGlow2 />
-                    <LampGlow3 />
-                  </LampTop>
+                  <LampTop />
+                  <LampGlow1 />
+                  <LampGlow2 />
+                  <LampGlow3 />
                 </Lamp>
               )}
             </NavLink>
