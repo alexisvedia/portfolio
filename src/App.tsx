@@ -52,7 +52,7 @@ const Content = styled.div`
 `;
 
 const Title = styled.div`
-font-family:
+  font-family:
     'Inter',
     -apple-system,
     BlinkMacSystemFont,
@@ -64,12 +64,12 @@ font-family:
     'Open Sans',
     'Helvetica Neue',
     sans-serif;
-font-size: ${({ theme }) => theme.fontSizes['5xl']};
-color: ${({ theme }) => theme.colors.text};
-margin-bottom: ${({ theme }) => theme.space['2xl']};
-text-align: center;
-font-weight: 700;
-text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-size: ${({ theme }) => theme.fontSizes['5xl']};
+  color: ${({ theme }) => theme.colors.text};
+  margin-bottom: ${({ theme }) => theme.space['2xl']};
+  text-align: center;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 `;
 
 // Secciones estilizadas
@@ -139,40 +139,89 @@ const SectionContent = styled.div`
 
 // Language Selector position
 const LanguageSelectorStyled = styled(LanguageSelector)<{ visible: boolean }>`
-position: fixed;
-top: 1.5rem;
-right: 1.5rem;
-z-index: 100;
-opacity: ${({ visible }) => (visible ? 1 : 0)};
-transform: translateY(${({ visible }) => (visible ? 0 : -10)}px);
-transition: opacity 0.5s ease, transform 0.5s ease;
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+  opacity: ${({ visible }) => (visible ? 1 : 0)};
+  transform: translateY(${({ visible }) => (visible ? 0 : -10)}px);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
 `;
 
 // NavBar estilizada con la misma transición pero manteniendo el centrado original
 const NavBarStyled = styled(NavBar)<{ visible: boolean }>`
-&&& {
+  &&& {
     opacity: ${({ visible }) => (visible ? 1 : 0)};
     transform: translateX(-50%) translateY(${({ visible }) => (visible ? 0 : -10)}px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-}
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
+  }
 `;
 
 const AppContent = () => {
-// Estado para controlar la visibilidad del navbar y selector de idioma
-const [visible, setVisible] = useState(false);
+  // Estado para controlar la visibilidad del navbar y selector de idioma
+  const [visible, setVisible] = useState(false);
+  const { t, i18n } = useTranslation();
+  const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
 
-// Establecer visible a true después de 500ms
-useEffect(() => {
+  // Establecer visible a true después de 1000ms cuando se inicia
+  useEffect(() => {
     const timer = setTimeout(() => {
-    setVisible(true);
+      setVisible(true);
     }, 1000);
-    
+
     // Limpiar el timeout cuando el componente se desmonte
     return () => clearTimeout(timer);
-}, []);
+  }, []);
 
-// Colores para cada sección
-const sectionColors = {
+  // Escuchar el evento de inicio de cambio de idioma
+  useEffect(() => {
+    const handleInitiateLanguageChange = (event: CustomEvent<{ newLanguage: string }>) => {
+      // Almacenar el nuevo idioma en el estado pendiente
+      setPendingLanguage(event.detail.newLanguage);
+      // Ocultar los componentes
+      setVisible(false);
+    };
+
+    // Escuchar el evento personalizado
+    window.addEventListener(
+      'initiateLanguageChange',
+      handleInitiateLanguageChange as EventListener
+    );
+
+    return () => {
+      window.removeEventListener(
+        'initiateLanguageChange',
+        handleInitiateLanguageChange as EventListener
+      );
+    };
+  }, []);
+
+  // Efecto para cambiar el idioma después de que los componentes estén ocultos
+  useEffect(() => {
+    if (!visible && pendingLanguage) {
+      // Esperar a que la animación de desvanecimiento termine antes de cambiar el idioma
+      const timer = setTimeout(() => {
+        // Cambiar el idioma
+        i18n.changeLanguage(pendingLanguage);
+        // Limpiar el idioma pendiente
+        setPendingLanguage(null);
+
+        // Esperar un momento antes de mostrar los componentes nuevamente
+        setTimeout(() => {
+          setVisible(true);
+        }, 400);
+      }, 500); // Tiempo suficiente para que la navbar desaparezca completamente
+
+      return () => clearTimeout(timer);
+    }
+  }, [visible, pendingLanguage, i18n]);
+
+  // Colores para cada sección
+  const sectionColors = {
     home: ['#3A29FF', '#FF94B4', '#FF3232'],
     about: ['#21D4FD', '#2152FF', '#21D4FD'],
     projects: ['#8E33FF', '#FF33A8', '#8E33FF'],
@@ -278,8 +327,6 @@ const sectionColors = {
     };
   }, []);
 
-  const { t, i18n } = useTranslation();
-
   const handleAnimationComplete = () => {
     console.log('Animation completed!');
     store.dispatch(setLoaded(true));
@@ -287,11 +334,11 @@ const sectionColors = {
 
   return (
     <AppWrapper>
-    <AuroraWrapper>
-    <Aurora colorStops={currentColors} blend={0.5} amplitude={1.0} speed={0.5} />
-    </AuroraWrapper>
-    <NavBarStyled t={t} visible={visible} />
-    <LanguageSelectorStyled visible={visible} />
+      <AuroraWrapper>
+        <Aurora colorStops={currentColors} blend={0.5} amplitude={1.0} speed={0.5} />
+      </AuroraWrapper>
+      <NavBarStyled t={t} visible={visible} />
+      <LanguageSelectorStyled visible={visible} />
 
       <Container>
         {/* Sección Home */}

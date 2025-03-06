@@ -46,8 +46,6 @@ const SimpleBlurText: React.FC<SimpleBlurTextProps> = ({
   useEffect(() => {
     setMounted(true);
 
-    // Calcula la duración total de la animación basado en el número de caracteres
-    // y un tiempo adicional para la animación completa
     const totalDuration = text.length * 80 + 800;
 
     // Ejecuta onAnimationComplete después de que termine toda la animación
