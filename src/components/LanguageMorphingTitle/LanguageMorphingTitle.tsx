@@ -8,11 +8,6 @@ interface LanguageMorphingTitleProps {
   morphTime?: number;
   cooldownTime?: number;
   className?: string;
-  animationDuration?: number;
-  ease?: string;
-  scrollStart?: string;
-  scrollEnd?: string;
-  stagger?: number;
 }
 
 const MorphContainer = styled.div<{ shouldMorph: boolean }>`
@@ -54,11 +49,6 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
   morphTime = 1,
   cooldownTime = 0.25,
   className,
-  animationDuration = 1,
-  ease = 'back.inOut(2)',
-  scrollStart = 'center bottom+=50%',
-  scrollEnd = 'bottom bottom-=40%',
-  stagger = 0.03,
 }) => {
   const { t, i18n } = useTranslation();
   const [shouldMorph, setShouldMorph] = useState(false);

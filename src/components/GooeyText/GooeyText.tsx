@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { cn } from '../../utils/cn';
 import styled from 'styled-components';
 
 interface GooeyTextProps {

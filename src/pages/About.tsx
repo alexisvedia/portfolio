@@ -60,7 +60,7 @@ const Content = styled.div`
 `;
 
 const About: React.FC = () => {
-  const { t } = useTranslation();
+  const {} = useTranslation();
 
   // Cuando el componente se monta, actualiza los colores para esta página
   useEffect(() => {
@@ -76,14 +76,7 @@ const About: React.FC = () => {
   return (
     <PageTransition>
       <Content>
-        <StyledMorphingTitle
-          translationKey="navbar.about"
-          animationDuration={1}
-          ease="back.inOut(2)"
-          stagger={0.03}
-          morphTime={0.8}
-          cooldownTime={0.2}
-        />
+        <StyledMorphingTitle translationKey="navbar.about" morphTime={0.8} cooldownTime={0.2} />
         <SectionContent>
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl vel ultricies

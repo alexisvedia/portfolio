@@ -60,7 +60,7 @@ const Content = styled.div`
 `;
 
 const Projects: React.FC = () => {
-  const { t } = useTranslation();
+  const {} = useTranslation();
 
   // Cuando el componente se monta, actualiza los colores para esta página
   useEffect(() => {
@@ -76,14 +76,7 @@ const Projects: React.FC = () => {
   return (
     <PageTransition>
       <Content>
-        <StyledMorphingTitle
-          translationKey="navbar.projects"
-          animationDuration={1}
-          ease="back.inOut(2)"
-          stagger={0.03}
-          morphTime={0.8}
-          cooldownTime={0.2}
-        />
+        <StyledMorphingTitle translationKey="navbar.projects" morphTime={0.8} cooldownTime={0.2} />
         <SectionContent>
           <p>
             Aquí irán tus proyectos. Esta sección puede ser expandida con tarjetas, imágenes, etc.
