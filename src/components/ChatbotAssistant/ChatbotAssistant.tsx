@@ -7,22 +7,51 @@ import { HiSparkles } from "react-icons/hi2";
 const fadeIn = keyframes`
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
 `;
 
-const fadeOut = keyframes`
-  from {
+const morphToChat = keyframes`
+  0% {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     opacity: 1;
-    transform: translateY(0) scale(1);
   }
-  to {
-    opacity: 0;
-    transform: translateY(10px) scale(0.95);
+  20% {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    opacity: 1;
+  }
+  100% {
+    width: 320px;
+    height: 400px;
+    border-radius: 16px;
+    opacity: 1;
+  }
+`;
+
+const morphToButton = keyframes`
+  0% {
+    width: 320px;
+    height: 400px;
+    border-radius: 16px;
+    opacity: 1;
+  }
+  80% {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    opacity: 1;
+  }
+  100% {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    opacity: 1;
   }
 `;
 
@@ -41,21 +70,6 @@ const pulse = keyframes`
   }
 `;
 
-const starTwinkle = keyframes`
-  0% {
-    opacity: 0.7;
-    transform: scale(1) rotate(0deg);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2) rotate(5deg);
-  }
-  100% {
-    opacity: 0.7;
-    transform: scale(1) rotate(0deg);
-  }
-`;
-
 const floatAnimation = keyframes`
   0% {
     transform: translateY(0px);
@@ -68,10 +82,34 @@ const floatAnimation = keyframes`
   }
 `;
 
+const fadeInContent = keyframes`
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+`;
+
+const fadeOutContent = keyframes`
+  0% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+`;
+
 const ChatbotContainer = styled.div<{ isOpen: boolean }>`
   position: fixed;
-  bottom: ${props => props.isOpen ? '30px' : '20px'};
-  right: ${props => props.isOpen ? '30px' : '20px'};
+  bottom: 20px;
+  right: 20px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -79,24 +117,58 @@ const ChatbotContainer = styled.div<{ isOpen: boolean }>`
   animation: ${floatAnimation} 6s ease-in-out infinite;
 `;
 
-const ChatbotButton = styled.button`
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.accent});
-  border: none;
-  cursor: pointer;
+const ChatElement = styled.div<{ isOpen: boolean }>`
+  width: ${props => props.isOpen ? '320px' : '48px'};
+  height: ${props => props.isOpen ? '400px' : '48px'};
+  border-radius: ${props => props.isOpen ? '16px' : '50%'};
+  background: ${props => props.isOpen ? 'rgba(30, 30, 35, 0.7)' : 'rgba(255, 255, 255, 0.1)'};
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: ${props => props.isOpen 
+    ? css`${morphToChat} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards` 
+    : css`${morphToButton} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards`};
+  transform-origin: bottom right;
+  
+  /* Windows 11 Mica effect */
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.15' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.02;
+    border-radius: inherit;
+    z-index: -1;
+    pointer-events: none;
+  }
+`;
+
+const ChatButton = styled.button<{ isOpen: boolean }>`
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(121, 40, 202, 0.4);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  position: relative;
-  overflow: hidden;
+  color: white;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: ${props => props.isOpen ? '0' : '2'};
+  opacity: ${props => props.isOpen ? '0' : '1'};
+  transition: opacity 0.2s ease-out;
   
   &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 25px rgba(121, 40, 202, 0.5);
+    background: rgba(255, 255, 255, 0.05);
   }
   
   &:before {
@@ -107,39 +179,42 @@ const ChatbotButton = styled.button`
     right: -10px;
     bottom: -10px;
     border-radius: 50%;
-    background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.accent});
+    background: rgba(255, 255, 255, 0.05);
     z-index: -1;
-    opacity: 0.6;
+    opacity: ${props => props.isOpen ? '0' : '0.6'};
     animation: ${pulse} 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  svg {
+    display: flex;
   }
 `;
 
-const ChatWindow = styled.div<{ isVisible: boolean }>`
-  width: 320px;
-  height: 400px;
-  background: ${props => props.theme.colors.secondary};
-  border-radius: 16px;
-  margin-bottom: 16px;
-  overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+const ChatContent = styled.div<{ isOpen: boolean }>`
   display: flex;
   flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  animation: ${props => props.isVisible ? css`${fadeIn} 0.4s forwards` : css`${fadeOut} 0.3s forwards`};
-  opacity: ${props => props.isVisible ? 1 : 0};
-  transform-origin: bottom right;
-  backdrop-filter: blur(10px);
+  width: 100%;
+  height: 100%;
+  opacity: ${props => props.isOpen ? '1' : '0'};
+  animation: ${props => props.isOpen 
+    ? css`${fadeInContent} 0.4s forwards` 
+    : css`${fadeOutContent} 0.2s forwards`};
+  z-index: ${props => props.isOpen ? '2' : '0'};
+  pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
 `;
 
 const ChatHeader = styled.div`
   padding: 16px;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.accent});
+  background: rgba(255, 255, 255, 0.05);
   color: ${props => props.theme.colors.text};
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
 `;
 
 const HeaderTitle = styled.h3`
@@ -149,6 +224,11 @@ const HeaderTitle = styled.h3`
   display: flex;
   align-items: center;
   gap: 8px;
+  
+  svg {
+    display: flex;
+    vertical-align: middle;
+  }
 `;
 
 const CloseButton = styled.button`
@@ -206,9 +286,11 @@ const MessageBubble = styled.div<{ isUser?: boolean }>`
 
 const ChatInputContainer = styled.div`
   padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   gap: 10px;
+  background: rgba(20, 20, 25, 0.3);
+  backdrop-filter: blur(10px);
 `;
 
 const ChatInput = styled.input`
@@ -233,20 +315,23 @@ const ChatInput = styled.input`
 `;
 
 const SendButton = styled.button`
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
-  background: linear-gradient(135deg, ${props => props.theme.colors.primary}, ${props => props.theme.colors.accent});
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   color: ${props => props.theme.colors.text};
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   
   &:hover {
     transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.15);
   }
   
   &:active {
@@ -255,41 +340,13 @@ const SendButton = styled.button`
 `;
 
 // AI Stars Icon Component
-const AIStarsIcon: React.FC = () => {
+const AIStarsIcon: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <HiSparkles size={22} />
+    <span className={className} style={{ display: 'flex', alignItems: 'center' }}>
+      <HiSparkles size={22} color="white" />
+    </span>
   );
 };
-
-const StarContainer = styled.div`
-  position: relative;
-  width: 22px;
-  height: 22px;
-  margin-right: 8px;
-`;
-
-interface StarProps {
-  delay: number;
-  size: string;
-  top?: string;
-  left?: string;
-  right?: string;
-  bottom?: string;
-}
-
-const Star = styled.div<StarProps>`
-  position: absolute;
-  width: ${props => props.size};
-  height: ${props => props.size};
-  top: ${props => props.top};
-  left: ${props => props.left};
-  right: ${props => props.right};
-  bottom: ${props => props.bottom};
-  background: white;
-  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-  animation: ${starTwinkle} ${props => 2 + props.delay}s ease-in-out infinite;
-  animation-delay: ${props => props.delay}s;
-`;
 
 // Sample messages for demo
 const initialMessages = [
@@ -343,7 +400,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
     if (isOpen && inputRef.current) {
       setTimeout(() => {
         inputRef.current?.focus();
-      }, 300); // Add a small delay to ensure animation completes
+      }, 400); // Adjusted delay to match animation time
     }
   }, [isOpen]);
   
@@ -390,11 +447,15 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
   
   return (
     <ChatbotContainer isOpen={isOpen} ref={chatbotRef}>
-      {isOpen && (
-        <ChatWindow isVisible={isOpen}>
+      <ChatElement isOpen={isOpen}>
+        <ChatButton onClick={toggleChat} isOpen={isOpen}>
+          <AIStarsIcon />
+        </ChatButton>
+        
+        <ChatContent isOpen={isOpen}>
           <ChatHeader>
             <HeaderTitle>
-              <AIStarsIcon />
+              <AIStarsIcon className="header-icon" />
               {t("Asistente")}
             </HeaderTitle>
             <CloseButton onClick={toggleChat}>×</CloseButton>
@@ -425,19 +486,8 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
               </svg>
             </SendButton>
           </ChatInputContainer>
-        </ChatWindow>
-      )}
-      
-      <ChatbotButton onClick={toggleChat}>
-        {!isOpen ? (
-          <AIStarsIcon />
-        ) : (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M19 5L5 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M5 5L19 19" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        )}
-      </ChatbotButton>
+        </ChatContent>
+      </ChatElement>
     </ChatbotContainer>
   );
 };
