@@ -142,6 +142,10 @@ const ChatbotContainer = styled.div<{ isOpen: boolean; visible: boolean; isReady
     ? css`${smoothAppear} 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards`
     : 'none'};
   animation-delay: 0s;
+
+  @media (max-width: 768px) {
+    bottom: 100px; // Elevamos el botón para que no se superponga con la navbar
+  }
 `;
 
 const FloatingWrapper = styled.div<{ isReady: boolean }>`
