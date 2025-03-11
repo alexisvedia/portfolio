@@ -4,15 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { HiSparkles } from "react-icons/hi2";
 
 // Animations
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`;
-
 const morphToChat = keyframes`
   0% {
     width: 48px;
@@ -106,18 +97,46 @@ const fadeOutContent = keyframes`
   }
 `;
 
-const ChatbotContainer = styled.div<{ isOpen: boolean }>`
+const messageEntrance = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const smoothAppear = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(15px) scale(0.9);
+    visibility: hidden;
+  }
+  30% {
+    visibility: visible;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  100% {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+`;
+
+const ChatbotContainer = styled.div<{ isOpen: boolean; visible: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  visibility: ${props => props.visible ? 'visible' : 'hidden'};
+  animation: ${props => props.visible ? css`${smoothAppear} 1.2s ease-out forwards` : 'none'};
   animation: ${floatAnimation} 6s ease-in-out infinite;
 `;
 
-const ChatElement = styled.div<{ isOpen: boolean }>`
+const ChatElement = styled.div<{ isOpen: boolean; isInitialRender: boolean }>`
   width: ${props => props.isOpen ? '320px' : '48px'};
   height: ${props => props.isOpen ? '400px' : '48px'};
   border-radius: ${props => props.isOpen ? '16px' : '50%'};
@@ -129,10 +148,11 @@ const ChatElement = styled.div<{ isOpen: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
-  animation: ${props => props.isOpen 
+  animation: ${props => !props.isInitialRender && (props.isOpen 
     ? css`${morphToChat} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards` 
-    : css`${morphToButton} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards`};
+    : css`${morphToButton} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards`)};
   transform-origin: bottom right;
+  transition: background 0.3s ease;
   
   /* Windows 11 Mica effect */
   &:before {
@@ -151,8 +171,8 @@ const ChatElement = styled.div<{ isOpen: boolean }>`
 `;
 
 const ChatButton = styled.button<{ isOpen: boolean }>`
-  width: 100%;
-  height: 100%;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -185,10 +205,18 @@ const ChatButton = styled.button<{ isOpen: boolean }>`
     animation: ${pulse} 3s ease-in-out infinite;
     pointer-events: none;
   }
-  
-  svg {
-    display: flex;
-  }
+`;
+
+const IconContainer = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
 `;
 
 const ChatContent = styled.div<{ isOpen: boolean }>`
@@ -269,7 +297,7 @@ const ChatMessages = styled.div`
   }
 `;
 
-const MessageBubble = styled.div<{ isUser?: boolean }>`
+const MessageBubble = styled.div<{ isUser?: boolean; index: number; shouldAnimate: boolean }>`
   max-width: 80%;
   padding: 10px 14px;
   border-radius: 16px;
@@ -278,10 +306,15 @@ const MessageBubble = styled.div<{ isUser?: boolean }>`
     : 'rgba(255, 255, 255, 0.1)'};
   color: ${props => props.theme.colors.text};
   align-self: ${props => props.isUser ? 'flex-end' : 'flex-start'};
-  animation: ${fadeIn} 0.3s forwards;
   font-size: ${props => props.theme.fontSizes.sm};
   line-height: 1.5;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  opacity: ${props => props.shouldAnimate ? 0 : 1};
+  animation: ${props => props.shouldAnimate 
+    ? css`${messageEntrance} 0.3s ease-out forwards` 
+    : 'none'};
+  animation-delay: ${props => props.shouldAnimate ? `${0.3 + props.index * 0.08}s` : '0s'};
+  transform-origin: ${props => props.isUser ? 'bottom right' : 'bottom left'};
 `;
 
 const ChatInputContainer = styled.div`
@@ -342,7 +375,7 @@ const SendButton = styled.button`
 // AI Stars Icon Component
 const AIStarsIcon: React.FC<{ className?: string }> = ({ className }) => {
   return (
-    <span className={className} style={{ display: 'flex', alignItems: 'center' }}>
+    <span className={className} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
       <HiSparkles size={22} color="white" />
     </span>
   );
@@ -362,18 +395,29 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState('');
   const [visible, setVisible] = useState(false);
+  const [shouldAnimateMessages, setShouldAnimateMessages] = useState(false);
+  const [isInitialRender, setIsInitialRender] = useState(true);
+  const [isReady, setIsReady] = useState(false); // Add ready state to ensure complete loading
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatbotRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
   
-  // Show the chatbot after initial delay
+  // Improved timing for showing the chatbot with a staged approach
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // First set visible to true
+    const showTimer = setTimeout(() => {
       setVisible(true);
+      
+      // Then after animation completes, set ready state
+      const readyTimer = setTimeout(() => {
+        setIsReady(true);
+      }, 1200); // Match with animation duration
+      
+      return () => clearTimeout(readyTimer);
     }, initialDelay);
     
-    return () => clearTimeout(timer);
+    return () => clearTimeout(showTimer);
   }, [initialDelay]);
   
   // Auto scroll to bottom when new messages are added
@@ -404,8 +448,33 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
     }
   }, [isOpen]);
   
+  // Trigger message animation when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      // Immediate animation for messages
+      setShouldAnimateMessages(true);
+    } else {
+      setShouldAnimateMessages(false);
+    }
+    
+    // After first toggle, no longer initial render
+    if (isInitialRender && isOpen) {
+      setIsInitialRender(false);
+    }
+  }, [isOpen, isInitialRender]);
+  
   const toggleChat = () => {
-    setIsOpen(!isOpen);
+    // Only allow toggle when component is fully ready
+    if (!isReady) return;
+    
+    if (isInitialRender) {
+      // On first click, just start animations next time
+      setIsInitialRender(false);
+      setIsOpen(true);
+    } else {
+      // Normal toggle behavior after first open
+      setIsOpen(!isOpen);
+    }
     
     // If opening, add a welcome message if chat is empty
     if (!isOpen && messages.length === 0) {
@@ -420,6 +489,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
   const handleSendMessage = () => {
     if (inputValue.trim()) {
       // Add user message
+      setShouldAnimateMessages(true); // Ensure animation for new messages
       setMessages([...messages, { text: inputValue, isUser: true }]);
       
       // Simulate assistant response (in a real app, this would call an API)
@@ -443,13 +513,16 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
     }
   };
   
+  // Return nothing until fully ready for first render
   if (!visible) return null;
   
   return (
-    <ChatbotContainer isOpen={isOpen} ref={chatbotRef}>
-      <ChatElement isOpen={isOpen}>
+    <ChatbotContainer isOpen={isOpen} ref={chatbotRef} visible={visible}>
+      <ChatElement isOpen={isOpen} isInitialRender={isInitialRender}>
         <ChatButton onClick={toggleChat} isOpen={isOpen}>
-          <AIStarsIcon />
+          <IconContainer>
+            <AIStarsIcon />
+          </IconContainer>
         </ChatButton>
         
         <ChatContent isOpen={isOpen}>
@@ -463,7 +536,12 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
           
           <ChatMessages>
             {messages.map((message, index) => (
-              <MessageBubble key={index} isUser={message.isUser}>
+              <MessageBubble 
+                key={index} 
+                isUser={message.isUser} 
+                index={index}
+                shouldAnimate={shouldAnimateMessages}
+              >
                 {message.text}
               </MessageBubble>
             ))}
