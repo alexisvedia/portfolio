@@ -205,7 +205,7 @@ const AppContent = () => {
       </AuroraWrapper>
       <NavBarStyled t={t} visible={navbarVisible} />
       <LanguageSelectorStyled initialDelay={1300} />
-      <ChatbotAssistant initialDelay={2500} />
+      <ChatbotAssistant initialDelay={1300} />
 
       <Container>
         <Routes>

@@ -139,15 +139,16 @@ const ChatbotContainer = styled.div<{ isOpen: boolean; visible: boolean; isReady
   opacity: 0;
   transform: translateY(20px);
   animation: ${props => props.visible 
-    ? css`${smoothAppear} 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards`
+    ? css`${smoothAppear} 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards`
     : 'none'};
+  animation-delay: 0s;
 `;
 
 const FloatingWrapper = styled.div<{ isReady: boolean }>`
   animation: ${props => props.isReady 
     ? css`${float} 6s ease-in-out infinite` 
     : 'none'};
-  animation-delay: 1.5s; /* Start floating only after appear animation */
+  animation-delay: 0.3s;
 `;
 
 const ChatElement = styled.div<{ isOpen: boolean; isInitialRender: boolean }>`
@@ -404,7 +405,7 @@ interface ChatbotAssistantProps {
   initialDelay?: number;
 }
 
-const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000 }) => {
+const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState(initialMessages);
   const [inputValue, setInputValue] = useState('');
@@ -427,7 +428,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
       // After appear animation completes, set ready
       const readyTimer = setTimeout(() => {
         setIsReady(true);
-      }, 1500); // Matches the duration of the appear animation
+      }, 300); // Adjusted delay to match new animation time
       
       return () => clearTimeout(readyTimer);
     }, initialDelay);
