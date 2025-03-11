@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import Aurora from './Aurora';
 import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar/NavBar';
+import ChatbotAssistant from '@components/ChatbotAssistant';
 
 // Importar páginas
 import Home from './pages/Home';
@@ -204,6 +205,7 @@ const AppContent = () => {
       </AuroraWrapper>
       <NavBarStyled t={t} visible={navbarVisible} />
       <LanguageSelectorStyled initialDelay={1300} />
+      <ChatbotAssistant initialDelay={2500} />
 
       <Container>
         <Routes>
