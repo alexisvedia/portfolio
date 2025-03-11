@@ -111,29 +111,43 @@ const messageEntrance = keyframes`
 const smoothAppear = keyframes`
   0% {
     opacity: 0;
-    transform: translateY(15px) scale(0.9);
-    visibility: hidden;
-  }
-  30% {
-    visibility: visible;
-    opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateY(20px);
   }
   100% {
-    visibility: visible;
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 `;
 
-const ChatbotContainer = styled.div<{ isOpen: boolean; visible: boolean }>`
+const float = keyframes`
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+`;
+
+const ChatbotContainer = styled.div<{ isOpen: boolean; visible: boolean; isReady: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 1000;
-  visibility: ${props => props.visible ? 'visible' : 'hidden'};
-  animation: ${props => props.visible ? css`${smoothAppear} 1.2s ease-out forwards` : 'none'};
-  animation: ${floatAnimation} 6s ease-in-out infinite;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: ${props => props.visible 
+    ? css`${smoothAppear} 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards`
+    : 'none'};
+`;
+
+const FloatingWrapper = styled.div<{ isReady: boolean }>`
+  animation: ${props => props.isReady 
+    ? css`${float} 6s ease-in-out infinite` 
+    : 'none'};
+  animation-delay: 1.5s; /* Start floating only after appear animation */
 `;
 
 const ChatElement = styled.div<{ isOpen: boolean; isInitialRender: boolean }>`
@@ -397,27 +411,28 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
   const [visible, setVisible] = useState(false);
   const [shouldAnimateMessages, setShouldAnimateMessages] = useState(false);
   const [isInitialRender, setIsInitialRender] = useState(true);
-  const [isReady, setIsReady] = useState(false); // Add ready state to ensure complete loading
+  const [isReady, setIsReady] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatbotRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
   
-  // Improved timing for showing the chatbot with a staged approach
+  // Staged approach to showing the chatbot with better timing
   useEffect(() => {
-    // First set visible to true
-    const showTimer = setTimeout(() => {
+    // First delay before starting to show
+    const initialTimer = setTimeout(() => {
+      // Start the appear animation
       setVisible(true);
       
-      // Then after animation completes, set ready state
+      // After appear animation completes, set ready
       const readyTimer = setTimeout(() => {
         setIsReady(true);
-      }, 1200); // Match with animation duration
+      }, 1500); // Matches the duration of the appear animation
       
       return () => clearTimeout(readyTimer);
     }, initialDelay);
     
-    return () => clearTimeout(showTimer);
+    return () => clearTimeout(initialTimer);
   }, [initialDelay]);
   
   // Auto scroll to bottom when new messages are added
@@ -513,59 +528,61 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 2000
     }
   };
   
-  // Return nothing until fully ready for first render
-  if (!visible) return null;
+  // Return nothing until we're ready to start the animation
+  if (!visible && !isReady) return null;
   
   return (
-    <ChatbotContainer isOpen={isOpen} ref={chatbotRef} visible={visible}>
-      <ChatElement isOpen={isOpen} isInitialRender={isInitialRender}>
-        <ChatButton onClick={toggleChat} isOpen={isOpen}>
-          <IconContainer>
-            <AIStarsIcon />
-          </IconContainer>
-        </ChatButton>
-        
-        <ChatContent isOpen={isOpen}>
-          <ChatHeader>
-            <HeaderTitle>
-              <AIStarsIcon className="header-icon" />
-              {t("Asistente")}
-            </HeaderTitle>
-            <CloseButton onClick={toggleChat}>×</CloseButton>
-          </ChatHeader>
+    <ChatbotContainer isOpen={isOpen} ref={chatbotRef} visible={visible} isReady={isReady}>
+      <FloatingWrapper isReady={isReady}>
+        <ChatElement isOpen={isOpen} isInitialRender={isInitialRender}>
+          <ChatButton onClick={toggleChat} isOpen={isOpen}>
+            <IconContainer>
+              <AIStarsIcon />
+            </IconContainer>
+          </ChatButton>
           
-          <ChatMessages>
-            {messages.map((message, index) => (
-              <MessageBubble 
-                key={index} 
-                isUser={message.isUser} 
-                index={index}
-                shouldAnimate={shouldAnimateMessages}
-              >
-                {message.text}
-              </MessageBubble>
-            ))}
-            <div ref={messagesEndRef} />
-          </ChatMessages>
-          
-          <ChatInputContainer>
-            <ChatInput
-              type="text"
-              placeholder={t("Escribe un mensaje...")}
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyPress={handleKeyPress}
-              ref={inputRef}
-            />
-            <SendButton onClick={handleSendMessage}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22 2L11 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </SendButton>
-          </ChatInputContainer>
-        </ChatContent>
-      </ChatElement>
+          <ChatContent isOpen={isOpen}>
+            <ChatHeader>
+              <HeaderTitle>
+                <AIStarsIcon className="header-icon" />
+                {t("Asistente")}
+              </HeaderTitle>
+              <CloseButton onClick={toggleChat}>×</CloseButton>
+            </ChatHeader>
+            
+            <ChatMessages>
+              {messages.map((message, index) => (
+                <MessageBubble 
+                  key={index} 
+                  isUser={message.isUser} 
+                  index={index}
+                  shouldAnimate={shouldAnimateMessages}
+                >
+                  {message.text}
+                </MessageBubble>
+              ))}
+              <div ref={messagesEndRef} />
+            </ChatMessages>
+            
+            <ChatInputContainer>
+              <ChatInput
+                type="text"
+                placeholder={t("Escribe un mensaje...")}
+                value={inputValue}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                ref={inputRef}
+              />
+              <SendButton onClick={handleSendMessage}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M22 2L11 13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </SendButton>
+            </ChatInputContainer>
+          </ChatContent>
+        </ChatElement>
+      </FloatingWrapper>
     </ChatbotContainer>
   );
 };
