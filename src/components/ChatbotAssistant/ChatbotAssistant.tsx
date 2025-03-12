@@ -131,14 +131,14 @@ const float = keyframes`
   }
 `;
 
-const ChatbotContainer = styled.div<{ isOpen: boolean; visible: boolean; isReady: boolean }>`
+const ChatbotContainer = styled.div<{ $isOpen: boolean; $visible: boolean; $isReady: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
   z-index: 1000;
   opacity: 0;
   transform: translateY(20px);
-  animation: ${props => props.visible 
+  animation: ${props => props.$visible 
     ? css`${smoothAppear} 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards`
     : 'none'};
   animation-delay: 0s;
@@ -148,18 +148,18 @@ const ChatbotContainer = styled.div<{ isOpen: boolean; visible: boolean; isReady
   }
 `;
 
-const FloatingWrapper = styled.div<{ isReady: boolean }>`
-  animation: ${props => props.isReady 
+const FloatingWrapper = styled.div<{ $isReady: boolean }>`
+  animation: ${props => props.$isReady 
     ? css`${float} 6s ease-in-out infinite` 
     : 'none'};
   animation-delay: 0.3s;
 `;
 
-const ChatElement = styled.div<{ isOpen: boolean; isInitialRender: boolean }>`
-  width: ${props => props.isOpen ? '320px' : '48px'};
-  height: ${props => props.isOpen ? '400px' : '48px'};
-  border-radius: ${props => props.isOpen ? '16px' : '50%'};
-  background: ${props => props.isOpen ? 'rgba(30, 30, 35, 0.7)' : 'rgba(255, 255, 255, 0.1)'};
+const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean }>`
+  width: ${props => props.$isOpen ? '320px' : '48px'};
+  height: ${props => props.$isOpen ? '400px' : '48px'};
+  border-radius: ${props => props.$isOpen ? '16px' : '50%'};
+  background: ${props => props.$isOpen ? 'rgba(30, 30, 35, 0.7)' : 'rgba(255, 255, 255, 0.1)'};
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
@@ -167,7 +167,7 @@ const ChatElement = styled.div<{ isOpen: boolean; isInitialRender: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
-  animation: ${props => !props.isInitialRender && (props.isOpen 
+  animation: ${props => !props.$isInitialRender && (props.$isOpen 
     ? css`${morphToChat} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards` 
     : css`${morphToButton} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards`)};
   transform-origin: bottom right;
@@ -189,7 +189,7 @@ const ChatElement = styled.div<{ isOpen: boolean; isInitialRender: boolean }>`
   }
 `;
 
-const ChatButton = styled.button<{ isOpen: boolean }>`
+const ChatButton = styled.button<{ $isOpen: boolean }>`
   width: 48px;
   height: 48px;
   display: flex;
@@ -202,8 +202,8 @@ const ChatButton = styled.button<{ isOpen: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
-  z-index: ${props => props.isOpen ? '0' : '2'};
-  opacity: ${props => props.isOpen ? '0' : '1'};
+  z-index: ${props => props.$isOpen ? '0' : '2'};
+  opacity: ${props => props.$isOpen ? '0' : '1'};
   transition: opacity 0.2s ease-out;
   
   &:hover {
@@ -220,7 +220,7 @@ const ChatButton = styled.button<{ isOpen: boolean }>`
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.05);
     z-index: -1;
-    opacity: ${props => props.isOpen ? '0' : '0.6'};
+    opacity: ${props => props.$isOpen ? '0' : '0.6'};
     animation: ${pulse} 3s ease-in-out infinite;
     pointer-events: none;
   }
@@ -238,17 +238,17 @@ const IconContainer = styled.div`
   height: 22px;
 `;
 
-const ChatContent = styled.div<{ isOpen: boolean }>`
+const ChatContent = styled.div<{ $isOpen: boolean }>`
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  opacity: ${props => props.isOpen ? '1' : '0'};
-  animation: ${props => props.isOpen 
+  opacity: ${props => props.$isOpen ? '1' : '0'};
+  animation: ${props => props.$isOpen 
     ? css`${fadeInContent} 0.4s forwards` 
     : css`${fadeOutContent} 0.2s forwards`};
-  z-index: ${props => props.isOpen ? '2' : '0'};
-  pointer-events: ${props => props.isOpen ? 'auto' : 'none'};
+  z-index: ${props => props.$isOpen ? '2' : '0'};
+  pointer-events: ${props => props.$isOpen ? 'auto' : 'none'};
 `;
 
 const ChatHeader = styled.div`
@@ -316,24 +316,24 @@ const ChatMessages = styled.div`
   }
 `;
 
-const MessageBubble = styled.div<{ isUser?: boolean; index: number; shouldAnimate: boolean }>`
+const MessageBubble = styled.div<{ $isUser?: boolean; $index: number; $shouldAnimate: boolean }>`
   max-width: 80%;
   padding: 10px 14px;
   border-radius: 16px;
-  background: ${props => props.isUser 
+  background: ${props => props.$isUser 
     ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.accent})` 
     : 'rgba(255, 255, 255, 0.1)'};
   color: ${props => props.theme.colors.text};
-  align-self: ${props => props.isUser ? 'flex-end' : 'flex-start'};
+  align-self: ${props => props.$isUser ? 'flex-end' : 'flex-start'};
   font-size: ${props => props.theme.fontSizes.sm};
   line-height: 1.5;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  opacity: ${props => props.shouldAnimate ? 0 : 1};
-  animation: ${props => props.shouldAnimate 
+  opacity: ${props => props.$shouldAnimate ? 0 : 1};
+  animation: ${props => props.$shouldAnimate 
     ? css`${messageEntrance} 0.3s ease-out forwards` 
     : 'none'};
-  animation-delay: ${props => props.shouldAnimate ? `${0.3 + props.index * 0.08}s` : '0s'};
-  transform-origin: ${props => props.isUser ? 'bottom right' : 'bottom left'};
+  animation-delay: ${props => props.$shouldAnimate ? `${0.3 + props.$index * 0.08}s` : '0s'};
+  transform-origin: ${props => props.$isUser ? 'bottom right' : 'bottom left'};
 `;
 
 const ChatInputContainer = styled.div`
@@ -537,16 +537,16 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   if (!visible && !isReady) return null;
   
   return (
-    <ChatbotContainer isOpen={isOpen} ref={chatbotRef} visible={visible} isReady={isReady}>
-      <FloatingWrapper isReady={isReady}>
-        <ChatElement isOpen={isOpen} isInitialRender={isInitialRender}>
-          <ChatButton onClick={toggleChat} isOpen={isOpen}>
+    <ChatbotContainer $isOpen={isOpen} ref={chatbotRef} $visible={visible} $isReady={isReady}>
+      <FloatingWrapper $isReady={isReady}>
+        <ChatElement $isOpen={isOpen} $isInitialRender={isInitialRender}>
+          <ChatButton onClick={toggleChat} $isOpen={isOpen}>
             <IconContainer>
               <AIStarsIcon />
             </IconContainer>
           </ChatButton>
           
-          <ChatContent isOpen={isOpen}>
+          <ChatContent $isOpen={isOpen}>
             <ChatHeader>
               <HeaderTitle>
                 <AIStarsIcon className="header-icon" />
@@ -559,9 +559,9 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
               {messages.map((message, index) => (
                 <MessageBubble 
                   key={index} 
-                  isUser={message.isUser} 
-                  index={index}
-                  shouldAnimate={shouldAnimateMessages}
+                  $isUser={message.isUser} 
+                  $index={index}
+                  $shouldAnimate={shouldAnimateMessages}
                 >
                   {message.text}
                 </MessageBubble>
