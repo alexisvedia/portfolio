@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +25,40 @@ const morphToChat = keyframes`
     opacity: 1;
   }
 `;
+
+// Mobile-specific animations
+const mobileButtonShrink = keyframes`
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+`;
+
+const mobileChatExpand = keyframes`
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+`;
+
+const appBlurIn = keyframes`
+  0% {
+    backdrop-filter: blur(0px);
+    background-color: rgba(0, 0, 0, 0);
+  }
+  100% {
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+`
 
 const morphToButton = keyframes`
   0% {
@@ -131,6 +166,21 @@ const float = keyframes`
   }
 `;
 
+const AppOverlay = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  pointer-events: ${props => props.$isOpen && props.$isMobile ? 'auto' : 'none'};
+  opacity: ${props => props.$isOpen && props.$isMobile ? 1 : 0};
+  animation: none;
+  transition: none;
+  backdrop-filter: ${props => props.$isOpen && props.$isMobile ? 'blur(8px)' : 'blur(0px)'};
+  background-color: ${props => props.$isOpen && props.$isMobile ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)'};
+`;
+
 const ChatbotContainer = styled.div<{ $isOpen: boolean; $visible: boolean; $isReady: boolean }>`
   position: fixed;
   bottom: 20px;
@@ -144,18 +194,38 @@ const ChatbotContainer = styled.div<{ $isOpen: boolean; $visible: boolean; $isRe
   animation-delay: 0s;
 
   @media (max-width: 768px) {
-    bottom: 100px; // Elevamos el botón para que no se superponga con la navbar
+    bottom: ${props => props.$isOpen ? '0' : '100px'};
+    right: ${props => props.$isOpen ? '0' : '20px'};
+    width: ${props => props.$isOpen ? '100%' : 'auto'};
+    height: ${props => props.$isOpen ? '100%' : 'auto'};
+    z-index: 1001;
   }
 `;
 
-const FloatingWrapper = styled.div<{ $isReady: boolean }>`
-  animation: ${props => props.$isReady 
+const FloatingWrapper = styled.div<{ $isReady: boolean; $isOpen: boolean }>`
+  animation: ${props => props.$isReady && !props.$isOpen
     ? css`${float} 6s ease-in-out infinite` 
     : 'none'};
   animation-delay: 0.3s;
+  
+  @media (max-width: 768px) {
+    width: ${props => props.$isOpen ? '100%' : 'auto'};
+    height: ${props => props.$isOpen ? '100%' : 'auto'};
+  }
 `;
 
-const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean }>`
+const fadeOut = keyframes`
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+`;
+
+const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $isMobile: boolean }>`
   width: ${props => props.$isOpen ? '320px' : '48px'};
   height: ${props => props.$isOpen ? '400px' : '48px'};
   border-radius: ${props => props.$isOpen ? '16px' : '50%'};
@@ -167,11 +237,12 @@ const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
-  animation: ${props => !props.$isInitialRender && (props.$isOpen 
+  animation: ${props => !props.$isMobile && !props.$isInitialRender && (props.$isOpen 
     ? css`${morphToChat} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards` 
     : css`${morphToButton} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards`)};
   transform-origin: bottom right;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  opacity: ${props => !props.$isOpen && !props.$isInitialRender && !props.$isMobile ? 0 : 1};
   
   /* Windows 11 Mica effect */
   &:before {
@@ -187,9 +258,25 @@ const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean }>`
     z-index: -1;
     pointer-events: none;
   }
+  
+  @media (max-width: 768px) {
+    width: ${props => props.$isOpen ? '100%' : '48px'};
+    height: ${props => props.$isOpen ? 'auto' : '48px'};
+    max-height: ${props => props.$isOpen ? '100%' : '48px'};
+    border-radius: ${props => props.$isOpen ? '0' : '50%'};
+    position: ${props => props.$isOpen ? 'fixed' : 'relative'};
+    top: ${props => props.$isOpen ? '0' : 'auto'};
+    right: ${props => props.$isOpen ? '0' : 'auto'};
+    bottom: ${props => props.$isOpen ? '0' : 'auto'};
+    left: ${props => props.$isOpen ? '0' : 'auto'};
+    animation: none;
+    transform: scale(1);
+    opacity: 1;
+    transition: none;
+  }
 `;
 
-const ChatButton = styled.button<{ $isOpen: boolean }>`
+const ChatButton = styled.button<{ $isOpen: boolean; $isMobile: boolean }>`
   width: 48px;
   height: 48px;
   display: flex;
@@ -205,6 +292,8 @@ const ChatButton = styled.button<{ $isOpen: boolean }>`
   z-index: ${props => props.$isOpen ? '0' : '2'};
   opacity: ${props => props.$isOpen ? '0' : '1'};
   transition: opacity 0.2s ease-out;
+  animation: none;
+  overflow: hidden;
   
   &:hover {
     background: rgba(255, 255, 255, 0.05);
@@ -226,6 +315,25 @@ const ChatButton = styled.button<{ $isOpen: boolean }>`
   }
 `;
 
+const RippleSpan = styled.span<{ $x: number; $y: number; $size: number }>`
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: rgba(255, 255, 255, 0.7);
+  width: ${props => props.$size}px;
+  height: ${props => props.$size}px;
+  top: ${props => props.$y - props.$size / 2}px;
+  left: ${props => props.$x - props.$size / 2}px;
+
+  @keyframes ripple {
+    to {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+`;
+
 const IconContainer = styled.div`
   position: absolute;
   top: 50%;
@@ -238,17 +346,19 @@ const IconContainer = styled.div`
   height: 22px;
 `;
 
-const ChatContent = styled.div<{ $isOpen: boolean }>`
+const ChatContent = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
   opacity: ${props => props.$isOpen ? '1' : '0'};
-  animation: ${props => props.$isOpen 
+  animation: ${props => !props.$isMobile && props.$isOpen 
     ? css`${fadeInContent} 0.4s forwards` 
-    : css`${fadeOutContent} 0.2s forwards`};
+    : !props.$isMobile ? css`${fadeOutContent} 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards` : 'none'};
   z-index: ${props => props.$isOpen ? '2' : '0'};
   pointer-events: ${props => props.$isOpen ? 'auto' : 'none'};
+  transition: ${props => props.$isMobile ? 'none' : 'none'};
+  transform: scale(1);
 `;
 
 const ChatHeader = styled.div`
@@ -262,6 +372,11 @@ const ChatHeader = styled.div`
   border-top-right-radius: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
+  
+  @media (max-width: 768px) {
+    border-radius: 0;
+    padding: 20px 16px;
+  }
 `;
 
 const HeaderTitle = styled.h3`
@@ -291,6 +406,11 @@ const CloseButton = styled.button`
     opacity: 1;
     transform: scale(1.1);
   }
+  
+  @media (max-width: 768px) {
+    font-size: ${props => props.theme.fontSizes.xl};
+    padding: 8px;
+  }
 `;
 
 const ChatMessages = styled.div`
@@ -314,9 +434,13 @@ const ChatMessages = styled.div`
     background: rgba(255, 255, 255, 0.2);
     border-radius: 3px;
   }
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+  }
 `;
 
-const MessageBubble = styled.div<{ $isUser?: boolean; $index: number; $shouldAnimate: boolean }>`
+const MessageBubble = styled.div<{ $isUser?: boolean; $index: number; $shouldAnimate: boolean; $isMobile: boolean }>`
   max-width: 80%;
   padding: 10px 14px;
   border-radius: 16px;
@@ -328,12 +452,16 @@ const MessageBubble = styled.div<{ $isUser?: boolean; $index: number; $shouldAni
   font-size: ${props => props.theme.fontSizes.sm};
   line-height: 1.5;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  opacity: ${props => props.$shouldAnimate ? 0 : 1};
-  animation: ${props => props.$shouldAnimate 
-    ? css`${messageEntrance} 0.3s ease-out forwards` 
-    : 'none'};
-  animation-delay: ${props => props.$shouldAnimate ? `${0.3 + props.$index * 0.08}s` : '0s'};
+  opacity: 1;
+  animation: none;
+  animation-delay: 0s;
   transform-origin: ${props => props.$isUser ? 'bottom right' : 'bottom left'};
+  
+  @media (max-width: 768px) {
+    max-width: 85%;
+    padding: 12px 16px;
+    font-size: calc(${props => props.theme.fontSizes.sm} + 1px);
+  }
 `;
 
 const ChatInputContainer = styled.div`
@@ -343,6 +471,11 @@ const ChatInputContainer = styled.div`
   gap: 10px;
   background: rgba(20, 20, 25, 0.3);
   backdrop-filter: blur(10px);
+  
+  @media (max-width: 768px) {
+    padding: 16px 20px;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
 `;
 
 const ChatInput = styled.input`
@@ -363,6 +496,11 @@ const ChatInput = styled.input`
   
   &::placeholder {
     color: rgba(255, 255, 255, 0.5);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 14px 18px;
+    font-size: calc(${props => props.theme.fontSizes.sm} + 1px);
   }
 `;
 
@@ -388,6 +526,11 @@ const SendButton = styled.button`
   
   &:active {
     transform: scale(0.95);
+  }
+  
+  @media (max-width: 768px) {
+    width: 44px;
+    height: 44px;
   }
 `;
 
@@ -417,10 +560,14 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   const [shouldAnimateMessages, setShouldAnimateMessages] = useState(false);
   const [isInitialRender, setIsInitialRender] = useState(true);
   const [isReady, setIsReady] = useState(false);
+  const [ripples, setRipples] = useState<Array<{ x: number; y: number; size: number; key: number }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatbotRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { t } = useTranslation();
+
+  // Verificar si estamos en un dispositivo móvil
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
   
   // Staged approach to showing the chatbot with better timing
   useEffect(() => {
@@ -445,10 +592,10 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  // Add click outside listener to close the chat
+  // Add click outside listener to close the chat (solo para desktop)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (chatbotRef.current && !chatbotRef.current.contains(event.target as Node) && isOpen) {
+      if (!isMobile && chatbotRef.current && !chatbotRef.current.contains(event.target as Node) && isOpen) {
         setIsOpen(false);
       }
     };
@@ -457,16 +604,29 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
+  
+  // Bloquear scroll del body cuando el chat está abierto en móvil
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, isMobile]);
   
   // Focus input when chat opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => {
         inputRef.current?.focus();
-      }, 400); // Adjusted delay to match animation time
+      }, isMobile ? 100 : 400); // Tiempo más rápido para móviles
     }
-  }, [isOpen]);
+  }, [isOpen, isMobile]);
   
   // Trigger message animation when chat opens
   useEffect(() => {
@@ -500,6 +660,34 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
     if (!isOpen && messages.length === 0) {
       setMessages([{ text: t("¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?"), isUser: false }]);
     }
+  };
+  
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Get click coordinates relative to button
+    const button = e.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Create new ripple with improved sizing
+    const size = Math.max(rect.width, rect.height) * 1.5; // Larger ripple for better visibility
+    const ripple = {
+      x,
+      y,
+      size,
+      key: Date.now()
+    };
+    
+    // Add new ripple to state
+    setRipples(prev => [...prev, ripple]);
+    
+    // Remove ripple after animation completes
+    setTimeout(() => {
+      setRipples(prev => prev.filter(r => r.key !== ripple.key));
+    }, 600); // Match the animation duration
+  
+    // Call existing toggle function
+    toggleChat();
   };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -537,16 +725,26 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   if (!visible && !isReady) return null;
   
   return (
-    <ChatbotContainer $isOpen={isOpen} ref={chatbotRef} $visible={visible} $isReady={isReady}>
-      <FloatingWrapper $isReady={isReady}>
-        <ChatElement $isOpen={isOpen} $isInitialRender={isInitialRender}>
-          <ChatButton onClick={toggleChat} $isOpen={isOpen}>
-            <IconContainer>
-              <AIStarsIcon />
-            </IconContainer>
-          </ChatButton>
+    <>
+      <AppOverlay $isOpen={isOpen} $isMobile={isMobile} />
+      <ChatbotContainer $isOpen={isOpen} ref={chatbotRef} $visible={visible} $isReady={isReady}>
+        <FloatingWrapper $isReady={isReady} $isOpen={isOpen}>
+          <ChatElement $isOpen={isOpen} $isInitialRender={isInitialRender} $isMobile={isMobile}>
+            <ChatButton onClick={handleButtonClick} $isOpen={isOpen} $isMobile={isMobile}>
+              <IconContainer>
+                <AIStarsIcon />
+              </IconContainer>
+              {ripples.map(ripple => (
+                <RippleSpan
+                  key={ripple.key}
+                  $x={ripple.x}
+                  $y={ripple.y}
+                  $size={ripple.size}
+                />
+              ))}
+            </ChatButton>
           
-          <ChatContent $isOpen={isOpen}>
+            <ChatContent $isOpen={isOpen} $isMobile={isMobile}>
             <ChatHeader>
               <HeaderTitle>
                 <AIStarsIcon className="header-icon" />
@@ -562,6 +760,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
                   $isUser={message.isUser} 
                   $index={index}
                   $shouldAnimate={shouldAnimateMessages}
+                  $isMobile={isMobile}
                 >
                   {message.text}
                 </MessageBubble>
@@ -589,6 +788,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
         </ChatElement>
       </FloatingWrapper>
     </ChatbotContainer>
+  </>
   );
 };
 

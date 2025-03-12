@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { MdOutlineLanguage } from "react-icons/md";
 
 interface LanguageSelectorProps {
   className?: string;
@@ -60,11 +61,14 @@ const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
   }
 `;
 
-const FlagIcon = styled.span<{ $changing?: boolean }>`
+const LanguageIcon = styled(MdOutlineLanguage)<{ $changing?: boolean }>`
   margin-right: 6px;
-  font-size: 1rem;
+  font-size: 1.2rem;
   opacity: ${props => (props.$changing ? 0.5 : 1)};
   transition: opacity 0.3s ease;
+  color: white;
+  display: inline-flex;
+  vertical-align: middle;
 `;
 
 // Tiempo mínimo que debe pasar entre cambios de idioma (ms)
@@ -141,7 +145,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   return (
     <LanguageSelectorContainer className={className} $visible={isVisible}>
       <LanguageButton onClick={toggleLanguage} $changing={isChangingLanguage}>
-        <FlagIcon $changing={isChangingLanguage}>{currentLang === 'es' ? '🇪🇸' : '🇺🇸'}</FlagIcon>
+        <LanguageIcon $changing={isChangingLanguage} />
         {currentLang === 'es' ? 'ES' : 'EN'}
       </LanguageButton>
     </LanguageSelectorContainer>
