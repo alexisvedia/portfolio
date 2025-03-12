@@ -79,7 +79,6 @@ export function GooeyText({
   // Limpiar cualquier animación en curso
   const cleanupAnimation = React.useCallback(() => {
     if (animationFrameIdRef.current) {
-      console.log('[GooeyText] Cancelando animación en curso');
       cancelAnimationFrame(animationFrameIdRef.current);
       animationFrameIdRef.current = null;
     }
@@ -150,8 +149,6 @@ export function GooeyText({
         text2Ref.current.style.opacity = '100%';
         text2Ref.current.style.filter = '';
         text2Ref.current.textContent = texts[1] || '';
-
-        console.log('[GooeyText] Estado estabilizado: mostrar segundo texto', texts[1]);
       } catch (err) {
         console.error('[GooeyText] Error al estabilizar:', err);
       }
@@ -160,25 +157,20 @@ export function GooeyText({
 
   // Efecto para iniciar o reiniciar la animación cuando cambian los textos
   React.useEffect(() => {
-    console.log('[GooeyText] recibió textos:', texts);
-
     // Manejo de casos bordes
     if (!texts || texts.length < 2) {
-      console.log('[GooeyText] Textos insuficientes', texts);
       forceStableState();
       return;
     }
 
     // Verificar que tengamos los textos necesarios y sean válidos
     if (!texts[0] || !texts[1]) {
-      console.log('[GooeyText] Textos incompletos o inválidos');
       forceStableState();
       return;
     }
 
     // Si los textos son iguales, no necesitamos animar
     if (texts[0] === texts[1]) {
-      console.log('[GooeyText] Textos iguales, no hay animación');
       if (text1Ref.current) {
         text1Ref.current.textContent = texts[0];
         text1Ref.current.style.opacity = '100%';
@@ -198,7 +190,6 @@ export function GooeyText({
       previousTextsRef.current[1] === texts[1] &&
       isAnimatingRef.current
     ) {
-      console.log('[GooeyText] Mismos textos que antes, continuando animación actual');
       return;
     }
 
@@ -213,8 +204,6 @@ export function GooeyText({
     // Configuración inicial
     if (text1Ref.current && text2Ref.current) {
       try {
-        console.log(`[GooeyText] Iniciando morphing de "${texts[0]}" a "${texts[1]}"`);
-
         // Preparamos los elementos de texto
         text1Ref.current.textContent = texts[0];
         text2Ref.current.textContent = texts[1];
@@ -235,7 +224,6 @@ export function GooeyText({
 
     // Si el tiempo de morphing es 0, no necesitamos animar
     if (morphTime <= 0) {
-      console.log('[GooeyText] morphTime es 0, aplicando estado final directamente');
       finalizeAnimation();
       return;
     }
@@ -251,7 +239,6 @@ export function GooeyText({
     const animate = (currentTime: number) => {
       // Si la animación fue abortada o ya no estamos animando
       if (animationAbortedRef.current || !isAnimatingRef.current) {
-        console.log('[GooeyText] Animación abortada o detenida');
         cleanupAnimation();
         return;
       }
@@ -263,7 +250,6 @@ export function GooeyText({
 
         // Si hemos superado el tiempo de morphing
         if (elapsed >= morphTime) {
-          console.log('[GooeyText] Morphing completado');
           // Aplicar el estado final
           finalizeAnimation();
 

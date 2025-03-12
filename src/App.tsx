@@ -194,7 +194,6 @@ const AppContent = () => {
   // Función para manejar la finalización de las animaciones
   const handleAnimationComplete = () => {
     // Este callback se llama cuando la animación de bienvenida está completa
-    console.log('Animación de bienvenida completada');
     store.dispatch(setLoaded(true));
   };
 
@@ -224,7 +223,7 @@ function App() {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AppContent />
         </Router>
       </ThemeProvider>

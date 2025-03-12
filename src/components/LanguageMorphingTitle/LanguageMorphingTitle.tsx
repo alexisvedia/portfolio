@@ -10,7 +10,7 @@ interface LanguageMorphingTitleProps {
   className?: string;
 }
 
-const MorphContainer = styled.div<{ shouldMorph: boolean }>`
+const MorphContainer = styled.div<{ $shouldMorph: boolean }>`
   position: relative;
   width: 100%;
   height: auto;
@@ -80,8 +80,6 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
 
   // Efecto para detectar cambios de idioma
   useEffect(() => {
-    console.log(`[LMT] Idioma actual: ${i18n.language}, Anterior: ${previousLanguageRef.current}`);
-
     // Si ya estamos procesando un cambio, no hacer nada
     if (isChangingRef.current) {
       return;
@@ -94,9 +92,7 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
       // Verificar si ha pasado suficiente tiempo desde el último cambio
       const timeElapsed = now - lastChangeTimeRef.current;
       if (timeElapsed < MIN_ANIMATION_DURATION) {
-        console.log(
-          `[LMT] Cambio demasiado rápido. Han pasado solo ${timeElapsed}ms desde el último cambio.`
-        );
+        // Cambio demasiado rápido
       }
 
       isChangingRef.current = true;
@@ -107,8 +103,6 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
 
       // Obtener el texto en el nuevo idioma
       const newText = t(translationKey, { lng: i18n.language });
-
-      console.log(`[LMT] Cambio de idioma detectado: "${oldText}" -> "${newText}"`);
 
       // Solo animar si los textos son diferentes
       if (oldText !== newText) {
@@ -124,7 +118,6 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
 
         // Configurar un nuevo timeout para finalizar la animación
         const totalDuration = getTotalAnimationDuration();
-        console.log(`[LMT] Iniciando animación de ${totalDuration}ms`);
 
         animationTimeoutRef.current = setTimeout(() => {
           setShouldMorph(false);
@@ -134,8 +127,6 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
           // Asegurar que el texto mostrado coincida con el idioma actual
           const finalText = t(translationKey);
           setTexts([finalText, finalText]);
-
-          console.log(`[LMT] Animación completada, texto final: "${finalText}"`);
         }, totalDuration);
       } else {
         // Si los textos son iguales, solo actualizamos la referencia
@@ -161,14 +152,14 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
   if (!texts[0] && !texts[1]) {
     const currentText = t(translationKey);
     return (
-      <MorphContainer className={className} shouldMorph={false}>
+      <MorphContainer className={className} $shouldMorph={false}>
         <SectionTitle>{currentText}</SectionTitle>
       </MorphContainer>
     );
   }
 
   return (
-    <MorphContainer className={className} shouldMorph={shouldMorph}>
+    <MorphContainer className={className} $shouldMorph={shouldMorph}>
       <SectionTitle>
         <GooeyText
           key={shouldMorph ? `morphing-${i18n.language}` : i18n.language}

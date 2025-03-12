@@ -114,59 +114,35 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   const toggleLanguage = () => {
     const now = Date.now();
+    const timeSinceLastChange = now - lastChangeTime;
 
-    // Verificar si estamos en proceso de cambio o si no ha pasado suficiente tiempo
-    if (isChangingLanguage || now - lastChangeTime < LANGUAGE_CHANGE_COOLDOWN) {
-      console.log('Por favor espera antes de cambiar el idioma nuevamente');
+    // Si está en proceso de cambio o no ha pasado suficiente tiempo, no hacer nada
+    if (isChangingLanguage || timeSinceLastChange < LANGUAGE_CHANGE_COOLDOWN) {
       return;
     }
 
-    const previousLang = currentLang;
-    const newLang = currentLang === 'en' ? 'es' : 'en';
-
-    // Marcar que estamos en proceso de cambio de idioma
-    setIsChangingLanguage(true);
+    // Actualizar el tiempo del último cambio
     setLastChangeTime(now);
+    setIsChangingLanguage(true);
 
-    // Emitir el evento para iniciar el proceso de cambio
+    // Determinar el nuevo idioma
+    const newLang = currentLang === 'es' ? 'en' : 'es';
+
+    // Emitir evento personalizado para notificar el cambio de idioma
     const event = new CustomEvent('initiateLanguageChange', {
       detail: {
-        previousLanguage: previousLang,
+        previousLanguage: currentLang,
         newLanguage: newLang,
       },
     });
     window.dispatchEvent(event);
-
-    // Actualizar inmediatamente el estado local para mejorar la respuesta UI
-    setCurrentLang(newLang);
   };
 
   return (
     <LanguageSelectorContainer className={className} $visible={isVisible}>
-      <LanguageButton
-        $active={true}
-        $changing={isChangingLanguage}
-        onClick={toggleLanguage}
-        disabled={isChangingLanguage}
-        aria-label={`Cambiar a ${currentLang === 'en' ? 'Español' : 'Inglés'}`}
-      >
-        <FlagIcon $changing={isChangingLanguage}>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-            <path d="M2 12h20"></path>
-          </svg>
-        </FlagIcon>
-        {currentLang === 'en' ? 'EN' : 'ES'}
+      <LanguageButton onClick={toggleLanguage} $changing={isChangingLanguage}>
+        <FlagIcon $changing={isChangingLanguage}>{currentLang === 'es' ? '🇪🇸' : '🇺🇸'}</FlagIcon>
+        {currentLang === 'es' ? 'ES' : 'EN'}
       </LanguageButton>
     </LanguageSelectorContainer>
   );
