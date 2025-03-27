@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { HiSparkles } from 'react-icons/hi2';
-import { sendMessageToN8N, ChatMessage } from '../../services/n8nService';
+import { sendMessageToN8N } from '../../services/n8nService';
 
 // Animations
 const morphToChat = keyframes`
@@ -419,26 +419,6 @@ const HeaderTitle = styled.h3`
   svg {
     display: flex;
     vertical-align: middle;
-  }
-`;
-
-const CloseButton = styled.button`
-  background: transparent;
-  border: none;
-  color: ${props => props.theme.colors.text};
-  cursor: pointer;
-  font-size: ${props => props.theme.fontSizes.lg};
-  opacity: 0.8;
-  transition: all 0.2s;
-
-  &:hover {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-
-  @media (max-width: 768px) {
-    font-size: ${props => props.theme.fontSizes.xl};
-    padding: 8px;
   }
 `;
 
