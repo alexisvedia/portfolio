@@ -1,6 +1,6 @@
 // Service to handle n8n chat webhook communication
 
-const N8N_WEBHOOK_URL = 'http://localhost:5678/webhook/49a82584-2afa-4ebf-b83a-93b5348cfe98/chat';
+const N8N_WEBHOOK_URL = import.meta.env.VITE_N8N_WEBHOOK_URL;
 
 export interface ChatMessage {
   text: string;
