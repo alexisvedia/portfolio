@@ -66,10 +66,10 @@ const BlurText: React.FC<BlurTextProps> = ({
     return () => observer.disconnect();
   }, [threshold, rootMargin]);
 
-  const springs = useSprings(elements.length, i => ({
+  const springs = useSprings(elements.length, (i: number) => ({
     from: animationFrom || defaultFrom,
     to: inView
-      ? async next => {
+      ? async (next: any) => {
           for (const step of animationTo || defaultTo) {
             await next(step);
           }
@@ -85,7 +85,7 @@ const BlurText: React.FC<BlurTextProps> = ({
 
   return (
     <p ref={ref} className={className} style={{ display: 'flex', flexWrap: 'wrap' }}>
-      {springs.map((style, index) => (
+      {springs.map((style: any, index: number) => (
         <animated.span
           key={index}
           style={{

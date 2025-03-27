@@ -1,6 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
-import ScrollFloat from '@components/ScrollFloat';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
 import { useTranslation } from 'react-i18next';
@@ -9,10 +8,9 @@ import { theme } from '@styles/theme';
 import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
 import Aurora from './Aurora';
-import SimpleBlurText from '@components/SimpleBlurText';
 import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar/NavBar';
-import LanguageMorphingTitle from '@components/LanguageMorphingTitle';
+import ChatbotAssistant from '@components/ChatbotAssistant';
 
 // Importar páginas
 import Home from './pages/Home';
@@ -54,103 +52,6 @@ const Container = styled.div`
   z-index: 1;
 `;
 
-const Content = styled.div`
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: ${({ theme }) => theme.space.xl};
-`;
-
-const Title = styled.div`
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
-  font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  color: ${({ theme }) => theme.colors.text};
-  margin-bottom: ${({ theme }) => theme.space['2xl']};
-  text-align: center;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-`;
-
-// Secciones estilizadas
-const Section = styled.section`
-  min-height: 100vh;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: ${({ theme }) => theme.space.xl};
-  position: relative;
-  scroll-margin-top: 4.5rem;
-  overflow: hidden;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['4xl']};
-  color: ${({ theme }) => theme.colors.text};
-  margin-bottom: ${({ theme }) => theme.space.xl};
-  text-align: center;
-  font-weight: 600;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  position: relative;
-
-  &:after {
-    content: '';
-    display: block;
-    width: 60px;
-    height: 4px;
-    background: #646cff;
-    margin: 8px auto 0;
-    border-radius: 2px;
-    box-shadow: 0 2px 10px rgba(100, 108, 255, 0.4);
-  }
-`;
-
-const SectionContent = styled.div`
-  max-width: 800px;
-  width: 100%;
-  background-color: rgba(30, 30, 30, 0.5);
-  backdrop-filter: blur(16px);
-  border-radius: 1rem;
-  padding: ${({ theme }) => theme.space.xl};
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-  }
-
-  /* Estilos para párrafos dentro del contenido */
-  p {
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-`;
-
 // Language Selector position
 const LanguageSelectorStyled = styled(LanguageSelector)`
   position: fixed;
@@ -177,27 +78,12 @@ const NavBarStyled = styled(NavBar)<{ visible: boolean }>`
   }
 `;
 
-// Estilo para los títulos de sección con animación morphing
-const StyledMorphingTitle = styled(LanguageMorphingTitle)`
-  font-size: clamp(2.5rem, 5vw, 7rem);
-  font-weight: 900;
-  margin-bottom: 2.5rem;
-  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-
-  @media (min-width: 768px) {
-    font-size: clamp(3.5rem, 8vw, 10rem);
-  }
-`;
-
 const AppContent = () => {
   // Estado para controlar la visibilidad solo de la navbar
   const [navbarVisible, setNavbarVisible] = useState(false);
   const { t, i18n } = useTranslation();
   const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-  const location = useLocation();
 
   // Estado para los colores de Aurora
   const [currentColors, setCurrentColors] = useState<string[]>(['#646cff', '#82e9de', '#a6c1ff']);
@@ -308,7 +194,6 @@ const AppContent = () => {
   // Función para manejar la finalización de las animaciones
   const handleAnimationComplete = () => {
     // Este callback se llama cuando la animación de bienvenida está completa
-    console.log('Animación de bienvenida completada');
     store.dispatch(setLoaded(true));
   };
 
@@ -319,6 +204,7 @@ const AppContent = () => {
       </AuroraWrapper>
       <NavBarStyled t={t} visible={navbarVisible} />
       <LanguageSelectorStyled initialDelay={1300} />
+      <ChatbotAssistant initialDelay={1300} />
 
       <Container>
         <Routes>
@@ -337,7 +223,7 @@ function App() {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <GlobalStyles />
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AppContent />
         </Router>
       </ThemeProvider>

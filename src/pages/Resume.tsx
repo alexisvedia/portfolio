@@ -60,7 +60,7 @@ const Content = styled.div`
 `;
 
 const Resume: React.FC = () => {
-  const { t } = useTranslation();
+  const {} = useTranslation();
 
   // Cuando el componente se monta, actualiza los colores para esta página
   useEffect(() => {
@@ -78,9 +78,6 @@ const Resume: React.FC = () => {
       <Content>
         <StyledMorphingTitle
           translationKey="navbar.resume"
-          animationDuration={1}
-          ease="back.inOut(2)"
-          stagger={0.03}
           morphTime={0.8}
           cooldownTime={0.2}
         />
