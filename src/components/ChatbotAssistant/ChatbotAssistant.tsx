@@ -165,16 +165,6 @@ const FloatingWrapper = styled.div<{ $isReady: boolean; $isOpen: boolean }>`
   }
 `;
 
-const fadeOut = keyframes`
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-`;
 
 const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $isMobile: boolean }>`
   width: ${props => (props.$isOpen ? '320px' : '48px')};
