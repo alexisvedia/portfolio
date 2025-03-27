@@ -27,39 +27,6 @@ const morphToChat = keyframes`
 `;
 
 // Mobile-specific animations
-const mobileButtonShrink = keyframes`
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(0);
-    opacity: 0;
-  }
-`;
-
-const mobileChatExpand = keyframes`
-  0% {
-    transform: scale(0.9);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-`;
-
-const appBlurIn = keyframes`
-  0% {
-    backdrop-filter: blur(0px);
-    background-color: rgba(0, 0, 0, 0);
-  }
-  100% {
-    backdrop-filter: blur(8px);
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-`;
-
 const morphToButton = keyframes`
   0% {
     width: 320px;
@@ -96,18 +63,6 @@ const pulse = keyframes`
   }
 `;
 
-const floatAnimation = keyframes`
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-`;
-
 const fadeInContent = keyframes`
   0% {
     opacity: 0;
@@ -129,17 +84,6 @@ const fadeOutContent = keyframes`
   }
   100% {
     opacity: 0;
-  }
-`;
-
-const messageEntrance = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
   }
 `;
 
