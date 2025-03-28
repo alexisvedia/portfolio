@@ -22,19 +22,20 @@ const generateSessionId = () => {
 // Store the session ID for reuse
 let currentSessionId = generateSessionId();
 
-// Función para implementar reintentos con backoff exponencial
-const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3): Promise<Response> => {
+// Función para implementar reintentos con tiempo de espera fijo
+const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 5): Promise<Response> => {
   let retries = 0;
   let lastError: Error | null = null;
+  // Tiempo fijo de espera entre reintentos (2 segundos)
+  const waitTime = 2000;
 
   while (retries < maxRetries) {
     try {
       const response = await fetch(url, options);
       
-      // Si el servicio está iniciando (503) o hay un error de conexión, reintentamos
-      if (response.status === 503 || response.status === 502 || response.status === 504) {
-        // Calculamos el tiempo de espera con backoff exponencial (1s, 2s, 4s)
-        const waitTime = Math.pow(2, retries) * 1000;
+      // Si el servicio está iniciando (500, 503) o hay un error de conexión, reintentamos
+      if (response.status === 500 || response.status === 503 || response.status === 502 || response.status === 504) {
+        console.log(`Intento ${retries + 1}/${maxRetries} falló con estado ${response.status}. Reintentando en ${waitTime/1000} segundos...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         retries++;
         continue;
@@ -47,7 +48,7 @@ const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3)
           (error.message.includes('failed to fetch') || 
            error.message.includes('network') || 
            error.message.includes('connection'))) {
-        const waitTime = Math.pow(2, retries) * 1000;
+        console.log(`Intento ${retries + 1}/${maxRetries} falló con error: ${error.message}. Reintentando en ${waitTime/1000} segundos...`);
         await new Promise(resolve => setTimeout(resolve, waitTime));
         retries++;
         lastError = error;
@@ -60,7 +61,7 @@ const fetchWithRetry = async (url: string, options: RequestInit, maxRetries = 3)
   }
   
   // Si llegamos aquí, es porque agotamos los reintentos
-  throw lastError || new Error('Error de conexión después de varios intentos');
+  throw lastError || new Error(`Error de conexión después de ${maxRetries} intentos`);
 };
 
 export const sendMessageToN8N = async (message: string): Promise<ChatMessage> => {
