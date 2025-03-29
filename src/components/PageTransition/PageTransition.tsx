@@ -10,12 +10,12 @@ interface PageTransitionProps {
 const PageContainer = styled(motion.div)`
   position: absolute;
   width: 100%;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  overflow-y: auto;
+  padding-bottom: 2rem;
 `;
 
 const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {

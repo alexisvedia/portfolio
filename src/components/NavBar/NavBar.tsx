@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { Home, User, Briefcase, FileText } from 'lucide-react';
+import { Home, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface NavItem {
@@ -179,8 +179,6 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
   const items: NavItem[] = [
     { name: 'Home', nameKey: 'navbar.home', url: '/', icon: Home },
     { name: 'About', nameKey: 'navbar.about', url: '/about', icon: User },
-    { name: 'Projects', nameKey: 'navbar.projects', url: '/projects', icon: Briefcase },
-    { name: 'Resume', nameKey: 'navbar.resume', url: '/resume', icon: FileText },
   ];
 
   const [isMobile, setIsMobile] = useState(false);

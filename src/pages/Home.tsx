@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import SimpleBlurText from '@components/SimpleBlurText';
@@ -10,9 +10,9 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 100vh;
   padding: ${({ theme }) => theme.space.xl};
+  padding-top: 5rem;
 `;
 
 const Title = styled.div`
@@ -38,17 +38,6 @@ const Title = styled.div`
 
 const Home: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationComplete }) => {
   const { t, i18n } = useTranslation();
-
-  // Cuando el componente se monta, actualiza los colores para esta página
-  useEffect(() => {
-    // Emitir evento para cambiar los colores del fondo Aurora
-    const event = new CustomEvent('updateAuroraColors', {
-      detail: {
-        colors: ['#646cff', '#82e9de', '#a6c1ff'],
-      },
-    });
-    window.dispatchEvent(event);
-  }, []);
 
   return (
     <PageTransition>

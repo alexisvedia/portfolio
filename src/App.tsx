@@ -7,7 +7,6 @@ import { store, setLoaded } from '@store/index';
 import { theme } from '@styles/theme';
 import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
-import Aurora from './Aurora';
 import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar/NavBar';
 import ChatbotAssistant from '@components/ChatbotAssistant';
@@ -15,8 +14,6 @@ import ChatbotAssistant from '@components/ChatbotAssistant';
 // Importar páginas
 import Home from './pages/Home';
 import About from './pages/About';
-import Projects from './pages/Projects';
-import Resume from './pages/Resume';
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -24,32 +21,17 @@ import '@utils/i18n';
 // Contenedor principal para toda la aplicación
 const AppWrapper = styled.div`
   position: relative;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
-// Contenedor para el efecto Aurora, que ahora está fijo y cubre solo la ventana
-const AuroraWrapper = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: 0;
-  overflow: hidden;
-
-  /* Aseguramos que en mobile el Aurora tenga suficiente espacio */
-  @media (max-width: 768px) {
-    width: 100%;
-    height: 100dvh; /* Usar dvh para mejor soporte en mobile */
-    transform: scale(1.2); /* Escalar Aurora para que no se vea comprimido */
-  }
-`;
+// Ya no necesitamos el contenedor para el efecto Aurora
 
 // Contenedor de páginas
 const Container = styled.div`
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
-  z-index: 1;
+  overflow: visible;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 // Language Selector position
@@ -84,9 +66,6 @@ const AppContent = () => {
   const { t, i18n } = useTranslation();
   const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
-
-  // Estado para los colores de Aurora
-  const [currentColors, setCurrentColors] = useState<string[]>(['#646cff', '#82e9de', '#a6c1ff']);
 
   // Detectar si estamos en dispositivo móvil
   useEffect(() => {
@@ -142,21 +121,6 @@ const AppContent = () => {
     };
   }, [isMobile, i18n]);
 
-  // Escuchar el evento de actualización de colores de Aurora
-  useEffect(() => {
-    const handleUpdateAuroraColors = (event: CustomEvent<{ colors: string[] }>) => {
-      setCurrentColors(event.detail.colors);
-    };
-
-    // Registrar oyente para el evento custom
-    window.addEventListener('updateAuroraColors', handleUpdateAuroraColors as EventListener);
-
-    // Limpiar oyentes cuando el componente se desmonte
-    return () => {
-      window.removeEventListener('updateAuroraColors', handleUpdateAuroraColors as EventListener);
-    };
-  }, []);
-
   // Efectuar el cambio de idioma solo cuando todas las animaciones iniciales y ocultar navbar hayan terminado
   useEffect(() => {
     // Si tenemos un idioma pendiente y la navbar está oculta (solo en desktop), podemos proceder
@@ -199,9 +163,6 @@ const AppContent = () => {
 
   return (
     <AppWrapper>
-      <AuroraWrapper>
-        <Aurora colorStops={currentColors} blend={0.5} amplitude={1.0} speed={0.5} />
-      </AuroraWrapper>
       <NavBarStyled t={t} visible={navbarVisible} />
       <LanguageSelectorStyled initialDelay={1300} />
       <ChatbotAssistant initialDelay={1300} />
@@ -210,8 +171,6 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} />} />
           <Route path="/about" element={<About />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/resume" element={<Resume />} />
         </Routes>
       </Container>
     </AppWrapper>
