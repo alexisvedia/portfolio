@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
-import { Home, User, Briefcase, FileText } from 'lucide-react';
+import { Home, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 interface NavItem {

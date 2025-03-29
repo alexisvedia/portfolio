@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import SimpleBlurText from '@components/SimpleBlurText';
@@ -38,9 +38,6 @@ const Title = styled.div`
 
 const Home: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationComplete }) => {
   const { t, i18n } = useTranslation();
-
-  // Ya no necesitamos actualizar los colores del fondo Aurora
-  // porque lo hemos eliminado
 
   return (
     <PageTransition>

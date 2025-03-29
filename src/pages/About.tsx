@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import LanguageMorphingTitle from '@components/LanguageMorphingTitle';

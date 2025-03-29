@@ -7,7 +7,6 @@ import { store, setLoaded } from '@store/index';
 import { theme } from '@styles/theme';
 import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
-import Aurora from './Aurora';
 import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar/NavBar';
 import ChatbotAssistant from '@components/ChatbotAssistant';
@@ -68,9 +67,6 @@ const AppContent = () => {
   const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Estado para los colores de Aurora
-  const [currentColors, setCurrentColors] = useState<string[]>(['#646cff', '#82e9de', '#a6c1ff']);
-
   // Detectar si estamos en dispositivo móvil
   useEffect(() => {
     const handleResize = () => {
@@ -124,21 +120,6 @@ const AppContent = () => {
       );
     };
   }, [isMobile, i18n]);
-
-  // Escuchar el evento de actualización de colores de Aurora
-  useEffect(() => {
-    const handleUpdateAuroraColors = (event: CustomEvent<{ colors: string[] }>) => {
-      setCurrentColors(event.detail.colors);
-    };
-
-    // Registrar oyente para el evento custom
-    window.addEventListener('updateAuroraColors', handleUpdateAuroraColors as EventListener);
-
-    // Limpiar oyentes cuando el componente se desmonte
-    return () => {
-      window.removeEventListener('updateAuroraColors', handleUpdateAuroraColors as EventListener);
-    };
-  }, []);
 
   // Efectuar el cambio de idioma solo cuando todas las animaciones iniciales y ocultar navbar hayan terminado
   useEffect(() => {
