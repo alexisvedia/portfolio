@@ -15,8 +15,6 @@ import ChatbotAssistant from '@components/ChatbotAssistant';
 // Importar páginas
 import Home from './pages/Home';
 import About from './pages/About';
-import Projects from './pages/Projects';
-import Resume from './pages/Resume';
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -24,32 +22,17 @@ import '@utils/i18n';
 // Contenedor principal para toda la aplicación
 const AppWrapper = styled.div`
   position: relative;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
-// Contenedor para el efecto Aurora, que ahora está fijo y cubre solo la ventana
-const AuroraWrapper = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  z-index: 0;
-  overflow: hidden;
-
-  /* Aseguramos que en mobile el Aurora tenga suficiente espacio */
-  @media (max-width: 768px) {
-    width: 100%;
-    height: 100dvh; /* Usar dvh para mejor soporte en mobile */
-    transform: scale(1.2); /* Escalar Aurora para que no se vea comprimido */
-  }
-`;
+// Ya no necesitamos el contenedor para el efecto Aurora
 
 // Contenedor de páginas
 const Container = styled.div`
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
-  z-index: 1;
+  overflow: visible;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 // Language Selector position
@@ -199,9 +182,6 @@ const AppContent = () => {
 
   return (
     <AppWrapper>
-      <AuroraWrapper>
-        <Aurora colorStops={currentColors} blend={0.5} amplitude={1.0} speed={0.5} />
-      </AuroraWrapper>
       <NavBarStyled t={t} visible={navbarVisible} />
       <LanguageSelectorStyled initialDelay={1300} />
       <ChatbotAssistant initialDelay={1300} />
@@ -210,8 +190,6 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} />} />
           <Route path="/about" element={<About />} />
-          <Route path="/projects" element={<Projects />} />
-          <Route path="/resume" element={<Resume />} />
         </Routes>
       </Container>
     </AppWrapper>

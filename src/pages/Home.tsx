@@ -10,9 +10,9 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 100vh;
   padding: ${({ theme }) => theme.space.xl};
+  padding-top: 5rem;
 `;
 
 const Title = styled.div`
@@ -39,16 +39,8 @@ const Title = styled.div`
 const Home: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationComplete }) => {
   const { t, i18n } = useTranslation();
 
-  // Cuando el componente se monta, actualiza los colores para esta página
-  useEffect(() => {
-    // Emitir evento para cambiar los colores del fondo Aurora
-    const event = new CustomEvent('updateAuroraColors', {
-      detail: {
-        colors: ['#646cff', '#82e9de', '#a6c1ff'],
-      },
-    });
-    window.dispatchEvent(event);
-  }, []);
+  // Ya no necesitamos actualizar los colores del fondo Aurora
+  // porque lo hemos eliminado
 
   return (
     <PageTransition>
