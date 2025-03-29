@@ -48,28 +48,13 @@ const Content = styled.div`
 `;
 
 const About: React.FC = () => {
-  const {} = useTranslation();
-
-  // Ya no necesitamos actualizar los colores del fondo Aurora
-  // porque lo hemos eliminado
+  const { t } = useTranslation();
 
   return (
     <PageTransition>
       <Content>
         <StyledMorphingTitle translationKey="navbar.about" morphTime={0.8} cooldownTime={0.2} />
         <SectionContent>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h3
-              style={{
-                fontSize: '1.8rem',
-                marginBottom: '1rem',
-                color: 'rgba(255, 255, 255, 0.9)',
-              }}
-            >
-              Perfil Profesional
-            </h3>
-          </div>
-
           <div
             style={{
               display: 'grid',
@@ -78,32 +63,6 @@ const About: React.FC = () => {
               alignItems: 'center',
             }}
           >
-            <div>
-              <p>
-                Desarrollador frontend apasionado, especializado en React y TypeScript, con vasta
-                experiencia en diseño UX/UI y gran interés en la integración de soluciones de
-                inteligencia artificial.
-              </p>
-              <p>
-                Me destaco por mi adaptabilidad, capacidad de trabajar en equipo, humildad y
-                compromiso constante con la excelencia. Siempre estoy en busca de desafíos que
-                impulsen mi crecimiento profesional y personal.
-              </p>
-              <div style={{ marginTop: '1.5rem' }}>
-                <h4
-                  style={{
-                    fontSize: '1.2rem',
-                    marginBottom: '0.5rem',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                  }}
-                >
-                  Idiomas
-                </h4>
-                <p>Español: Nativo</p>
-                <p>Inglés: Nivel Intermedio</p>
-              </div>
-            </div>
-
             <div
               style={{
                 height: '300px',
@@ -113,17 +72,23 @@ const About: React.FC = () => {
                 boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 margin: '0 auto',
+                order: 1,
               }}
             >
               <img
                 src="/src/assets/profile-image.png"
-                alt="Foto de perfil"
+                alt={t('navbar.about')}
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
                 }}
               />
+            </div>
+
+            <div style={{ order: 2 }}>
+              <p>{t('about.bio.part1')}</p>
+              <p>{t('about.bio.part2')}</p>
             </div>
           </div>
         </SectionContent>
@@ -137,7 +102,7 @@ const About: React.FC = () => {
                 color: 'rgba(255, 255, 255, 0.9)',
               }}
             >
-              Experiencia Profesional
+              {t('about.professionalExperience')}
             </h3>
           </div>
 
@@ -149,7 +114,7 @@ const About: React.FC = () => {
                 color: 'rgba(255, 255, 255, 0.9)',
               }}
             >
-              Desarrollador Frontend Senior
+              {t('about.jobs.fullStackEngineer')}
             </h4>
             <p
               style={{
@@ -158,15 +123,14 @@ const About: React.FC = () => {
                 marginBottom: '0.5rem',
               }}
             >
-              Empresa XYZ | 2020 - Presente
+              {t('about.jobs.fusionOS')}
             </p>
             <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
-              <li>
-                Desarrollo de aplicaciones web utilizando React, TypeScript y styled-components.
-              </li>
-              <li>Implementación de arquitecturas escalables y mantenibles.</li>
-              <li>Colaboración en equipos multidisciplinarios utilizando metodologías ágiles.</li>
-              <li>Optimización de rendimiento y experiencia de usuario.</li>
+              {(t('about.jobDescriptions.fusionOS', { returnObjects: true }) as string[]).map(
+                (description: string, index: number) => (
+                  <li key={index}>{description}</li>
+                )
+              )}
             </ul>
           </div>
 
@@ -178,7 +142,7 @@ const About: React.FC = () => {
                 color: 'rgba(255, 255, 255, 0.9)',
               }}
             >
-              Desarrollador Frontend
+              {t('about.jobs.uiUxDesigner')}
             </h4>
             <p
               style={{
@@ -187,12 +151,14 @@ const About: React.FC = () => {
                 marginBottom: '0.5rem',
               }}
             >
-              Empresa ABC | 2018 - 2020
+              {t('about.jobs.xcons')}
             </p>
             <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
-              <li>Desarrollo de interfaces de usuario con React y JavaScript.</li>
-              <li>Implementación de diseños responsivos y accesibles.</li>
-              <li>Integración con APIs RESTful y GraphQL.</li>
+              {(t('about.jobDescriptions.xcons', { returnObjects: true }) as string[]).map(
+                (description: string, index: number) => (
+                  <li key={index}>{description}</li>
+                )
+              )}
             </ul>
           </div>
         </SectionContent>
@@ -206,7 +172,7 @@ const About: React.FC = () => {
                 color: 'rgba(255, 255, 255, 0.9)',
               }}
             >
-              Proyectos Destacados
+              {t('about.featuredProjects')}
             </h3>
           </div>
 
@@ -241,12 +207,9 @@ const About: React.FC = () => {
                   color: 'rgba(255, 255, 255, 0.9)',
                 }}
               >
-                Portfolio Personal
+                {t('about.projects.personalPortfolio')}
               </h4>
-              <p>
-                Sitio web personal desarrollado con React, TypeScript y Vite, con animaciones
-                avanzadas y diseño responsive.
-              </p>
+              <p>{t('about.projects.personalPortfolioDesc')}</p>
               <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span
                   style={{
@@ -305,12 +268,9 @@ const About: React.FC = () => {
                   color: 'rgba(255, 255, 255, 0.9)',
                 }}
               >
-                E-commerce App
+                {t('about.projects.ecommerceApp')}
               </h4>
-              <p>
-                Aplicación de comercio electrónico con carrito de compras, pasarela de pagos y panel
-                de administración.
-              </p>
+              <p>{t('about.projects.ecommerceAppDesc')}</p>
               <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span
                   style={{
@@ -356,7 +316,7 @@ const About: React.FC = () => {
                 color: 'rgba(255, 255, 255, 0.9)',
               }}
             >
-              Habilidades
+              {t('about.skills')}
             </h3>
           </div>
 
@@ -375,7 +335,7 @@ const About: React.FC = () => {
                   color: 'rgba(255, 255, 255, 0.9)',
                 }}
               >
-                Frontend
+                {t('about.skillCategories.fullStack')}
               </h4>
               <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
                 <li>React / React Native</li>
@@ -383,6 +343,7 @@ const About: React.FC = () => {
                 <li>HTML5 / CSS3</li>
                 <li>Styled Components</li>
                 <li>Redux / Context API</li>
+                <li>Python (Django, Flask, FastAPI)</li>
               </ul>
             </div>
 
@@ -394,7 +355,7 @@ const About: React.FC = () => {
                   color: 'rgba(255, 255, 255, 0.9)',
                 }}
               >
-                Backend
+                {t('about.skillCategories.backend')}
               </h4>
               <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
                 <li>Node.js</li>
@@ -413,14 +374,15 @@ const About: React.FC = () => {
                   color: 'rgba(255, 255, 255, 0.9)',
                 }}
               >
-                Herramientas
+                {t('about.skillCategories.tools')}
               </h4>
               <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
-                <li>Git / GitHub</li>
+                <li>Git / GitHub / Bitbucket / Jira / Trello</li>
+                <li>WordPress (nivel avanzado) / Elementor</li>
                 <li>Webpack / Vite</li>
-                <li>Jest / Testing Library</li>
-                <li>Figma / Adobe XD</li>
-                <li>CI/CD</li>
+                <li>Figma / Adobe Suite (Photoshop, Illustrator)</li>
+                <li>Postman / Jest / Testing Library</li>
+                <li>n8n (Automatizaciones)</li>
               </ul>
             </div>
           </div>

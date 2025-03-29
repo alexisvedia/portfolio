@@ -16,6 +16,55 @@ const resources = {
         projects: 'Projects',
         resume: 'Resume',
       },
+      // About page
+      about: {
+        professionalProfile: 'Professional Profile',
+        professionalExperience: 'Professional Experience',
+        featuredProjects: 'Featured Projects',
+        skills: 'Skills',
+        languages: 'Languages',
+        spanish: 'Spanish: Native',
+        english: 'English: Intermediate Level',
+        bio: {
+          part1:
+            'Passionate Full Stack Developer, specialized in React and TypeScript, with extensive experience in UX/UI design and great interest in integrating artificial intelligence solutions. I stand out for my adaptability, teamwork ability, humility, and constant commitment to excellence.',
+          part2:
+            'Experience in automations with n8n. I am always looking for challenges that drive my professional and personal growth.',
+        },
+        jobs: {
+          fullStackEngineer: 'Full Stack Engineer',
+          fusionOS: 'FusionOS.ai | 2024 - 2025',
+          uiUxDesigner: 'UI/UX Designer & Quality Assurance Specialist',
+          xcons: 'XCONS | 2022 - 2024',
+        },
+        jobDescriptions: {
+          fusionOS: [
+            'Advanced development of frontend functionalities with React and TypeScript.',
+            'Integration and consumption of REST APIs to make the application dynamic.',
+            'Implementation and maintenance of scalable interfaces with debugging practices and code quality assurance.',
+          ],
+          xcons: [
+            'Design of graphical interfaces and user experiences for web and mobile applications.',
+            'Creation and maintenance of UI component libraries.',
+            'Development and customization of websites using WordPress and Elementor.',
+            'Execution of functional tests, error detection and documentation.',
+            'Quality assurance in digital processes and products.',
+          ],
+        },
+        projects: {
+          personalPortfolio: 'Personal Portfolio',
+          personalPortfolioDesc:
+            'Personal website developed with React, TypeScript and Vite, with advanced animations and responsive design.',
+          ecommerceApp: 'E-commerce App',
+          ecommerceAppDesc:
+            'E-commerce application with shopping cart, payment gateway and admin panel.',
+        },
+        skillCategories: {
+          fullStack: 'Full Stack',
+          backend: 'Backend',
+          tools: 'Tools',
+        },
+      },
     },
   },
   es: {
@@ -30,6 +79,55 @@ const resources = {
         about: 'Sobre Mí',
         projects: 'Proyectos',
         resume: 'Currículum',
+      },
+      // Página Sobre Mí
+      about: {
+        professionalProfile: 'Perfil Profesional',
+        professionalExperience: 'Experiencia Profesional',
+        featuredProjects: 'Proyectos Destacados',
+        skills: 'Habilidades',
+        languages: 'Idiomas',
+        spanish: 'Español: Nativo',
+        english: 'Inglés: Nivel Intermedio',
+        bio: {
+          part1:
+            'Desarrollador Full Stack apasionado, especializado en React y TypeScript, con vasta experiencia en diseño UX/UI y gran interés en la integración de soluciones de inteligencia artificial. Me destaco por mi adaptabilidad, capacidad de trabajar en equipo, humildad y compromiso constante con la excelencia.',
+          part2:
+            'Experiencia en automatizaciones con n8n. Siempre estoy en busca de desafíos que impulsen mi crecimiento profesional y personal.',
+        },
+        jobs: {
+          fullStackEngineer: 'Ingeniero Full Stack',
+          fusionOS: 'FusionOS.ai | 2024 - 2025',
+          uiUxDesigner: 'Diseñador UI/UX & Especialista en Aseguramiento de Calidad',
+          xcons: 'XCONS | 2022 - 2024',
+        },
+        jobDescriptions: {
+          fusionOS: [
+            'Desarrollo avanzado de funcionalidades frontend con React y TypeScript.',
+            'Integración y consumo de APIs REST para dinamizar la aplicación.',
+            'Implementación y mantenimiento de interfaces escalables con prácticas de debugging y aseguramiento de la calidad del código.',
+          ],
+          xcons: [
+            'Diseño de interfaces gráficas y experiencias de usuario para aplicaciones web y móviles.',
+            'Creación y mantenimiento de bibliotecas de componentes UI.',
+            'Desarrollo y personalización de sitios web utilizando WordPress y Elementor.',
+            'Ejecución de pruebas funcionales, detección y documentación de errores.',
+            'Aseguramiento de la calidad en procesos y productos digitales.',
+          ],
+        },
+        projects: {
+          personalPortfolio: 'Portfolio Personal',
+          personalPortfolioDesc:
+            'Sitio web personal desarrollado con React, TypeScript y Vite, con animaciones avanzadas y diseño responsive.',
+          ecommerceApp: 'E-commerce App',
+          ecommerceAppDesc:
+            'Aplicación de comercio electrónico con carrito de compras, pasarela de pagos y panel de administración.',
+        },
+        skillCategories: {
+          fullStack: 'Full Stack',
+          backend: 'Backend',
+          tools: 'Herramientas',
+        },
       },
     },
   },
