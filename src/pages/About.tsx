@@ -76,7 +76,7 @@ const About: React.FC = () => {
               }}
             >
               <img
-                src="/src/assets/profile-image.png"
+                src="/src/assets/profile-image.webp"
                 alt={t('navbar.about')}
                 style={{
                   width: '100%',
