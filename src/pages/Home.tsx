@@ -13,7 +13,7 @@ const Content = styled.div`
   min-height: 100vh;
   padding: ${({ theme }) => theme.space.xl};
   padding-top: 5rem;
-`;
+  `;
 
 const Title = styled.div`
   font-family:
