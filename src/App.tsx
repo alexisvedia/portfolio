@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar/NavBar';
 import ChatbotAssistant from '@components/ChatbotAssistant';
+import { initScrollDetection } from '@utils/scrollDetection';
 
 // Importar páginas
 import Home from './pages/Home';
@@ -160,6 +161,12 @@ const AppContent = () => {
     // Este callback se llama cuando la animación de bienvenida está completa
     store.dispatch(setLoaded(true));
   };
+
+  // Inicializar la detección de scroll para controlar la visibilidad de la barra de desplazamiento
+  useEffect(() => {
+    const cleanup = initScrollDetection();
+    return cleanup;
+  }, []);
 
   return (
     <AppWrapper>
