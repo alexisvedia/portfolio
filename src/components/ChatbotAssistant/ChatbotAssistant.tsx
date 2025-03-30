@@ -165,13 +165,12 @@ const FloatingWrapper = styled.div<{ $isReady: boolean; $isOpen: boolean }>`
   }
 `;
 
-
 const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $isMobile: boolean }>`
   width: ${props => (props.$isOpen ? '320px' : '48px')};
   height: ${props => (props.$isOpen ? '400px' : '48px')};
   border-radius: ${props => (props.$isOpen ? '16px' : '50%')};
-  background: ${props => (props.$isOpen ? 'rgba(30, 30, 35, 0.7)' : 'rgba(255, 255, 255, 0.1)')};
-  backdrop-filter: blur(20px);
+  background: ${props => (props.$isOpen ? 'rgba(30, 30, 35, 0.85)' : 'rgba(255, 255, 255, 0.1)')};
+  backdrop-filter: blur(7px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -724,21 +723,25 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
       } catch (error) {
         console.error('Error al enviar mensaje:', error);
         setIsTyping(false);
-        
+
         // Mensaje personalizado basado en el tipo de error
-        let errorMessage = 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo más tarde.';
-        
+        let errorMessage =
+          'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo más tarde.';
+
         // Si es un error específico de arranque en frío o conexión
         if (error instanceof Error) {
-          if (error.message.includes('iniciando') || 
-              error.message.includes('después de varios intentos') ||
-              error.message.includes('failed to fetch') ||
-              error.message.includes('network') ||
-              error.message.includes('connection')) {
-            errorMessage = 'Parece que el servicio está iniciando o hay problemas de conexión. Por favor, espera unos segundos y vuelve a intentarlo.';
+          if (
+            error.message.includes('iniciando') ||
+            error.message.includes('después de varios intentos') ||
+            error.message.includes('failed to fetch') ||
+            error.message.includes('network') ||
+            error.message.includes('connection')
+          ) {
+            errorMessage =
+              'Parece que el servicio está iniciando o hay problemas de conexión. Por favor, espera unos segundos y vuelve a intentarlo.';
           }
         }
-        
+
         setMessages(prev => [
           ...prev,
           {
