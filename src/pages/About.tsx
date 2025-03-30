@@ -3,8 +3,8 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import LanguageMorphingTitle from '@components/LanguageMorphingTitle';
 import PageTransition from '@components/PageTransition/PageTransition';
+import profileImage from '../assets/profile-image.webp';
 
-// Estilo para los títulos de sección con animación morphing
 const StyledMorphingTitle = styled(LanguageMorphingTitle)`
   font-size: clamp(2.5rem, 5vw, 7rem);
   font-weight: 900;
@@ -76,7 +76,7 @@ const About: React.FC = () => {
               }}
             >
               <img
-                src="/src/assets/profile-image.webp"
+                src={profileImage}
                 alt={t('navbar.about')}
                 style={{
                   width: '100%',
