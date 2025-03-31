@@ -13,6 +13,9 @@ interface N8NResponse {
   data?: any;
 }
 
+// Variable para rastrear si el servidor ya ha sido inicializado
+let serverInitialized = false;
+
 const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
@@ -62,6 +65,57 @@ const fetchWithRetry = async (
   }
 
   throw lastError || new Error(`Error de conexión después de ${maxRetries} intentos`);
+};
+
+/**
+ * Inicializa el servidor n8n enviando una petición de precalentamiento
+ * Esta función debe ser llamada cuando se carga la aplicación
+ */
+export const initializeN8NServer = async (): Promise<boolean> => {
+  // Si ya se ha inicializado, no hacemos nada
+  if (serverInitialized) return true;
+  
+  try {
+    console.log('Inicializando servidor n8n...');
+    const options = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        chatInput: 'ping',
+        sessionId: currentSessionId,
+        type: 'warmup',
+      }),
+    };
+
+    // Usamos un timeout más corto para la inicialización
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    try {
+      const response = await fetch(N8N_WEBHOOK_URL, {
+        ...options,
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        console.log('Servidor n8n inicializado correctamente');
+        serverInitialized = true;
+        return true;
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      console.log('El servidor n8n está en modo suspendido, se activará con la primera petición real');
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error al inicializar el servidor n8n:', error);
+    return false;
+  }
 };
 
 export const sendMessageToN8N = async (message: string): Promise<ChatMessage> => {

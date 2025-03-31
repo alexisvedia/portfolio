@@ -11,6 +11,7 @@ import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar/NavBar';
 import ChatbotAssistant from '@components/ChatbotAssistant';
 import { initScrollDetection } from '@utils/scrollDetection';
+import { initializeN8NServer } from '@services/n8nService';
 
 // Importar páginas
 import Home from './pages/Home';
@@ -67,6 +68,12 @@ const AppContent = () => {
   const { t, i18n } = useTranslation();
   const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Inicializar el servidor n8n cuando la aplicación se carga
+  useEffect(() => {
+    // Intentamos precalentar el servidor n8n lo antes posible
+    initializeN8NServer();
+  }, []);
 
   // Detectar si estamos en dispositivo móvil
   useEffect(() => {

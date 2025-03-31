@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { HiSparkles } from 'react-icons/hi2';
-import { sendMessageToN8N } from '../../services/n8nService';
+import { sendMessageToN8N, initializeN8NServer } from '../../services/n8nService';
 
 // Animations
 const morphToChat = keyframes`
@@ -758,6 +758,16 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
       handleSendMessage();
     }
   };
+
+  // Inicializar el servidor n8n cuando el componente se monta
+  useEffect(() => {
+    // Intentamos inicializar el servidor n8n cuando el componente se monta
+    initializeN8NServer().then(initialized => {
+      if (initialized) {
+        console.log('Servidor n8n precalentado correctamente');
+      }
+    });
+  }, []);
 
   // Return nothing until we're ready to start the animation
   if (!visible && !isReady) return null;
