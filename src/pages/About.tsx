@@ -8,13 +8,14 @@ import profileImage from '../assets/profile-image.webp';
 const StyledMorphingTitle = styled(LanguageMorphingTitle)`
   font-size: clamp(2.5rem, 5vw, 7rem);
   font-weight: 900;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0.5rem;
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   line-height: 1.2;
   letter-spacing: -0.02em;
 
   @media (min-width: 768px) {
     font-size: clamp(3.5rem, 8vw, 10rem);
+    margin-bottom: 2rem;
   }
 `;
 

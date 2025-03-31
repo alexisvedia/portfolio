@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
 import { Home, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useScrollDirection } from '../../utils/useScrollDirection';
 
 interface NavItem {
   name: string;
@@ -18,12 +19,13 @@ interface NavBarProps {
 }
 
 // Contenedor principal de la barra de navegación
-const NavContainer = styled.div`
+const NavContainer = styled(motion.div)`
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
   margin-top: 1.5rem;
+  transition: transform 0.3s ease;
 
   @media (max-width: 768px) {
     bottom: 0;
@@ -183,6 +185,8 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
 
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
+  const { direction } = useScrollDirection({ threshold: 5 });
+  const [isVisible, setIsVisible] = useState(true);
 
   // Configurar detector de tamaño de pantalla
   useEffect(() => {
@@ -195,8 +199,38 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Controlar la visibilidad de la barra de navegación según la dirección del scroll
+  useEffect(() => {
+    if (isMobile) {
+      if (direction === 'down') {
+        setIsVisible(false);
+      } else if (direction === 'up') {
+        setIsVisible(true);
+      }
+    } else {
+      setIsVisible(true); // En desktop siempre visible
+    }
+  }, [direction, isMobile]);
+
+  const navVariants = {
+    visible: { 
+      transform: 'translateX(-50%)',
+      opacity: 1 
+    },
+    hidden: { 
+      transform: isMobile ? 'translateX(-50%) translateY(100%)' : 'translateX(-50%)',
+      opacity: isMobile ? 0 : 1
+    }
+  };
+
   return (
-    <NavContainer className={className}>
+    <AnimatePresence>
+      <NavContainer 
+        className={className}
+        initial="visible"
+        animate={isVisible ? "visible" : "hidden"}
+        variants={navVariants}
+        transition={{ duration: 0.3 }}>
       <NavContent>
         {items.map(item => {
           const Icon = item.icon;
@@ -230,6 +264,7 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
         })}
       </NavContent>
     </NavContainer>
+    </AnimatePresence>
   );
 };
 

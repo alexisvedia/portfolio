@@ -13,7 +13,7 @@ interface GooeyTextProps {
 
 const Container = styled.div`
   position: relative;
-  min-height: 150px;
+  min-height: 120px;
   min-width: 280px;
   width: 100%;
 
@@ -32,7 +32,7 @@ const TextContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 150px;
+  min-height: 120px;
   width: 100%;
   position: relative;
 

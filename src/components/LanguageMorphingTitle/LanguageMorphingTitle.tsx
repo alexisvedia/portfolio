@@ -14,11 +14,11 @@ const MorphContainer = styled.div<{ $shouldMorph: boolean }>`
   position: relative;
   width: 100%;
   height: auto;
-  min-height: 150px;
+  min-height: 100px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
   font-size: clamp(2.5rem, 5vw, 7rem);
   font-weight: 900;
   color: white;
@@ -27,7 +27,8 @@ const MorphContainer = styled.div<{ $shouldMorph: boolean }>`
   letter-spacing: -0.02em;
 
   @media (min-width: 768px) {
-    min-height: 180px;
+    min-height: 160px;
+    margin-bottom: 2rem;
     font-size: clamp(3.5rem, 8vw, 10rem);
   }
 `;
