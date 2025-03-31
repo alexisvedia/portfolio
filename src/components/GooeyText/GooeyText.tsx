@@ -41,6 +41,7 @@ const TextContainer = styled.div`
   }
 `;
 
+
 const TextSpan = styled.span`
   position: absolute;
   display: inline-block;
