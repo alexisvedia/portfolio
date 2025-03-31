@@ -46,7 +46,7 @@ const TextSpan = styled.span`
   display: inline-block;
   user-select: none;
   text-align: center;
-  font-size: clamp(2.5rem, 5vw, 7rem);
+  font-size: clamp(3.5rem, 5vw, 7rem);
   line-height: 1.2;
   white-space: nowrap;
   color: white;
