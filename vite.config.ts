@@ -4,6 +4,18 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'styled-components'],
+          i18n: ['i18next', 'react-i18next'],
+          icons: ['react-icons'],
+        },
+      },
+    },
+  },
   plugins: [react()],
   resolve: {
     alias: {

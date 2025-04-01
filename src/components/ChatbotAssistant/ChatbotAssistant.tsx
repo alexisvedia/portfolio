@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { HiSparkles } from 'react-icons/hi2';
-import { sendMessageToN8N } from '../../services/n8nService';
+import ReactMarkdown from 'react-markdown';
+import { sendMessageToN8N, initializeN8NServer } from '../../services/n8nService';
 
 // Animations
 const morphToChat = keyframes`
@@ -554,6 +555,8 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   const [shouldAnimateMessages, setShouldAnimateMessages] = useState(false);
   const [isInitialRender, setIsInitialRender] = useState(true);
   const [isReady, setIsReady] = useState(false);
+// Remove unused state since isServiceReady is not being read anywhere
+  const initRetryCountRef = useRef(0);
   const [ripples, setRipples] = useState<
     Array<{ x: number; y: number; size: number; key: number }>
   >([]);
@@ -572,22 +575,40 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   // Verificar si estamos en un dispositivo móvil
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
 
-  // Staged approach to showing the chatbot with better timing
+  // Función para intentar inicializar el servicio n8n
+  const initializeService = async () => {
+    try {
+      const isInitialized = await initializeN8NServer();
+      if (isInitialized) {
+// Service is ready, no need to track state since it's not used elsewhere
+        // Solo después de que el servicio esté listo, iniciamos la animación del chat
+        const initialTimer = setTimeout(() => {
+          setVisible(true);
+          const readyTimer = setTimeout(() => {
+            setIsReady(true);
+          }, 300);
+          return () => clearTimeout(readyTimer);
+        }, initialDelay);
+        return () => clearTimeout(initialTimer);
+      } else {
+        // Si la inicialización falla y no hemos excedido el límite de intentos, reintentamos
+        if (initRetryCountRef.current < 3) {
+          initRetryCountRef.current += 1;
+          setTimeout(initializeService, 2000); // Reintentamos cada 2 segundos
+        }
+      }
+    } catch (error) {
+      console.error('Error al inicializar el servicio:', error);
+      if (initRetryCountRef.current < 3) {
+        initRetryCountRef.current += 1;
+        setTimeout(initializeService, 2000);
+      }
+    }
+  };
+
+  // Iniciamos el proceso de inicialización cuando el componente se monta
   useEffect(() => {
-    // First delay before starting to show
-    const initialTimer = setTimeout(() => {
-      // Start the appear animation
-      setVisible(true);
-
-      // After appear animation completes, set ready
-      const readyTimer = setTimeout(() => {
-        setIsReady(true);
-      }, 300); // Adjusted delay to match new animation time
-
-      return () => clearTimeout(readyTimer);
-    }, initialDelay);
-
-    return () => clearTimeout(initialTimer);
+    initializeService();
   }, [initialDelay]);
 
   // Auto scroll to bottom when new messages are added
@@ -815,7 +836,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
                     $shouldAnimate={shouldAnimateMessages}
                     $isMobile={isMobile}
                   >
-                    {message.text}
+                    <ReactMarkdown>{message.text}</ReactMarkdown>
                   </MessageBubble>
                 ))}
                 {isTyping && (

@@ -1,3 +1,4 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
@@ -9,13 +10,14 @@ import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
 import LanguageSelector from '@components/LanguageSelector';
 import NavBar from '@components/NavBar/NavBar';
-import ChatbotAssistant from '@components/ChatbotAssistant';
+const ChatbotAssistant = React.lazy(() => import('@components/ChatbotAssistant'));
 import { initScrollDetection } from '@utils/scrollDetection';
 import { initializeN8NServer } from '@services/n8nService';
 
 // Importar páginas
 import Home from './pages/Home';
-import About from './pages/About';
+// Using dynamic imports for code splitting
+const About = React.lazy(() => import('./pages/About'));
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -179,13 +181,17 @@ const AppContent = () => {
     <AppWrapper>
       <NavBarStyled t={t} visible={navbarVisible} />
       <LanguageSelectorStyled initialDelay={1300} />
-      <ChatbotAssistant initialDelay={1300} />
+      <React.Suspense fallback={null}>
+        <ChatbotAssistant initialDelay={1300} />
+      </React.Suspense>
 
       <Container>
-        <Routes>
-          <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} />} />
-          <Route path="/about" element={<About />} />
-        </Routes>
+        <React.Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} />} />
+            <Route path="/about" element={<About />} />
+          </Routes>
+        </React.Suspense>
       </Container>
     </AppWrapper>
   );
