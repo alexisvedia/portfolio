@@ -13,8 +13,9 @@ interface N8NResponse {
   data?: any;
 }
 
-// Variable para rastrear si el servidor ya ha sido inicializado
+// Variable para rastrear si el servidor ya ha sido inicializado y la promesa de inicialización
 let serverInitialized = false;
+let initializationPromise: Promise<boolean> | null = null;
 
 const generateSessionId = () => {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -72,11 +73,16 @@ const fetchWithRetry = async (
  * Esta función debe ser llamada cuando se carga la aplicación
  */
 export const initializeN8NServer = async (): Promise<boolean> => {
-  // Si ya se ha inicializado, no hacemos nada
+  // Si ya se ha inicializado, retornamos true inmediatamente
   if (serverInitialized) return true;
   
-  try {
-    console.log('Inicializando servidor n8n...');
+  // Si ya hay una inicialización en curso, retornamos la promesa existente
+  if (initializationPromise) return initializationPromise;
+  
+  // Crear una nueva promesa de inicialización
+  initializationPromise = (async () => {
+    try {
+    // Eliminamos el log de inicialización
     const options = {
       method: 'POST',
       headers: {
@@ -102,20 +108,27 @@ export const initializeN8NServer = async (): Promise<boolean> => {
       clearTimeout(timeoutId);
       
       if (response.ok) {
-        console.log('Servidor n8n inicializado correctamente');
+        // Eliminamos el log de inicialización correcta
         serverInitialized = true;
+        initializationPromise = null;
         return true;
       }
     } catch (error) {
       clearTimeout(timeoutId);
-      console.log('El servidor n8n está en modo suspendido, se activará con la primera petición real');
+      // Eliminamos el log de servidor en modo suspendido
     }
     
+    initializationPromise = null;
     return false;
   } catch (error) {
+    // Mantenemos solo el log de error para depuración
     console.error('Error al inicializar el servidor n8n:', error);
+    initializationPromise = null;
     return false;
   }
+})();  // Ejecutamos la función asíncrona inmediatamente
+
+return initializationPromise;
 };
 
 export const sendMessageToN8N = async (message: string): Promise<ChatMessage> => {
@@ -153,7 +166,7 @@ export const sendMessageToN8N = async (message: string): Promise<ChatMessage> =>
       isUser: false,
     };
   } catch (error) {
-    console.error('Error en la comunicación con n8n:', error);
+    // Mantenemos el log de error para depuración pero lo hacemos más discreto
     const errorMessage =
       error instanceof Error
         ? error.message

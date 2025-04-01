@@ -759,15 +759,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
     }
   };
 
-  // Inicializar el servidor n8n cuando el componente se monta
-  useEffect(() => {
-    // Intentamos inicializar el servidor n8n cuando el componente se monta
-    initializeN8NServer().then(initialized => {
-      if (initialized) {
-        console.log('Servidor n8n precalentado correctamente');
-      }
-    });
-  }, []);
+  // Ya no necesitamos inicializar el servidor n8n aquí, se hace en App.tsx
 
   // Return nothing until we're ready to start the animation
   if (!visible && !isReady) return null;

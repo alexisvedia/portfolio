@@ -71,7 +71,7 @@ const AppContent = () => {
   
   // Inicializar el servidor n8n cuando la aplicación se carga
   useEffect(() => {
-    // Intentamos precalentar el servidor n8n lo antes posible
+    // Una única llamada de precalentamiento al servidor n8n
     initializeN8NServer();
   }, []);
 
