@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { HiSparkles } from 'react-icons/hi2';
-import { sendMessageToN8N, initializeN8NServer } from '../../services/n8nService';
+import { sendMessageToN8N } from '../../services/n8nService';
 
 // Animations
 const morphToChat = keyframes`
