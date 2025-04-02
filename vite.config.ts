@@ -16,6 +16,11 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    ...(process.env.NODE_ENV === 'development' && {
+      allowedHosts: true,
+    }) 
+  },
   plugins: [react()],
   resolve: {
     alias: {
