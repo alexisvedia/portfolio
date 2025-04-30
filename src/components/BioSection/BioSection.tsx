@@ -18,17 +18,18 @@ const SectionContainer = styled.section`
   position: relative;
   overflow: hidden;
   width: 100%;
-  margin: 3rem 0;
+  margin: -11rem 0 3rem 0;
 `;
 
-const ContentWrapper = styled.div<{ $visible: boolean }>`
+const ContentWrapper = styled.div<{ $opacity: number; $translateY: number }>`
   max-width: 1300px;
   margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0;
-  animation: ${props => (props.$visible ? fadeIn : 'none')} 1.2s ease-out forwards;
+  opacity: ${props => props.$opacity};
+  transform: translateY(${props => props.$translateY}px);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
   
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     flex-direction: column;
@@ -94,38 +95,63 @@ const BioText = styled.p`
 
 const BioSection: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const [isVisible, setIsVisible] = useState(false);
+  const [opacity, setOpacity] = useState(0);
+  const [translateY, setTranslateY] = useState(120);
   const sectionRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const [entry] = entries;
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(entry.target);
+    const handleScroll = () => {
+      if (!sectionRef.current) return;
+      
+      const scrollPosition = window.scrollY;
+      const triggerHeight = window.innerHeight * 0.3; // Comienza a mostrar cuando el scroll ha pasado 30% de la ventana
+      const threshold = window.innerHeight * 0.2; // Un umbral más corto para completar la animación más rápido
+      
+      if (scrollPosition > triggerHeight) {
+        // Calcular progreso de animación con un umbral más corto para que sea más decisivo
+        const scrollProgress = Math.min((scrollPosition - triggerHeight) / threshold, 1);
+        
+        // Aplicar una curva de aceleración para que la animación sea más decisiva
+        // Usamos una curva básica donde pequeños cambios al principio y final tienen mayor efecto
+        let easedProgress;
+        
+        if (scrollProgress < 0.2) {
+          // Inicio acelerado (0 a 0.5 más rápido)
+          easedProgress = scrollProgress * 2.5;
+        } else if (scrollProgress > 0.8) {
+          // Final acelerado (0.8 a 1 más rápido)
+          easedProgress = 0.5 + ((scrollProgress - 0.2) / 0.8) * 0.5;
+        } else {
+          // Mitad con velocidad normal
+          easedProgress = scrollProgress;
         }
-      },
-      { 
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        
+        // Asegurar que llegue a 1 más fácilmente
+        if (scrollProgress > 0.9) easedProgress = 1;
+        
+        setOpacity(easedProgress);
+        
+        // Parallax effect: mover hacia arriba mientras scrolleamos
+        const parallaxDistance = 120;
+        const newTranslateY = Math.max(0, parallaxDistance - (easedProgress * parallaxDistance));
+        setTranslateY(newTranslateY);
+      } else {
+        setOpacity(0);
+        setTranslateY(120);
       }
-    );
+    };
     
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Inicializar con la posición actual
     
     return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
+      window.removeEventListener('scroll', handleScroll);
     };
   }, []);
   
   return (
     <SectionContainer ref={sectionRef}>
-      <ContentWrapper $visible={isVisible}>
+      <ContentWrapper $opacity={opacity} $translateY={translateY}>
         <ProfileImage 
           src="/images/projects/alexis.png" 
           alt="Alexis Vedia" 
