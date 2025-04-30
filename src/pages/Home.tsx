@@ -2,10 +2,10 @@ import React from 'react';
 import styled from 'styled-components';
 import PageTransition from '@components/PageTransition/PageTransition';
 import HeroSection from '@components/HeroSection/HeroSection';
+import BioSection from '@components/BioSection';
 import ProjectsSection from '@components/ProjectsSection/ProjectsSection';
 import SkillsSection from '@components/SkillsSection/SkillsSection';
 import Footer from '@components/Footer/Footer';
-import AboutSection from '@components/AboutSection/AboutSection';
 
 const HomeContainer = styled.div`
   position: relative;
@@ -24,7 +24,7 @@ const Home: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationCompl
       <HomeContainer id="home">
         <ContentWrapper>
           <HeroSection onAnimationComplete={onAnimationComplete} />
-          <AboutSection />
+          <BioSection />
           <ProjectsSection />
           <SkillsSection />
           <Footer />
