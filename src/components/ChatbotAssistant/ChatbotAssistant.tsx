@@ -359,14 +359,16 @@ const ChatContent = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
 
 const ChatHeader = styled.div`
   padding: 16px;
-  background: rgba(255, 255, 255, 0.05);
+  background: ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
   color: ${props => props.theme.colors.text};
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
   backdrop-filter: none;
 
   .header-buttons {
@@ -453,7 +455,8 @@ const TypingIndicator = styled.div`
   align-items: center;
   gap: 4px;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.1);
+  background: ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
   border-radius: 16px;
   max-width: 80px;
   margin: 4px 0;
@@ -491,12 +494,18 @@ const MessageBubble = styled.div<{
   background: ${props =>
     props.$isUser
       ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.accent})`
-      : 'rgba(255, 255, 255, 0.1)'};
-  color: ${props => props.$isUser ? "white" : props.theme.colors.text};
+      : props.theme.isDark 
+        ? 'rgba(255, 255, 255, 0.1)' 
+        : 'rgba(0, 0, 0, 0.05)'};
+  color: ${props => 
+    props.$isUser 
+      ? "white" 
+      : props.theme.colors.text};
   align-self: ${props => (props.$isUser ? 'flex-end' : 'flex-start')};
   font-size: ${props => props.theme.fontSizes.sm};
   line-height: 1.5;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px ${({ theme }) => 
+    theme.isDark ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
   opacity: 1;
   animation: none;
   animation-delay: 0s;
@@ -511,10 +520,12 @@ const MessageBubble = styled.div<{
 
 const ChatInputContainer = styled.div`
   padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
   display: flex;
   gap: 10px;
-  background: rgba(20, 20, 25, 0.3);
+  background: ${({ theme }) => 
+    theme.isDark ? 'rgba(20, 20, 25, 0.3)' : 'rgba(240, 240, 245, 0.9)'};
   backdrop-filter: none;
 
   @media (max-width: 768px) {
@@ -533,19 +544,22 @@ const ChatInput = styled.input`
   padding: 12px 16px;
   border-radius: 20px;
   border: none;
-  background: rgba(255, 255, 255, 0.05);
+  background: ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
   color: ${props => props.theme.colors.text};
   font-size: ${props => props.theme.fontSizes.sm};
   outline: none;
   transition: all 0.2s;
 
   &:focus {
-    background: rgba(255, 255, 255, 0.1);
+    background: ${({ theme }) => 
+      theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
     box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.3);
   }
 
   &::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: ${({ theme }) => 
+      theme.isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.4)'};
   }
 
   @media (max-width: 768px) {
@@ -560,7 +574,8 @@ const SendButton = styled.button`
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
   backdrop-filter: none;
   color: ${props => props.theme.colors.text};
   display: flex;
@@ -568,11 +583,13 @@ const SendButton = styled.button`
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
 
   &:hover {
     transform: scale(1.05);
-    background: rgba(255, 255, 255, 0.15);
+    background: ${({ theme }) => 
+      theme.isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'};
   }
 
   &:active {
@@ -1044,7 +1061,21 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
                         <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
                       </svg>
                     </HeaderButton>
-                    <HeaderButton onClick={toggleChat}>×</HeaderButton>
+                    <HeaderButton onClick={toggleChat} title="Cerrar chat">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M18 6L6 18" />
+                        <path d="M6 6l12 12" />
+                      </svg>
+                    </HeaderButton>
                   </div>
                 </ChatHeader>
 
@@ -1128,7 +1159,8 @@ const HeaderButton = styled.button`
   transition: background-color 0.2s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: ${({ theme }) => 
+      theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
   }
 
   &:active {
