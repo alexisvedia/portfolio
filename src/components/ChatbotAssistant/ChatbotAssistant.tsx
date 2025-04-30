@@ -393,6 +393,7 @@ const HeaderTitle = styled.h3`
   margin: 0;
   font-size: ${props => props.theme.fontSizes.lg};
   font-weight: 600;
+  font-family: inherit;
   display: flex;
   align-items: center;
   gap: 8px;
