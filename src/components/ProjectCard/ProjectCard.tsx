@@ -136,9 +136,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   projectUrl,
   repoUrl,
 }) => {
+  // Imagen de respaldo en base64 (rectángulo gris con texto "No Image" - 300x200px)
+  const fallbackImage = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiM5OTk5OTkiPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==";
+
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    // Si la imagen falla, reemplazarla con una imagen local de respaldo
-    e.currentTarget.src = `/images/projects/fallback-image.jpg`;
+    console.log("Imagen no encontrada, usando imagen de respaldo para:", title);
+    e.currentTarget.src = fallbackImage;
+    // Prevenir bucle infinito si la imagen de respaldo también falla
+    e.currentTarget.onerror = null;
   };
 
   return (
@@ -175,4 +180,4 @@ const ProjectCard: React.FC<ProjectCardProps> = ({
   );
 };
 
-export default ProjectCard; 
+export default ProjectCard;

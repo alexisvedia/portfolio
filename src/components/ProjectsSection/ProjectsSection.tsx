@@ -31,9 +31,24 @@ const ProjectsGrid = styled.div`
 
 // Función para generar URLs de imágenes de placeholder
 const getPlaceholderImage = (index: number) => {
-  // En lugar de usar placeholder.com, usaremos una solución local
-  // Esto evitará los errores de red que se muestran en la consola
-  return `/images/projects/project-${index + 1}.jpg`;
+  // Definimos colores para generar imágenes con diferentes tonalidades
+  const colors = ['#4361ee', '#3a0ca3', '#7209b7', '#f72585', '#4cc9f0', '#560bad'];
+  const color = colors[index % colors.length];
+  
+  // Creamos una imagen SVG en base64 con un color de fondo único para cada proyecto
+  // y un texto indicando el número de proyecto
+  const svgContent = `
+  <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+    <rect width="600" height="400" fill="${color}"/>
+    <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="36" 
+      text-anchor="middle" dominant-baseline="middle" fill="white">
+      Proyecto ${index + 1}
+    </text>
+  </svg>`;
+  
+  // Convertimos el SVG a base64
+  const base64 = btoa(svgContent);
+  return `data:image/svg+xml;base64,${base64}`;
 };
 
 // Datos de ejemplo para los proyectos
