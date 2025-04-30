@@ -1,28 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import SimpleBlurText from '../SimpleBlurText';
+import { useTheme } from '../../context/ThemeContext';
 
 const HeroContainer = styled.section`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 90vh;
+  min-height: 100vh;
   padding: ${({ theme }) => theme.space.xl};
   text-align: center;
   position: relative;
+  overflow: hidden;
 `;
 
 const Title = styled.h1`
-  font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  font-weight: 800;
-  margin-bottom: ${({ theme }) => theme.space.md};
+  font-family: 'Morganite', sans-serif;
+  font-weight: 900;
   color: ${({ theme }) => theme.colors.text};
-  line-height: 1.2;
+  line-height: 0.9;
+  text-transform: uppercase;
+  width: 100%;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: 232px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 0.8;
+  }
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: calc(${({ theme }) => theme.fontSizes['5xl']} * 1.2);
+    font-size: 500px;
+    margin-bottom: ${({ theme }) => theme.space.md};
+  }
+`;
+
+const StyledVedia = styled.div`
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    margin-top: -15px;
+    display: flex;
+    justify-content: center;
+  }
+`;
+
+const StyledAlexis = styled.div`
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    display: flex;
+    justify-content: center;
   }
 `;
 
@@ -32,57 +59,68 @@ const Subtitle = styled.h2`
   margin-bottom: ${({ theme }) => theme.space.xl};
   color: ${({ theme }) => `${theme.colors.text}cc`};
   max-width: 800px;
+  position: relative;
+  z-index: 2;
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: ${({ theme }) => theme.fontSizes['3xl']};
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.space.md};
-  margin-top: ${({ theme }) => theme.space.lg};
-  flex-wrap: wrap;
-  justify-content: center;
-`;
-
-const PrimaryButton = styled.a`
-  padding: ${({ theme }) => `${theme.space.md} ${theme.space.xl}`};
-  background-color: ${({ theme }) => theme.colors.primary};
-  color: ${({ theme }) => theme.colors.text};
-  border: none;
-  border-radius: 6px;
-  font-size: ${({ theme }) => theme.fontSizes.lg};
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  
-  &:hover {
-    background-color: ${({ theme }) => `${theme.colors.primary}dd`};
-    transform: translateY(-2px);
+    font-size: ${({ theme }) => theme.fontSizes['4xl']};
+    margin-top: -60px;
   }
 `;
 
 const HeroSection: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationComplete }) => {
   const { t, i18n } = useTranslation();
+  const { themeMode } = useTheme();
+  const [key, setKey] = useState(`${i18n.language}-${themeMode}`);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Detectar si estamos en dispositivo móvil
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Actualizar la key cuando cambia el tema o el idioma
+  useEffect(() => {
+    setKey(`${i18n.language}-${themeMode}`);
+  }, [i18n.language, themeMode]);
   
   return (
     <HeroContainer>
       <Title>
-        <SimpleBlurText
-          key={i18n.language}
-          text={t('heroTitle')}
-          onAnimationComplete={onAnimationComplete}
-        />
+        {isMobile ? (
+          <>
+            <StyledAlexis>
+              <SimpleBlurText
+                key={`${key}-1`}
+                text="ALEXIS"
+                onAnimationComplete={undefined}
+              />
+            </StyledAlexis>
+            <StyledVedia>
+              <SimpleBlurText
+                key={`${key}-2`}
+                text="VEDIA"
+                onAnimationComplete={onAnimationComplete}
+              />
+            </StyledVedia>
+          </>
+        ) : (
+          <SimpleBlurText
+            key={key}
+            text="ALEXIS VEDIA"
+            onAnimationComplete={onAnimationComplete}
+          />
+        )}
       </Title>
       <Subtitle>{t('heroSubtitle')}</Subtitle>
-      <ButtonContainer>
-        <PrimaryButton href="#projects">{t('viewProjects')}</PrimaryButton>
-        <PrimaryButton href="#about">{t('navbar.about')}</PrimaryButton>
-      </ButtonContainer>
     </HeroContainer>
   );
 };
 
-export default HeroSection; 
+export default HeroSection;

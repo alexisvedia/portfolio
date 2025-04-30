@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
 import { useTheme } from '../../context/ThemeContext';
 import './toggle-styles.css';
-
-// Contenedor principal
-const Container = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-`;
 
 interface ThemeToggleProps {
   className?: string;

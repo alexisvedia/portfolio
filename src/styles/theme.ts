@@ -2,7 +2,8 @@ const baseTheme = {
   fonts: {
     body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
     heading:
-      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+      "'Morganite', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif",
+    morganite: "'Morganite', sans-serif",
   },
   fontSizes: {
     xs: "0.75rem",
@@ -14,6 +15,9 @@ const baseTheme = {
     "3xl": "1.875rem",
     "4xl": "2.25rem",
     "5xl": "3rem",
+    "6xl": "4rem",
+    "7xl": "5rem",
+    "8xl": "6rem",
   },
   space: {
     xs: "0.25rem",

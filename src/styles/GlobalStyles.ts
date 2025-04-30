@@ -1,4 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
+import './fonts.css'; // Importar el archivo de fuentes
 
 export const GlobalStyles = createGlobalStyle`
   * {
@@ -89,12 +90,27 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: ${({ theme }) => theme.fonts.heading};
+    font-family: 'Morganite', ${({ theme }) => theme.fonts.heading};
     font-weight: 700;
   }
   
   /* Transiciones para el cambio de tema */
   a, button, input, textarea, .card, .navbar, .footer {
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* Clases para utilizar la fuente Morganite */
+  .morganite {
+    font-family: 'Morganite', sans-serif;
+  }
+  
+  .morganite-bold {
+    font-family: 'Morganite', sans-serif;
+    font-weight: 700;
+  }
+  
+  .morganite-black {
+    font-family: 'Morganite', sans-serif;
+    font-weight: 900;
   }
 `;

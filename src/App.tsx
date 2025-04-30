@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 import { store, setLoaded } from '@store/index';
 import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
@@ -23,6 +22,7 @@ import { initializeN8NServer } from '@services/n8nService';
 import Home from './pages/Home';
 // Using dynamic imports for code splitting
 const About = React.lazy(() => import('./pages/About'));
+const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -76,7 +76,6 @@ const ThemeToggleStyled = styled(ThemeToggle)<{ $hideOnScroll: boolean }>`
 `;
 
 const AppContent = () => {
-  const { i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
   const [hideControls, setHideControls] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
@@ -155,6 +154,7 @@ const AppContent = () => {
           <Routes>
             <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} />} />
             <Route path="/about" element={<About />} />
+            <Route path="/font-example" element={<MorganiteExample />} />
           </Routes>
         </React.Suspense>
       </Container>
