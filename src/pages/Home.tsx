@@ -18,12 +18,17 @@ const ContentWrapper = styled.div`
   margin: 0 auto;
 `;
 
-const Home: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationComplete }) => {
+interface HomeProps {
+  onAnimationComplete?: () => void;
+  fontsLoaded: boolean;
+}
+
+const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded }) => {
   return (
     <PageTransition>
       <HomeContainer id="home">
         <ContentWrapper>
-          <HeroSection onAnimationComplete={onAnimationComplete} />
+          <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
           <BioSection />
           <ProjectsSection />
           <SkillsSection />
