@@ -1,6 +1,13 @@
 import { createGlobalStyle } from 'styled-components';
 import './fonts.css'; // Importar el archivo de fuentes
 
+// Importar Google Fonts directamente en el archivo JS para evitar el error de CSS
+const googleFontsUrl = 'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap';
+const link = document.createElement('link');
+link.rel = 'stylesheet';
+link.href = googleFontsUrl;
+document.head.appendChild(link);
+
 export const GlobalStyles = createGlobalStyle`
   * {
     margin: 0;

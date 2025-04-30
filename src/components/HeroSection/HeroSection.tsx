@@ -90,6 +90,11 @@ const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
     return 'none';
   }};
 
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: 18px;
+    margin-top: 10px;
+  }
+
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     font-size: 1.3rem;
     margin-top: -37px;
@@ -102,7 +107,12 @@ const ParallaxTitle = styled.div`
   will-change: transform, filter, opacity;
 `;
 
-const HeroSection: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationComplete }) => {
+interface HeroSectionProps {
+  onAnimationComplete?: () => void;
+  fontsLoaded?: boolean;
+}
+
+const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoaded = false }) => {
   const { t, i18n } = useTranslation();
   const { themeMode } = useTheme();
   // Cambiamos para que el key ya no dependa del idioma, solo del tema
@@ -111,6 +121,7 @@ const HeroSection: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimati
   const [subtitleVisible, setSubtitleVisible] = useState(false);
   const [subtitleFadeOut, setSubtitleFadeOut] = useState(false);
   const [currentSubtitleText, setCurrentSubtitleText] = useState('');
+  const [startAnimations, setStartAnimations] = useState(false);
   const titleRef = useRef<HTMLDivElement>(null);
   const prevLangRef = useRef(i18n.language);
   
@@ -134,6 +145,22 @@ const HeroSection: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimati
   useEffect(() => {
     setTitleKey(`title-${themeMode}`);
   }, [themeMode]);
+  
+  // Iniciar animaciones solo cuando las fuentes se han cargado
+  useEffect(() => {
+    if (fontsLoaded) {
+      // Si es una visita posterior, iniciar animaciones inmediatamente
+      if (localStorage.getItem('hasVisitedBefore')) {
+        setStartAnimations(true);
+      } else {
+        // En la primera visita, esperamos a que el FontLoader desaparezca
+        const timer = setTimeout(() => {
+          setStartAnimations(true);
+        }, 1000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [fontsLoaded]);
   
   // Efecto separado para manejar cambios de idioma con transición suave
   useEffect(() => {
@@ -240,6 +267,7 @@ const HeroSection: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimati
                   key={`${titleKey}-1`}
                   text="ALEXIS"
                   onAnimationComplete={undefined}
+                  delayStart={!startAnimations}
                 />
               </StyledAlexis>
               <StyledVedia>
@@ -247,6 +275,7 @@ const HeroSection: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimati
                   key={`${titleKey}-2`}
                   text="VEDIA"
                   onAnimationComplete={handleTitleAnimationComplete}
+                  delayStart={!startAnimations}
                 />
               </StyledVedia>
             </>
@@ -255,6 +284,7 @@ const HeroSection: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimati
               key={titleKey}
               text="ALEXIS VEDIA"
               onAnimationComplete={handleTitleAnimationComplete}
+              delayStart={!startAnimations}
             />
           )}
         </Title>

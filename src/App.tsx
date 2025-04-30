@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import LanguageSelector from '@components/LanguageSelector';
 import ThemeToggle from '@components/ThemeToggle';
 import { ThemeProvider } from './context/ThemeContext';
+import FontLoader from '@components/FontLoader/FontLoader';
 // Cargar el componente del chatbot de manera diferida para mejorar el rendimiento inicial
 const ChatbotAssistant = React.lazy(() => 
   // Añadimos un ligero retraso para mejorar métricas de rendimiento
@@ -79,6 +80,33 @@ const AppContent = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [hideControls, setHideControls] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [shouldShowLoader, setShouldShowLoader] = useState(false);
+  
+  // Verificar si es la primera visita del usuario
+  useEffect(() => {
+    // Comprobar si es la primera visita
+    const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
+    
+    if (!hasVisitedBefore) {
+      // Es la primera visita, mostrar el loader
+      setShouldShowLoader(true);
+      // Guardar en localStorage que ya visitó la página
+      localStorage.setItem('hasVisitedBefore', 'true');
+    } else {
+      // No es la primera visita, marcar las fuentes como ya cargadas
+      // y permitir que las animaciones comiencen inmediatamente
+      setFontsLoaded(true);
+    }
+    
+    // Verificar si las fuentes ya están cargadas en el navegador
+    document.fonts.ready.then(() => {
+      if (hasVisitedBefore) {
+        // En visitas posteriores, asegurar que las animaciones comiencen inmediatamente
+        setFontsLoaded(true);
+      }
+    });
+  }, []);
   
   // Inicializar el servidor n8n cuando la aplicación se carga
   useEffect(() => {
@@ -139,8 +167,15 @@ const AppContent = () => {
     return cleanup;
   }, []);
 
+  // Manejar cuando las fuentes estén cargadas
+  const handleFontsLoaded = () => {
+    setFontsLoaded(true);
+  };
+
   return (
     <AppWrapper>
+      {shouldShowLoader && !fontsLoaded && <FontLoader onLoaded={handleFontsLoaded} />}
+      
       <LanguageSelectorStyled initialDelay={500} $hideOnScroll={hideControls} />
       <ThemeToggleStyled initialDelay={500} $hideOnScroll={hideControls} />
       {chatbotVisible && (
@@ -152,7 +187,7 @@ const AppContent = () => {
       <Container>
         <React.Suspense fallback={<div>Loading...</div>}>
           <Routes>
-            <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} />} />
+            <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} fontsLoaded={fontsLoaded} />} />
             <Route path="/about" element={<About />} />
             <Route path="/font-example" element={<MorganiteExample />} />
           </Routes>
