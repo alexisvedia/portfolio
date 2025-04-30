@@ -9,7 +9,13 @@ import styled from 'styled-components';
 import LanguageSelector from '@components/LanguageSelector';
 import ThemeToggle from '@components/ThemeToggle';
 import { ThemeProvider } from './context/ThemeContext';
-const ChatbotAssistant = React.lazy(() => import('@components/ChatbotAssistant'));
+// Cargar el componente del chatbot de manera diferida para mejorar el rendimiento inicial
+const ChatbotAssistant = React.lazy(() => 
+  // Añadimos un ligero retraso para mejorar métricas de rendimiento
+  new Promise<{ default: React.ComponentType<any> }>(resolve => 
+    setTimeout(() => resolve(import('@components/ChatbotAssistant')), 2000)
+  )
+);
 import { initScrollDetection } from '@utils/scrollDetection';
 import { initializeN8NServer } from '@services/n8nService';
 
@@ -73,11 +79,17 @@ const AppContent = () => {
   const { i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
   const [hideControls, setHideControls] = useState(false);
+  const [chatbotVisible, setChatbotVisible] = useState(false);
   
   // Inicializar el servidor n8n cuando la aplicación se carga
   useEffect(() => {
-    // Una única llamada de precalentamiento al servidor n8n
-    initializeN8NServer();
+    // Retrasar la inicialización para mejorar métricas de rendimiento
+    const timer = setTimeout(() => {
+      // Una única llamada de precalentamiento al servidor n8n
+      initializeN8NServer();
+    }, 2500);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   // Detectar si estamos en dispositivo móvil
@@ -107,6 +119,15 @@ const AppContent = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isMobile]);
 
+  // Mostrar chatbot después de un retraso para mejorar LCP
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setChatbotVisible(true);
+    }, isMobile ? 3000 : 2000); // Mayor retraso en móvil
+    
+    return () => clearTimeout(timer);
+  }, [isMobile]);
+
   // Función para manejar la finalización de las animaciones
   const handleAnimationComplete = () => {
     // Este callback se llama cuando la animación de bienvenida está completa
@@ -123,9 +144,11 @@ const AppContent = () => {
     <AppWrapper>
       <LanguageSelectorStyled initialDelay={500} $hideOnScroll={hideControls} />
       <ThemeToggleStyled initialDelay={500} $hideOnScroll={hideControls} />
-      <React.Suspense fallback={null}>
-        <ChatbotAssistant initialDelay={500} />
-      </React.Suspense>
+      {chatbotVisible && (
+        <React.Suspense fallback={null}>
+          <ChatbotAssistant initialDelay={500} />
+        </React.Suspense>
+      )}
 
       <Container>
         <React.Suspense fallback={<div>Loading...</div>}>

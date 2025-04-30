@@ -112,12 +112,18 @@ const AppOverlay = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
   bottom: 0;
   z-index: 999;
   pointer-events: ${props => (props.$isOpen && props.$isMobile ? 'auto' : 'none')};
-  opacity: ${props => (props.$isOpen && props.$isMobile ? 0.5 : 0)};
+  opacity: ${props => (props.$isOpen && props.$isMobile ? 1 : 0)};
   background-color: ${props =>
     props.$isOpen && props.$isMobile ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)'};
-  transition: ${props => (props.$isMobile ? 'opacity 0.2s linear' : 'none')};
+  transition: opacity 0.2s linear;
   will-change: opacity;
-  backdrop-filter: none;
+  backdrop-filter: ${props => (props.$isOpen && props.$isMobile ? 'blur(5px)' : 'none')};
+
+  @supports (backdrop-filter: blur(5px)) {
+    backdrop-filter: ${props => (props.$isOpen && props.$isMobile ? 'blur(5px)' : 'none')};
+    background-color: ${props =>
+      props.$isOpen && props.$isMobile ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0)'};
+  }
 
   @media (max-width: 768px) {
     height: calc(var(--vh, 1vh) * 100);
@@ -178,13 +184,13 @@ const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $i
   background: ${({ theme, $isOpen }) => 
     $isOpen 
       ? theme.isDark 
-        ? 'rgba(30, 30, 35, 0.95)' 
-        : 'rgba(240, 240, 245, 0.95)'
+        ? 'rgba(30, 30, 35, 0.85)' 
+        : 'rgba(240, 240, 245, 0.85)'
       : theme.isDark 
         ? 'rgba(255, 255, 255, 0.1)' 
         : 'rgba(0, 0, 0, 0.05)'
   };
-  backdrop-filter: none;
+  backdrop-filter: ${props => props.$isOpen ? 'blur(7px)' : 'blur(5px)'};
   border: 1px solid ${({ theme }) => 
     theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
   box-shadow: 0 4px 20px ${({ theme }) => 
@@ -206,11 +212,15 @@ const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $i
   transform-origin: bottom right;
   transition: ${props => 
     props.$isMobile 
-      ? 'none' 
+      ? 'width 0.3s ease, height 0.3s ease, border-radius 0.3s ease' 
       : 'all 0.3s ease'
   };
-  visibility: visible;
-  opacity: 1;
+  opacity: ${props => (!props.$isOpen && !props.$isInitialRender && !props.$isMobile ? 0 : 1)};
+  resize: ${props => (props.$isOpen && !props.$isMobile ? 'both' : 'none')};
+  min-width: ${props => (props.$isOpen ? '320px' : '48px')};
+  min-height: ${props => (props.$isOpen ? '400px' : '48px')};
+  max-width: ${props => (props.$isOpen ? '80vw' : '48px')};
+  max-height: ${props => (props.$isOpen ? '80vh' : '48px')};
 
   &:before {
     content: '';
@@ -219,7 +229,7 @@ const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $i
     left: 0;
     right: 0;
     bottom: 0;
-    backdrop-filter: none;
+    backdrop-filter: ${props => props.$isMobile ? 'none' : 'blur(7px)'};
     z-index: -1;
   }
 
@@ -234,6 +244,7 @@ const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $i
     left: ${props => (props.$isOpen ? '0' : 'auto')};
     will-change: width, height, border-radius, position;
     border: ${props => (props.$isOpen ? 'none' : '1px solid rgba(255, 255, 255, 0.1)')};
+    resize: none;
   }
 `;
 
@@ -367,7 +378,7 @@ const ChatHeader = styled.div`
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: none;
+  backdrop-filter: blur(10px);
 
   .header-buttons {
     display: flex;
@@ -384,8 +395,8 @@ const ChatHeader = styled.div`
     position: sticky;
     top: 0;
     z-index: 10;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 `;
 
@@ -514,7 +525,7 @@ const ChatInputContainer = styled.div`
   display: flex;
   gap: 10px;
   background: rgba(20, 20, 25, 0.3);
-  backdrop-filter: none;
+  backdrop-filter: blur(10px);
 
   @media (max-width: 768px) {
     padding: 16px 20px;
@@ -523,7 +534,6 @@ const ChatInputContainer = styled.div`
     bottom: 0;
     width: 100%;
     z-index: 10;
-    backdrop-filter: none;
   }
 `;
 
@@ -560,7 +570,7 @@ const SendButton = styled.button`
   border-radius: 50%;
   border: none;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: none;
+  backdrop-filter: blur(10px);
   color: ${props => props.theme.colors.text};
   display: flex;
   align-items: center;
@@ -581,7 +591,6 @@ const SendButton = styled.button`
   @media (max-width: 768px) {
     width: 44px;
     height: 44px;
-    backdrop-filter: none;
   }
 `;
 
@@ -603,6 +612,74 @@ const initialMessages = [
   { text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?', isUser: false },
 ];
 
+// Componente para el resizer personalizado
+const ResizeHandle = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nesw-resize;
+  opacity: 0.5;
+  display: ${props => (props.$isOpen && !props.$isMobile ? 'block' : 'none')};
+  
+  &:before {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    width: 8px;
+    height: 2px;
+    background-color: ${({ theme }) => theme.colors.text};
+    transform: rotate(-45deg);
+  }
+  
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: 8px;
+    left: 4px;
+    width: 8px;
+    height: 2px;
+    background-color: ${({ theme }) => theme.colors.text};
+    transform: rotate(-45deg);
+  }
+`;
+
+// Añadir otro manejador resizable en otra esquina
+const ResizeHandleTopRight = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nesw-resize;
+  opacity: 0.5;
+  display: ${props => (props.$isOpen && !props.$isMobile ? 'block' : 'none')};
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 2px;
+    background-color: ${({ theme }) => theme.colors.text};
+    transform: rotate(-45deg);
+  }
+  
+  &:after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: 4px;
+    width: 8px;
+    height: 2px;
+    background-color: ${({ theme }) => theme.colors.text};
+    transform: rotate(-45deg);
+  }
+`;
+
 interface ChatbotAssistantProps {
   initialDelay?: number;
 }
@@ -622,29 +699,10 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatbotRef = useRef<HTMLDivElement>(null);
+  const chatElementRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const resizeRef = useRef<{ width: number; height: number } | null>(null);
   const { t } = useTranslation();
-
-  // Añadir efecto para establecer la variable vh para viewport en móviles
-  useEffect(() => {
-    // Crear una variable CSS para la altura real de la ventana en dispositivos móviles
-    const setVh = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
-
-    // Establecer el valor inicial
-    setVh();
-
-    // Actualizar en cambios de orientación o redimensionamiento
-    window.addEventListener('resize', setVh);
-    window.addEventListener('orientationchange', setVh);
-
-    return () => {
-      window.removeEventListener('resize', setVh);
-      window.removeEventListener('orientationchange', setVh);
-    };
-  }, []);
 
   const handleClearChat = () => {
     setMessages([
@@ -706,6 +764,231 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Cargar tamaño persistido
+  useEffect(() => {
+    if (!isMobile) {
+      const savedSize = localStorage.getItem('chatSize');
+      if (savedSize && chatElementRef.current) {
+        try {
+          const { width, height } = JSON.parse(savedSize);
+          chatElementRef.current.style.width = `${width}px`;
+          chatElementRef.current.style.height = `${height}px`;
+          resizeRef.current = { width, height };
+        } catch (e) {
+          console.error('Error al cargar el tamaño del chat:', e);
+        }
+      }
+    }
+  }, []);
+  
+  // Guardar tamaño cuando cambia
+  const saveSize = () => {
+    if (!isMobile && chatElementRef.current && isOpen) {
+      const width = chatElementRef.current.offsetWidth;
+      const height = chatElementRef.current.offsetHeight;
+      if (width >= 320 && height >= 400) {
+        localStorage.setItem('chatSize', JSON.stringify({ width, height }));
+        resizeRef.current = { width, height };
+      }
+    }
+  };
+
+  // Trigger message animation when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      // Immediate animation for messages
+      setShouldAnimateMessages(true);
+    } else {
+      setShouldAnimateMessages(false);
+    }
+
+    // After first toggle, no longer initial render
+    if (isInitialRender && isOpen) {
+      setIsInitialRender(false);
+    }
+  }, [isOpen, isInitialRender]);
+
+  const toggleChat = () => {
+    // Only allow toggle when component is fully ready
+    if (!isReady) return;
+
+    // Use requestAnimationFrame for state updates to improve performance
+    requestAnimationFrame(() => {
+      if (isInitialRender) {
+        // On first click, just start animations next time
+        setIsInitialRender(false);
+        setIsOpen(true);
+      } else {
+        // Normal toggle behavior after first open
+        setIsOpen(!isOpen);
+      }
+
+      // If opening, add a welcome message if chat is empty
+      if (!isOpen && messages.length === 0) {
+        setMessages([
+          { text: t('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'), isUser: false },
+        ]);
+      }
+    });
+  };
+
+  // Modificar el efecto para el manejo de click fuera para asegurar que funcione en desktop
+  const handleClickOutside = React.useCallback((event: MouseEvent) => {
+    if (
+      chatbotRef.current &&
+      !chatbotRef.current.contains(event.target as Node) &&
+      isOpen
+    ) {
+      // Solo cerrar el chat, no ocultar el componente
+      setIsOpen(false);
+    }
+  }, [isOpen]);
+
+  // Optimizar manejo de click outside
+  useEffect(() => {
+    if (isOpen) {
+      // Solo agregar el event listener cuando el chat está abierto para optimizar rendimiento
+      document.addEventListener('mousedown', handleClickOutside);
+      
+      // Agregar listener para detectar cambios de tamaño
+      const handleResize = () => {
+        saveSize();
+      };
+      
+      window.addEventListener('resize', handleResize);
+      
+      // Observer para detectar cambios de tamaño en el elemento ChatElement
+      let resizeObserver: ResizeObserver;
+      if (chatElementRef.current && typeof ResizeObserver !== 'undefined') {
+        resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(chatElementRef.current);
+      }
+      
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        window.removeEventListener('resize', handleResize);
+        if (resizeObserver) {
+          resizeObserver.disconnect();
+        }
+      };
+    }
+  }, [isOpen, handleClickOutside]);
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // Prevent multiple clicks
+    if (!isReady) return;
+    
+    // Debounce click handling to improve performance
+    e.preventDefault();
+    
+    // Call toggle function directly without ripple calculation on low-end devices
+    if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) {
+      toggleChat();
+      return;
+    }
+    
+    // Get click coordinates relative to button - use requestAnimationFrame for better performance
+    requestAnimationFrame(() => {
+      const button = e.currentTarget;
+      const rect = button.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Create new ripple with improved sizing
+      const size = Math.max(rect.width, rect.height) * 1.5; // Larger ripple for better visibility
+      const ripple = {
+        x,
+        y,
+        size,
+        key: Date.now(),
+      };
+
+      // Add new ripple to state - limit to one ripple for mobile
+      setRipples([ripple]);
+
+      // Remove ripple after animation completes
+      setTimeout(() => {
+        setRipples([]);
+      }, 600); // Match the animation duration
+    });
+
+    // Call toggle function immediately for better responsiveness
+    toggleChat();
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value);
+  };
+
+  const handleSendMessage = async () => {
+    if (inputValue.trim()) {
+      const userMessage = { text: inputValue, isUser: true };
+      setInputValue('');
+      inputRef.current?.focus();
+      setShouldAnimateMessages(true);
+      setMessages([...messages, userMessage]);
+      setIsTyping(true);
+
+      try {
+        const response = await sendMessageToN8N(inputValue);
+        setIsTyping(false);
+        setMessages(prev => [...prev, response]);
+      } catch (error) {
+        console.error('Error al enviar mensaje:', error);
+        setIsTyping(false);
+
+        // Mensaje personalizado basado en el tipo de error
+        let errorMessage =
+          'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo más tarde.';
+
+        // Si es un error específico de arranque en frío o conexión
+        if (error instanceof Error) {
+          if (
+            error.message.includes('iniciando') ||
+            error.message.includes('después de varios intentos') ||
+            error.message.includes('failed to fetch') ||
+            error.message.includes('network') ||
+            error.message.includes('connection')
+          ) {
+            errorMessage =
+              'Parece que el servicio está iniciando o hay problemas de conexión. Por favor, espera unos segundos y vuelve a intentarlo.';
+          }
+        }
+
+        setMessages(prev => [
+          ...prev,
+          {
+            text: errorMessage,
+            isUser: false,
+          },
+        ]);
+      }
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSendMessage();
+    }
+  };
+
+  // Optimizar renderizado usando React.memo para componentes internos
+  const MessageBubbleContent = React.memo(({ message }: { message: { text: string; isUser: boolean } }) => (
+    <ReactMarkdown>{message.text}</ReactMarkdown>
+  ));
+
+  // Focus input when chat opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      setTimeout(
+        () => {
+          inputRef.current?.focus();
+        },
+        isMobile ? 100 : 400
+      ); // Tiempo más rápido para móviles
+    }
+  }, [isOpen, isMobile]);
 
   // Modificar el efecto para el manejo del scroll
   useEffect(() => {
@@ -787,214 +1070,6 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
     };
   }, [isOpen, isMobile]);
 
-  // Focus input when chat opens
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      setTimeout(
-        () => {
-          inputRef.current?.focus();
-        },
-        isMobile ? 100 : 400
-      ); // Tiempo más rápido para móviles
-    }
-  }, [isOpen, isMobile]);
-
-  // Trigger message animation when chat opens
-  useEffect(() => {
-    if (isOpen) {
-      // Immediate animation for messages
-      setShouldAnimateMessages(true);
-    } else {
-      setShouldAnimateMessages(false);
-    }
-
-    // After first toggle, no longer initial render
-    if (isInitialRender && isOpen) {
-      setIsInitialRender(false);
-    }
-  }, [isOpen, isInitialRender]);
-
-  const toggleChat = () => {
-    // Only allow toggle when component is fully ready
-    if (!isReady) return;
-
-    // Sin usar requestAnimationFrame en móvil para que sea instantáneo
-    if (isMobile) {
-      if (isInitialRender) {
-        setIsInitialRender(false);
-        setIsOpen(true);
-      } else {
-        setIsOpen(!isOpen);
-      }
-
-      // Si estamos abriendo y no hay mensajes, añadir mensaje de bienvenida
-      if (!isOpen && messages.length === 0) {
-        setMessages([
-          { text: t('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'), isUser: false },
-        ]);
-      }
-    } else {
-      // Mantener animación en desktop
-      requestAnimationFrame(() => {
-        if (isInitialRender) {
-          setIsInitialRender(false);
-          setIsOpen(true);
-        } else {
-          setIsOpen(!isOpen);
-        }
-
-        if (!isOpen && messages.length === 0) {
-          setMessages([
-            { text: t('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'), isUser: false },
-          ]);
-        }
-      });
-    }
-  };
-
-  // MOVIDO: Después de la definición de toggleChat
-  const handleClickOutside = React.useCallback((event: MouseEvent) => {
-    try {
-      if (
-        chatbotRef.current &&
-        !chatbotRef.current.contains(event.target as Node) &&
-        isOpen
-      ) {
-        // Usar el toggleChat en lugar de setIsOpen para cerrar correctamente
-        toggleChat();
-      }
-    } catch (error) {
-      console.error("Error en handleClickOutside:", error);
-    }
-  }, [isOpen, chatbotRef, toggleChat]);
-
-  // Optimizar manejo de click outside
-  useEffect(() => {
-    // Siempre agregar el event listener cuando el chat está abierto, independientemente del dispositivo
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }
-  }, [isOpen, handleClickOutside]);
-
-  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent multiple clicks
-    if (!isReady) return;
-    
-    // Debounce click handling to improve performance
-    e.preventDefault();
-    e.stopPropagation(); // Prevenir propagación del evento
-    
-    try {
-      // Call toggle function directly without ripple calculation on low-end devices
-      if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) {
-        toggleChat();
-        return;
-      }
-      
-      // Guardar las coordenadas inmediatamente para evitar errores si el botón desaparece
-      const button = e.currentTarget;
-      if (!button) {
-        toggleChat();
-        return;
-      }
-      
-      const rect = button.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const size = Math.max(rect.width, rect.height) * 1.5;
-      
-      // Use requestAnimationFrame para la UI
-      requestAnimationFrame(() => {
-        // Create new ripple with improved sizing
-        const ripple = {
-          x,
-          y,
-          size,
-          key: Date.now(),
-        };
-
-        // Add new ripple to state - limit to one ripple for mobile
-        setRipples([ripple]);
-
-        // Remove ripple after animation completes
-        setTimeout(() => {
-          setRipples([]);
-        }, 600); // Match the animation duration
-      });
-
-      // Call toggle function immediately for better responsiveness
-      toggleChat();
-    } catch (error) {
-      console.error("Error en handleButtonClick:", error);
-      // En caso de error, al menos asegurar que el toggle funcione
-      toggleChat();
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
-
-  const handleSendMessage = async () => {
-    if (inputValue.trim()) {
-      const userMessage = { text: inputValue, isUser: true };
-      setInputValue('');
-      inputRef.current?.focus();
-      setShouldAnimateMessages(true);
-      setMessages([...messages, userMessage]);
-      setIsTyping(true);
-
-      try {
-        const response = await sendMessageToN8N(inputValue);
-        setIsTyping(false);
-        setMessages(prev => [...prev, response]);
-      } catch (error) {
-        console.error('Error al enviar mensaje:', error);
-        setIsTyping(false);
-
-        // Mensaje personalizado basado en el tipo de error
-        let errorMessage =
-          'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo más tarde.';
-
-        // Si es un error específico de arranque en frío o conexión
-        if (error instanceof Error) {
-          if (
-            error.message.includes('iniciando') ||
-            error.message.includes('después de varios intentos') ||
-            error.message.includes('failed to fetch') ||
-            error.message.includes('network') ||
-            error.message.includes('connection')
-          ) {
-            errorMessage =
-              'Parece que el servicio está iniciando o hay problemas de conexión. Por favor, espera unos segundos y vuelve a intentarlo.';
-          }
-        }
-
-        setMessages(prev => [
-          ...prev,
-          {
-            text: errorMessage,
-            isUser: false,
-          },
-        ]);
-      }
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
-
-  // Optimizar renderizado usando React.memo para componentes internos
-  const MessageBubbleContent = React.memo(({ message }: { message: { text: string; isUser: boolean } }) => (
-    <ReactMarkdown>{message.text}</ReactMarkdown>
-  ));
-
   // Return nothing until we're ready to start the animation
   if (!visible && !isReady) return null;
 
@@ -1008,7 +1083,12 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
         $isReady={isReady}
       >
         <FloatingWrapper $isReady={isReady} $isOpen={isOpen} $isMobile={isMobile}>
-          <ChatElement $isOpen={isOpen} $isInitialRender={isInitialRender} $isMobile={isMobile}>
+          <ChatElement 
+            ref={chatElementRef}
+            $isOpen={isOpen} 
+            $isInitialRender={isInitialRender} 
+            $isMobile={isMobile}
+          >
             <ChatButton onClick={handleButtonClick} $isOpen={isOpen} $isMobile={isMobile}>
               <IconContainer>
                 <AIStarsIcon />
@@ -1102,6 +1182,9 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
                     </svg>
                   </SendButton>
                 </ChatInputContainer>
+                
+                <ResizeHandle $isOpen={isOpen} $isMobile={isMobile} />
+                <ResizeHandleTopRight $isOpen={isOpen} $isMobile={isMobile} />
               </ChatContent>
             )}
           </ChatElement>

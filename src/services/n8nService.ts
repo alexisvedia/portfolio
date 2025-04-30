@@ -26,13 +26,17 @@ let currentSessionId = generateSessionId();
 const fetchWithRetry = async (
   url: string,
   options: RequestInit,
-  maxRetries = 5
+  maxRetries = 3
 ): Promise<Response> => {
   let retries = 0;
   let lastError: Error | null = null;
-  const waitTime = 2000;
+  const waitTime = 1500;
 
-  while (retries < maxRetries) {
+  // Verificar si estamos en móvil para ajustar estrategia
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const actualMaxRetries = isMobile ? 2 : maxRetries; // Menos reintentos en móvil
+
+  while (retries < actualMaxRetries) {
     try {
       const response = await fetch(url, options);
 
@@ -65,7 +69,7 @@ const fetchWithRetry = async (
     }
   }
 
-  throw lastError || new Error(`Error de conexión después de ${maxRetries} intentos`);
+  throw lastError || new Error(`Error de conexión después de ${actualMaxRetries} intentos`);
 };
 
 /**
@@ -79,56 +83,62 @@ export const initializeN8NServer = async (): Promise<boolean> => {
   // Si ya hay una inicialización en curso, retornamos la promesa existente
   if (initializationPromise) return initializationPromise;
   
+  // Verificar si estamos en un dispositivo de baja potencia (priorizar rendimiento)
+  const isLowPowerDevice = typeof navigator !== 'undefined' && 
+                           navigator.hardwareConcurrency !== undefined && 
+                           navigator.hardwareConcurrency <= 4;
+
   // Crear una nueva promesa de inicialización
   initializationPromise = (async () => {
-    try {
-    // Eliminamos el log de inicialización
-    const options = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
-      body: JSON.stringify({
-        chatInput: 'ping',
-        sessionId: currentSessionId,
-        type: 'warmup',
-      }),
-    };
-
-    // Usamos un timeout más corto para la inicialización
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    try {
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        ...options,
-        signal: controller.signal
-      });
-      clearTimeout(timeoutId);
-      
-      if (response.ok) {
-        // Eliminamos el log de inicialización correcta
-        serverInitialized = true;
-        initializationPromise = null;
-        return true;
-      }
-    } catch (error) {
-      clearTimeout(timeoutId);
-      // Eliminamos el log de servidor en modo suspendido
+    // Retrasamos un poco la inicialización en dispositivos móviles o de baja potencia
+    if (isLowPowerDevice || (typeof window !== 'undefined' && window.innerWidth <= 768)) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
     }
     
-    initializationPromise = null;
-    return false;
-  } catch (error) {
-    // Mantenemos solo el log de error para depuración
-    console.error('Error al inicializar el servidor n8n:', error);
-    initializationPromise = null;
-    return false;
-  }
-})();  // Ejecutamos la función asíncrona inmediatamente
+    try {
+      const options = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({
+          chatInput: 'ping',
+          sessionId: currentSessionId,
+          type: 'warmup',
+        }),
+      };
 
-return initializationPromise;
+      // Usamos un timeout más corto para la inicialización
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 4000); // Reducir el timeout
+      
+      try {
+        const response = await fetch(N8N_WEBHOOK_URL, {
+          ...options,
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          serverInitialized = true;
+          initializationPromise = null;
+          return true;
+        }
+      } catch (error) {
+        clearTimeout(timeoutId);
+      }
+      
+      initializationPromise = null;
+      return false;
+    } catch (error) {
+      console.error('Error al inicializar el servidor n8n:', error);
+      initializationPromise = null;
+      return false;
+    }
+  })();
+
+  return initializationPromise;
 };
 
 export const sendMessageToN8N = async (message: string): Promise<ChatMessage> => {
