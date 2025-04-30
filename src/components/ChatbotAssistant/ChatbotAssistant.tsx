@@ -601,7 +601,7 @@ const AIStarsIcon = React.memo(({ className }: { className?: string }) => {
 
 // Sample messages for demo
 const initialMessages = [
-  { text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?', isUser: false },
+  { text: '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?', isUser: false },
 ];
 
 interface ChatbotAssistantProps {
@@ -649,7 +649,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
 
   const handleClearChat = () => {
     setMessages([
-      { text: t('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'), isUser: false },
+      { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
     ]);
   };
 
@@ -831,7 +831,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
       // Si estamos abriendo y no hay mensajes, añadir mensaje de bienvenida
       if (!isOpen && messages.length === 0) {
         setMessages([
-          { text: t('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'), isUser: false },
+          { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
         ]);
       }
     } else {
@@ -846,7 +846,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
 
         if (!isOpen && messages.length === 0) {
           setMessages([
-            { text: t('¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'), isUser: false },
+            { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
           ]);
         }
       });
@@ -1025,7 +1025,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
                 <ChatHeader>
                   <HeaderTitle>
                     <AIStarsIcon className="header-icon" />
-                    {t('Asistente')}
+                    {t('AI Portfolio Assistant')}
                   </HeaderTitle>
                   <div className="header-buttons">
                     <HeaderButton onClick={handleClearChat} title="Limpiar chat">
