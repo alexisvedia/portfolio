@@ -2,14 +2,13 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
-import { ThemeProvider } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { store, setLoaded } from '@store/index';
-import { theme } from '@styles/theme';
 import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
 import LanguageSelector from '@components/LanguageSelector';
-import NavBar from '@components/NavBar/NavBar';
+import ThemeToggle from '@components/ThemeToggle';
+import { ThemeProvider } from './context/ThemeContext';
 const ChatbotAssistant = React.lazy(() => import('@components/ChatbotAssistant'));
 import { initScrollDetection } from '@utils/scrollDetection';
 import { initializeN8NServer } from '@services/n8nService';
@@ -28,8 +27,6 @@ const AppWrapper = styled.div`
   background-color: ${({ theme }) => theme.colors.background};
 `;
 
-// Ya no necesitamos el contenedor para el efecto Aurora
-
 // Contenedor de páginas
 const Container = styled.div`
   position: relative;
@@ -39,37 +36,43 @@ const Container = styled.div`
 `;
 
 // Language Selector position
-const LanguageSelectorStyled = styled(LanguageSelector)`
+const LanguageSelectorStyled = styled(LanguageSelector)<{ $hideOnScroll: boolean }>`
   position: fixed;
   top: 1.5rem;
   right: 1.5rem;
   z-index: 100;
+  transition: transform 0.3s ease;
+  
+  @media (max-width: 768px) {
+    transform: translateY(${props => props.$hideOnScroll ? '-100px' : '0'});
+  }
 `;
 
-// NavBar estilizada con la misma transición pero manteniendo el centrado original
-const NavBarStyled = styled(NavBar)<{ visible: boolean }>`
-  &&& {
-    opacity: ${({ visible }) => (visible ? 1 : 0)};
-    transform: translateX(-50%) translateY(${({ visible }) => (visible ? 0 : -10)}px);
-    transition:
-      opacity 0.5s cubic-bezier(0.215, 0.61, 0.355, 1),
-      transform 0.5s cubic-bezier(0.215, 0.61, 0.355, 1);
-
-    @media (max-width: 768px) {
-      transform: translateX(-50%) translateY(${({ visible }) => (visible ? 0 : 10)}px);
-      transition:
-        opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+// Theme Toggle position con exactamente las propiedades solicitadas
+const ThemeToggleStyled = styled(ThemeToggle)<{ $hideOnScroll: boolean }>`
+  position: fixed;
+  top: 1.6rem;
+  right: 6.8rem;
+  z-index: 100;
+  --toggle-size: 14px;
+  height: 40px;
+  transition: transform 0.3s ease;
+  
+  /* Ajustar el tamaño del toggle */
+  & label {
+    width: 42px;
+    height: 42px;
+  }
+  
+  @media (max-width: 768px) {
+    transform: translateY(${props => props.$hideOnScroll ? '-100px' : '0'});
   }
 `;
 
 const AppContent = () => {
-  // Estado para controlar la visibilidad solo de la navbar
-  const [navbarVisible, setNavbarVisible] = useState(false);
-  const { t, i18n } = useTranslation();
-  const [pendingLanguage, setPendingLanguage] = useState<string | null>(null);
+  const { i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
+  const [hideControls, setHideControls] = useState(false);
   
   // Inicializar el servidor n8n cuando la aplicación se carga
   useEffect(() => {
@@ -88,82 +91,21 @@ const AppContent = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Establecer navbarVisible a true después de 1000ms cuando se inicia
+  // Controlar el scroll para ocultar controles en móvil
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setNavbarVisible(true);
-    }, 1000);
-
-    // Limpiar el timeout cuando el componente se desmonte
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Escuchar el evento de cambio de idioma para ocultar solo la navbar
-  useEffect(() => {
-    const handleInitiateLanguageChange = (
-      event: CustomEvent<{ previousLanguage: string; newLanguage: string }>
-    ) => {
-      // Guardar el idioma que queremos cambiar
-      setPendingLanguage(event.detail.newLanguage);
-
-      // Solo ocultar la navbar si NO estamos en modo móvil
-      // En móvil, solo mostramos iconos, por lo que no hay necesidad de ocultar y mostrar el navbar
-      if (!isMobile) {
-        setNavbarVisible(false);
+    if (!isMobile) return; // Solo aplicar en móvil
+    
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setHideControls(true);
       } else {
-        // En móvil, cambiamos el idioma directamente sin ocultar/mostrar el navbar
-        i18n.changeLanguage(event.detail.newLanguage);
+        setHideControls(false);
       }
     };
 
-    // Registrar oyente para el evento custom
-    window.addEventListener(
-      'initiateLanguageChange',
-      handleInitiateLanguageChange as EventListener
-    );
-
-    // Limpiar oyentes cuando el componente se desmonte
-    return () => {
-      window.removeEventListener(
-        'initiateLanguageChange',
-        handleInitiateLanguageChange as EventListener
-      );
-    };
-  }, [isMobile, i18n]);
-
-  // Efectuar el cambio de idioma solo cuando todas las animaciones iniciales y ocultar navbar hayan terminado
-  useEffect(() => {
-    // Si tenemos un idioma pendiente y la navbar está oculta (solo en desktop), podemos proceder
-    if (pendingLanguage && (!navbarVisible || isMobile)) {
-      // Solo necesitamos esta lógica si no estamos en mobile
-      if (!isMobile) {
-        const timer = setTimeout(() => {
-          // Cambiar realmente el idioma en i18n SOLO después de que la navbar esté oculta
-          i18n.changeLanguage(pendingLanguage).then(() => {
-            // Después de un tiempo para que el cambio de idioma surta efecto, mostrar navbar nuevamente
-            const showTimer = setTimeout(() => {
-              setNavbarVisible(true);
-              // Limpiar el idioma pendiente
-              setPendingLanguage(null);
-            }, 300);
-
-            return () => clearTimeout(showTimer);
-          });
-        }, 300); // Dar tiempo para que la navbar termine de ocultarse
-
-        return () => clearTimeout(timer);
-      } else {
-        // En móvil, añadimos un pequeño efecto de "pulso" al cambiar el idioma
-        const timer = setTimeout(() => {
-          i18n.changeLanguage(pendingLanguage).then(() => {
-            setPendingLanguage(null);
-          });
-        }, 100);
-
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [pendingLanguage, navbarVisible, i18n, isMobile]);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
 
   // Función para manejar la finalización de las animaciones
   const handleAnimationComplete = () => {
@@ -179,10 +121,10 @@ const AppContent = () => {
 
   return (
     <AppWrapper>
-      <NavBarStyled t={t} visible={navbarVisible} />
-      <LanguageSelectorStyled initialDelay={1300} />
+      <LanguageSelectorStyled initialDelay={500} $hideOnScroll={hideControls} />
+      <ThemeToggleStyled initialDelay={500} $hideOnScroll={hideControls} />
       <React.Suspense fallback={null}>
-        <ChatbotAssistant initialDelay={1300} />
+        <ChatbotAssistant initialDelay={500} />
       </React.Suspense>
 
       <Container>
@@ -200,7 +142,7 @@ const AppContent = () => {
 function App() {
   return (
     <Provider store={store}>
-      <ThemeProvider theme={theme}>
+      <ThemeProvider>
         <GlobalStyles />
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <AppContent />

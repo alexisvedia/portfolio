@@ -9,6 +9,30 @@ const resources = {
       selectLanguage: 'Select language',
       english: 'English',
       spanish: 'Spanish',
+      // Hero
+      heroTitle: 'UX/UI Designer & Frontend Developer',
+      heroSubtitle: 'I create beautiful and functional digital experiences with React and TypeScript, focusing on usability and modern design.',
+      viewProjects: 'View Projects',
+      contactMe: 'Contact Me',
+      // Navigation
+      home: 'Home',
+      projects: 'Projects',
+      skills: 'Skills',
+      contact: 'Contact',
+      // Projects section
+      // Skills section
+      // Contact section
+      contactText: 'Want to work together? Have a project in mind? Feel free to reach out!',
+      name: 'Name',
+      email: 'Email',
+      message: 'Message',
+      send: 'Send Message',
+      sending: 'Sending...',
+      messageSent: 'Message sent successfully! I will get back to you soon.',
+      messageError: 'There was an error sending your message. Please try again.',
+      // Footer
+      yourName: 'Your Name',
+      allRightsReserved: 'All Rights Reserved',
       // Navegación
       navbar: {
         home: 'Home',
@@ -73,6 +97,30 @@ const resources = {
       selectLanguage: 'Seleccionar idioma',
       english: 'Inglés',
       spanish: 'Español',
+      // Hero
+      heroTitle: 'Diseñador UX/UI y Desarrollador Frontend',
+      heroSubtitle: 'Creo experiencias digitales hermosas y funcionales con React y TypeScript, enfocándome en la usabilidad y el diseño moderno.',
+      viewProjects: 'Ver Proyectos',
+      contactMe: 'Contáctame',
+      // Navigation
+      home: 'Inicio',
+      projects: 'Proyectos',
+      skills: 'Habilidades',
+      contact: 'Contacto',
+      // Projects section
+      // Skills section
+      // Contact section
+      contactText: '¿Quieres trabajar juntos? ¿Tienes un proyecto en mente? ¡No dudes en contactarme!',
+      name: 'Nombre',
+      email: 'Correo electrónico',
+      message: 'Mensaje',
+      send: 'Enviar Mensaje',
+      sending: 'Enviando...',
+      messageSent: '¡Mensaje enviado con éxito! Te responderé pronto.',
+      messageError: 'Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo.',
+      // Footer
+      yourName: 'Tu Nombre',
+      allRightsReserved: 'Todos los Derechos Reservados',
       // Navegación
       navbar: {
         home: 'Inicio',

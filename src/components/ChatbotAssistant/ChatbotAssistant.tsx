@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { HiSparkles } from 'react-icons/hi2';
 import ReactMarkdown from 'react-markdown';
 import { sendMessageToN8N, initializeN8NServer } from '../../services/n8nService';
+import { useTheme } from '../../context/ThemeContext';
 
 // Animations
 const morphToChat = keyframes`
@@ -143,7 +144,7 @@ const ChatbotContainer = styled.div<{ $isOpen: boolean; $visible: boolean; $isRe
   animation-delay: 0s;
 
   @media (max-width: 768px) {
-    bottom: ${props => (props.$isOpen ? '0' : '100px')};
+    bottom: ${props => (props.$isOpen ? '0' : '30px')};
     right: ${props => (props.$isOpen ? '0' : '20px')};
     width: ${props => (props.$isOpen ? '100%' : 'auto')};
     height: ${props => (props.$isOpen ? '100%' : 'auto')};
@@ -151,9 +152,9 @@ const ChatbotContainer = styled.div<{ $isOpen: boolean; $visible: boolean; $isRe
   }
 `;
 
-const FloatingWrapper = styled.div<{ $isReady: boolean; $isOpen: boolean }>`
+const FloatingWrapper = styled.div<{ $isReady: boolean; $isOpen: boolean; $isMobile: boolean }>`
   animation: ${props =>
-    props.$isReady && !props.$isOpen
+    props.$isReady && !props.$isOpen && !props.$isMobile
       ? css`
           ${float} 6s ease-in-out infinite
         `
@@ -170,10 +171,20 @@ const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $i
   width: ${props => (props.$isOpen ? '320px' : '48px')};
   height: ${props => (props.$isOpen ? '400px' : '48px')};
   border-radius: ${props => (props.$isOpen ? '16px' : '50%')};
-  background: ${props => (props.$isOpen ? 'rgba(30, 30, 35, 0.85)' : 'rgba(255, 255, 255, 0.1)')};
-  backdrop-filter: blur(7px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  background: ${({ theme, $isOpen }) => 
+    $isOpen 
+      ? theme.isDark 
+        ? 'rgba(30, 30, 35, 0.85)' 
+        : 'rgba(240, 240, 245, 0.85)'
+      : theme.isDark 
+        ? 'rgba(255, 255, 255, 0.1)' 
+        : 'rgba(0, 0, 0, 0.05)'
+  };
+  backdrop-filter: ${props => props.$isOpen ? 'blur(7px)' : 'blur(10px)'};
+  border: 1px solid ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
+  box-shadow: 0 4px 20px ${({ theme }) => 
+    theme.isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.1)'};
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -230,7 +241,7 @@ const ChatButton = styled.button<{ $isOpen: boolean; $isMobile: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: ${({ theme }) => theme.colors.text};
   cursor: pointer;
   border: none;
   background: transparent;
@@ -244,7 +255,8 @@ const ChatButton = styled.button<{ $isOpen: boolean; $isMobile: boolean }>`
   overflow: hidden;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: ${({ theme }) => 
+      theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
   }
 
   &:before {
@@ -255,7 +267,8 @@ const ChatButton = styled.button<{ $isOpen: boolean; $isMobile: boolean }>`
     right: -10px;
     bottom: -10px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.05);
+    background: ${({ theme }) => 
+      theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
     z-index: -1;
     opacity: ${props => (props.$isOpen ? '0' : '0.6')};
     animation: ${pulse} 3s ease-in-out infinite;
@@ -439,7 +452,7 @@ const MessageBubble = styled.div<{
     props.$isUser
       ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.accent})`
       : 'rgba(255, 255, 255, 0.1)'};
-  color: ${props => props.theme.colors.text};
+  color: ${props => props.$isUser ? "white" : props.theme.colors.text};
   align-self: ${props => (props.$isUser ? 'flex-end' : 'flex-start')};
   font-size: ${props => props.theme.fontSizes.sm};
   line-height: 1.5;
@@ -528,12 +541,13 @@ const SendButton = styled.button`
 
 // AI Stars Icon Component
 const AIStarsIcon: React.FC<{ className?: string }> = ({ className }) => {
+  const { themeMode } = useTheme();
   return (
     <span
       className={className}
       style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <HiSparkles size={22} color="white" />
+      <HiSparkles size={22} color={themeMode === 'dark' ? "white" : "black"} />
     </span>
   );
 };
@@ -555,7 +569,6 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   const [shouldAnimateMessages, setShouldAnimateMessages] = useState(false);
   const [isInitialRender, setIsInitialRender] = useState(true);
   const [isReady, setIsReady] = useState(false);
-// Remove unused state since isServiceReady is not being read anywhere
   const initRetryCountRef = useRef(0);
   const [ripples, setRipples] = useState<
     Array<{ x: number; y: number; size: number; key: number }>
@@ -580,7 +593,6 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
     try {
       const isInitialized = await initializeN8NServer();
       if (isInitialized) {
-// Service is ready, no need to track state since it's not used elsewhere
         // Solo después de que el servicio esté listo, iniciamos la animación del chat
         const initialTimer = setTimeout(() => {
           setVisible(true);
@@ -788,8 +800,13 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
   return (
     <>
       <AppOverlay $isOpen={isOpen} $isMobile={isMobile} />
-      <ChatbotContainer $isOpen={isOpen} ref={chatbotRef} $visible={visible} $isReady={isReady}>
-        <FloatingWrapper $isReady={isReady} $isOpen={isOpen}>
+      <ChatbotContainer 
+        $isOpen={isOpen} 
+        ref={chatbotRef} 
+        $visible={visible} 
+        $isReady={isReady}
+      >
+        <FloatingWrapper $isReady={isReady} $isOpen={isOpen} $isMobile={isMobile}>
           <ChatElement $isOpen={isOpen} $isInitialRender={isInitialRender} $isMobile={isMobile}>
             <ChatButton onClick={handleButtonClick} $isOpen={isOpen} $isMobile={isMobile}>
               <IconContainer>
@@ -868,14 +885,14 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 
                   >
                     <path
                       d="M22 2L11 13"
-                      stroke="white"
+                      stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
                     <path
                       d="M22 2L15 22L11 13L2 9L22 2Z"
-                      stroke="white"
+                      stroke="currentColor"
                       strokeWidth="2"
                       strokeLinecap="round"
                       strokeLinejoin="round"
