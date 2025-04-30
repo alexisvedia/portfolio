@@ -1,17 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
 
 const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space.xl} 0;
