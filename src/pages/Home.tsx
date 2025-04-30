@@ -1,55 +1,35 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import SimpleBlurText from '@components/SimpleBlurText';
 import PageTransition from '@components/PageTransition/PageTransition';
+import HeroSection from '@components/HeroSection/HeroSection';
+import ProjectsSection from '@components/ProjectsSection/ProjectsSection';
+import SkillsSection from '@components/SkillsSection/SkillsSection';
+import Footer from '@components/Footer/Footer';
+import AboutSection from '@components/AboutSection/AboutSection';
 
-const Content = styled.div`
+const HomeContainer = styled.div`
   position: relative;
   z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  padding: ${({ theme }) => theme.space.xl};
-  padding-top: 5rem;
-  `;
+  overflow: hidden;
+`;
 
-const Title = styled.div`
-  font-family:
-    'Inter',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
-  font-size: ${({ theme }) => theme.fontSizes['5xl']};
-  color: ${({ theme }) => theme.colors.text};
-  margin-bottom: ${({ theme }) => theme.space['2xl']};
-  text-align: center;
-  font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+const ContentWrapper = styled.div`
+  max-width: 1400px;
+  margin: 0 auto;
 `;
 
 const Home: React.FC<{ onAnimationComplete?: () => void }> = ({ onAnimationComplete }) => {
-  const { t, i18n } = useTranslation();
-
   return (
     <PageTransition>
-      <Content>
-        <Title>
-          <SimpleBlurText
-            key={i18n.language}
-            text={t('welcome')}
-            onAnimationComplete={onAnimationComplete}
-          />
-        </Title>
-      </Content>
+      <HomeContainer id="home">
+        <ContentWrapper>
+          <HeroSection onAnimationComplete={onAnimationComplete} />
+          <AboutSection />
+          <ProjectsSection />
+          <SkillsSection />
+          <Footer />
+        </ContentWrapper>
+      </HomeContainer>
     </PageTransition>
   );
 };

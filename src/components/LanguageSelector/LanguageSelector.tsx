@@ -25,7 +25,7 @@ const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
   background: ${props =>
     props.$changing ? 'rgba(150, 150, 150, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
   color: ${({ theme, $changing }) => ($changing ? 'rgba(255, 255, 255, 0.5)' : theme.colors.text)};
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid ${({ theme }) => theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
   border-radius: 50px;
   padding: 10px 15px;
   cursor: ${props => (props.$changing ? 'not-allowed' : 'pointer')};
@@ -33,13 +33,21 @@ const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
   font-weight: 500;
   backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px ${({ theme }) => theme.isDark ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
   position: relative;
   overflow: hidden;
 
+  /* Ajustamos el color de fondo basado en el tema */
+  background: ${({ theme }) => 
+    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
+
   &:hover {
-    background: ${props =>
-      props.$changing ? 'rgba(150, 150, 150, 0.2)' : 'rgba(255, 255, 255, 0.2)'};
+    background: ${({ theme, $changing }) =>
+      $changing 
+      ? 'rgba(150, 150, 150, 0.2)' 
+      : theme.isDark 
+        ? 'rgba(255, 255, 255, 0.2)' 
+        : 'rgba(0, 0, 0, 0.1)'};
     transform: ${props => (props.$changing ? 'none' : 'scale(1.05) translateY(-2px)')};
   }
 
@@ -66,7 +74,7 @@ const LanguageIcon = styled(MdOutlineLanguage)<{ $changing?: boolean }>`
   font-size: 1.2rem;
   opacity: ${props => (props.$changing ? 0.5 : 1)};
   transition: opacity 0.3s ease;
-  color: white;
+  color: ${({ theme }) => theme.colors.text};
   display: inline-flex;
   vertical-align: middle;
 `;
@@ -131,15 +139,20 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
     // Determinar el nuevo idioma
     const newLang = currentLang === 'es' ? 'en' : 'es';
-
-    // Emitir evento personalizado para notificar el cambio de idioma
-    const event = new CustomEvent('initiateLanguageChange', {
-      detail: {
-        previousLanguage: currentLang,
-        newLanguage: newLang,
-      },
-    });
-    window.dispatchEvent(event);
+    
+    // Cambiar el idioma directamente
+    i18n.changeLanguage(newLang)
+      .then(() => {
+        setCurrentLang(newLang);
+        // Permitimos que la animación continue un poco antes de quitar el estado de loading
+        setTimeout(() => {
+          setIsChangingLanguage(false);
+        }, 1000);
+      })
+      .catch(error => {
+        console.error('Error al cambiar el idioma:', error);
+        setIsChangingLanguage(false);
+      });
   };
 
   return (

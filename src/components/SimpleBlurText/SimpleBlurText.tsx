@@ -26,8 +26,8 @@ interface AnimatedSpanProps {
 const AnimatedSpan = styled.span<AnimatedSpanProps>`
   display: inline-block;
   opacity: 0;
-  animation: ${blurIn} 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
-  animation-delay: ${props => props.$delay * 0.08}s;
+  animation: ${blurIn} 0.5s cubic-bezier(0.215, 0.61, 0.355, 1) forwards;
+  animation-delay: ${props => props.$delay * 0.04}s;
 `;
 
 interface SimpleBlurTextProps {
@@ -46,7 +46,7 @@ const SimpleBlurText: React.FC<SimpleBlurTextProps> = ({
   useEffect(() => {
     setMounted(true);
 
-    const totalDuration = text.length * 80 + 800;
+    const totalDuration = text.length * 40 + 500;
 
     // Ejecuta onAnimationComplete después de que termine toda la animación
     const timer = setTimeout(() => {

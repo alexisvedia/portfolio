@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import { theme } from './theme';
+import './fonts.css'; // Importar el archivo de fuentes
 
 export const GlobalStyles = createGlobalStyle`
   * {
@@ -15,7 +15,7 @@ export const GlobalStyles = createGlobalStyle`
     
     /* Personalización de la barra de desplazamiento */
     scrollbar-width: thin;
-    scrollbar-color: rgba(200, 200, 200, 0.5) transparent;
+    scrollbar-color: ${({ theme }) => `${theme.colors.text}50`} transparent;
   }
   
   /* Estilos para navegadores WebKit (Chrome, Safari, etc.) */
@@ -29,14 +29,14 @@ export const GlobalStyles = createGlobalStyle`
   }
   
   ::-webkit-scrollbar-thumb {
-    background-color: rgba(200, 200, 200, 0.5);
+    background-color: ${({ theme }) => `${theme.colors.text}50`};
     border-radius: 3px;
     transition: opacity 1.5s ease;
   }
   
   /* Ocultar la barra cuando no se está desplazando */
   ::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(200, 200, 200, 0.8);
+    background-color: ${({ theme }) => `${theme.colors.text}80`};
   }
   
   /* Ocultar flechas de inicio y fin */
@@ -58,17 +58,18 @@ export const GlobalStyles = createGlobalStyle`
   
   /* Mostrar la barra de desplazamiento durante el scroll */
   body.scrolling ::-webkit-scrollbar-thumb {
-    background-color: rgba(200, 200, 200, 0.5);
+    background-color: ${({ theme }) => `${theme.colors.text}50`};
     visibility: visible;
   }
   
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: ${theme.colors.background};
-    color: ${theme.colors.text};
+    background-color: ${({ theme }) => theme.colors.background};
+    color: ${({ theme }) => theme.colors.text};
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
 
@@ -89,7 +90,27 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: ${theme.fonts.heading};
+    font-family: 'Morganite', ${({ theme }) => theme.fonts.heading};
     font-weight: 700;
+  }
+  
+  /* Transiciones para el cambio de tema */
+  a, button, input, textarea, .card, .navbar, .footer {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  /* Clases para utilizar la fuente Morganite */
+  .morganite {
+    font-family: 'Morganite', sans-serif;
+  }
+  
+  .morganite-bold {
+    font-family: 'Morganite', sans-serif;
+    font-weight: 700;
+  }
+  
+  .morganite-black {
+    font-family: 'Morganite', sans-serif;
+    font-weight: 900;
   }
 `;
