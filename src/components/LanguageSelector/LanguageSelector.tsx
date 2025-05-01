@@ -1,12 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { keyframes, css } from 'styled-components';
 import { MdOutlineLanguage } from "react-icons/md";
+
+// Tiempo mínimo que debe pasar entre cambios de idioma (ms)
+const LANGUAGE_CHANGE_COOLDOWN = 3000;
 
 interface LanguageSelectorProps {
   className?: string;
   initialDelay?: number; // Retraso inicial para la aparición en ms
 }
+
+// Animación de carga
+const loadingAnimation = keyframes`
+  from { width: 0; }
+  to { width: 100%; }
+`;
 
 const LanguageSelectorContainer = styled.div<{ $visible: boolean }>`
   position: fixed;
@@ -62,10 +71,13 @@ const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
     bottom: 0;
     left: 0;
     height: 2px;
-    width: ${props => (props.$changing ? '100%' : '0')};
+    width: 0; /* Siempre comienza en 0 */
     background: linear-gradient(90deg, #646cff, #82e9de);
-    transition: width 2.5s ease-in-out;
     opacity: ${props => (props.$changing ? 1 : 0)};
+    ${props => props.$changing && css`
+      animation: ${loadingAnimation} 3s linear;
+      animation-fill-mode: forwards;
+    `}
   }
 `;
 
@@ -79,20 +91,16 @@ const LanguageIcon = styled(MdOutlineLanguage)<{ $changing?: boolean }>`
   vertical-align: middle;
 `;
 
-// Tiempo mínimo que debe pasar entre cambios de idioma (ms)
-const LANGUAGE_CHANGE_COOLDOWN = 3000;
-
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   className,
   initialDelay = 1300, // Por defecto, aparece 300ms después de la navbar (que aparece a los 1000ms)
 }) => {
   const { i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language?.startsWith('es') ? 'es' : 'en');
-
-  // Verificar si ya se ha disparado un cambio de idioma y está en proceso
-  const [isChangingLanguage, setIsChangingLanguage] = useState(false);
-  // Almacenar la última vez que se cambió el idioma
-  const [lastChangeTime, setLastChangeTime] = useState(0);
+  
+  // Un solo estado para controlar si el botón está en cooldown
+  const [isDisabled, setIsDisabled] = useState(false);
+  
   // Estado para controlar la animación inicial de aparición
   const [isVisible, setIsVisible] = useState(false);
 
@@ -111,54 +119,42 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     if (currentLang !== lang) {
       setCurrentLang(lang);
     }
-
-    // Después de que i18n.language cambia, permitir una espera adicional
-    // para asegurar que todas las animaciones completen
-    const timer = setTimeout(() => {
-      setIsChangingLanguage(false);
-    }, 1000); // Damos tiempo para que las animaciones terminen
-
+    
     // También actualizar localStorage explícitamente
     localStorage.setItem('i18nextLng', i18n.language);
-
-    return () => clearTimeout(timer);
   }, [i18n.language, currentLang]);
 
   const toggleLanguage = () => {
-    const now = Date.now();
-    const timeSinceLastChange = now - lastChangeTime;
-
-    // Si está en proceso de cambio o no ha pasado suficiente tiempo, no hacer nada
-    if (isChangingLanguage || timeSinceLastChange < LANGUAGE_CHANGE_COOLDOWN) {
+    // Si está deshabilitado, no hacer nada
+    if (isDisabled) {
       return;
     }
 
-    // Actualizar el tiempo del último cambio
-    setLastChangeTime(now);
-    setIsChangingLanguage(true);
+    // Deshabilitar el botón inmediatamente
+    setIsDisabled(true);
 
     // Determinar el nuevo idioma
     const newLang = currentLang === 'es' ? 'en' : 'es';
     
-    // Cambiar el idioma directamente
+    // Cambiar el idioma
     i18n.changeLanguage(newLang)
       .then(() => {
         setCurrentLang(newLang);
-        // Permitimos que la animación continue un poco antes de quitar el estado de loading
-        setTimeout(() => {
-          setIsChangingLanguage(false);
-        }, 1000);
       })
       .catch(error => {
         console.error('Error al cambiar el idioma:', error);
-        setIsChangingLanguage(false);
       });
+    
+    // Configurar un temporizador para habilitar el botón después del cooldown
+    setTimeout(() => {
+      setIsDisabled(false);
+    }, LANGUAGE_CHANGE_COOLDOWN);
   };
 
   return (
     <LanguageSelectorContainer className={className} $visible={isVisible}>
-      <LanguageButton onClick={toggleLanguage} $changing={isChangingLanguage}>
-        <LanguageIcon $changing={isChangingLanguage} />
+      <LanguageButton onClick={toggleLanguage} $changing={isDisabled}>
+        <LanguageIcon $changing={isDisabled} />
         {currentLang === 'es' ? 'ES' : 'EN'}
       </LanguageButton>
     </LanguageSelectorContainer>

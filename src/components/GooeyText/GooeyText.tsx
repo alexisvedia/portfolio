@@ -50,7 +50,7 @@ const TextSpan = styled.span`
   font-size: clamp(3.5rem, 5vw, 7rem);
   line-height: 1.2;
   white-space: nowrap;
-  color: white;
+  color: ${({ theme }) => theme.colors.text};
   font-weight: 900;
   letter-spacing: -0.02em;
   transform-origin: center center;
@@ -99,6 +99,8 @@ export function GooeyText({
 
       text1Ref.current.style.filter = `blur(${blur1}px)`;
       text1Ref.current.style.opacity = `${opacity1}%`;
+      // Asegurar que mantenga el color del tema durante la transición
+      text1Ref.current.style.color = 'inherit';
 
       // Luego establecer el texto saliente (se desvanecerá gradualmente)
       const blur2 = Math.min(8 / fraction - 8, 100);
@@ -106,6 +108,8 @@ export function GooeyText({
 
       text2Ref.current.style.filter = `blur(${blur2}px)`;
       text2Ref.current.style.opacity = `${opacity2}%`;
+      // Asegurar que mantenga el color del tema durante la transición
+      text2Ref.current.style.color = 'inherit';
     } catch (err) {
       console.error('[GooeyText] Error en setMorph:', err);
       animationAbortedRef.current = true;
@@ -121,10 +125,12 @@ export function GooeyText({
       // El texto original (text1) está completamente oculto
       text1Ref.current.style.opacity = '0%';
       text1Ref.current.style.filter = '';
+      text1Ref.current.style.color = 'inherit';
 
       // El texto nuevo (text2) está completamente visible
       text2Ref.current.style.opacity = '100%';
       text2Ref.current.style.filter = '';
+      text2Ref.current.style.color = 'inherit';
 
       // Asegurar que el texto final sea visible
       if (texts && texts.length > 1 && texts[1]) {
@@ -145,10 +151,12 @@ export function GooeyText({
       try {
         // Mostrar directamente el segundo texto sin animación
         text1Ref.current.style.opacity = '0%';
+        text1Ref.current.style.color = 'inherit';
         text1Ref.current.textContent = texts[0] || '';
 
         text2Ref.current.style.opacity = '100%';
         text2Ref.current.style.filter = '';
+        text2Ref.current.style.color = 'inherit';
         text2Ref.current.textContent = texts[1] || '';
       } catch (err) {
         console.error('[GooeyText] Error al estabilizar:', err);
