@@ -2,26 +2,37 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { MicaCard } from '../ProjectCard';
+import TiltedCompanyCards from '../TiltedCompanyCards/TiltedCompanyCards';
 
 const SectionContainer = styled.section`
-  padding: ${({ theme }) => theme.space['2xl']} 0;
+  padding: 0 0 ${({ theme }) => theme.space['2xl']};
   position: relative;
-  z-index: 10;
+  z-index: 5;
+`;
+
+// Contenedor para el título con un poco de margen superior
+const TitleContainer = styled.div`
+  margin-top: 4rem;
+  padding-top: 2rem;
 `;
 
 const SectionTitle = styled.h2`
   font-size: 80px;
   font-weight: 900;
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
+  margin-bottom: 3rem;
   text-align: center;
   color: ${({ theme }) => theme.colors.text};
+  position: relative;
+  font-family: 'Morganite', sans-serif;
+  letter-spacing: 4px;
 `;
 
 const ProjectsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: ${({ theme }) => theme.space.xl};
+  margin-top: 2rem;
   
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     grid-template-columns: repeat(2, 1fr);
@@ -84,7 +95,10 @@ const ProjectsSection: React.FC = () => {
   
   return (
     <SectionContainer id="projects">
-      <SectionTitle>{t('projects')}</SectionTitle>
+      <TiltedCompanyCards />
+      <TitleContainer>
+        <SectionTitle>{t('projects')}</SectionTitle>
+      </TitleContainer>
       <ProjectsGrid>
         {projectsData.map((project, index) => (
           <MicaCard key={index} {...project} />
