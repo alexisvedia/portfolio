@@ -21,7 +21,7 @@ const MorphContainer = styled.div<{ $shouldMorph: boolean }>`
   margin-bottom: 1rem;
   font-size: clamp(2.5rem, 5vw, 7rem);
   font-weight: 900;
-  color: white;
+  color: ${({ theme }) => theme.colors.text};
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   line-height: 1.2;
   letter-spacing: -0.02em;

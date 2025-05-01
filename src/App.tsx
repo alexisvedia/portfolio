@@ -9,6 +9,7 @@ import LanguageSelector from '@components/LanguageSelector';
 import ThemeToggle from '@components/ThemeToggle';
 import { ThemeProvider } from './context/ThemeContext';
 import FontLoader from '@components/FontLoader/FontLoader';
+import GrainOverlay from '@components/GrainOverlay';
 // Cargar el componente del chatbot de manera diferida para mejorar el rendimiento inicial
 const ChatbotAssistant = React.lazy(() => 
   // Añadimos un ligero retraso para mejorar métricas de rendimiento
@@ -176,6 +177,7 @@ const AppContent = () => {
     <AppWrapper>
       {shouldShowLoader && !fontsLoaded && <FontLoader onLoaded={handleFontsLoaded} />}
       
+      <GrainOverlay />
       <LanguageSelectorStyled initialDelay={500} $hideOnScroll={hideControls} />
       <ThemeToggleStyled initialDelay={500} $hideOnScroll={hideControls} />
       {chatbotVisible && (
