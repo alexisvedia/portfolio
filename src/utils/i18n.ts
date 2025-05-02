@@ -11,12 +11,14 @@ const resources = {
       spanish: 'Spanish',
       // Hero
       heroTitle: 'UX/UI Designer & Frontend Developer',
-      heroSubtitle: 'I create beautiful and functional digital experiences with React and TypeScript, focusing on usability and modern design.',
+      heroSubtitle:
+        'I create beautiful and functional digital experiences with React and TypeScript, focusing on usability and modern design.',
       viewProjects: 'View Projects',
       contactMe: 'Contact Me',
       // Navigation
       home: 'Home',
       projects: 'Projects',
+      experience: 'Experience',
       skills: 'Skills',
       contact: 'Contact',
       // Projects section
@@ -99,18 +101,21 @@ const resources = {
       spanish: 'Español',
       // Hero
       heroTitle: 'Diseñador UX/UI y Desarrollador Frontend',
-      heroSubtitle: 'Creo experiencias digitales hermosas y funcionales con React y TypeScript, enfocándome en la usabilidad y el diseño moderno.',
+      heroSubtitle:
+        'Creo experiencias digitales hermosas y funcionales con React y TypeScript, enfocándome en la usabilidad y el diseño moderno.',
       viewProjects: 'Ver Proyectos',
       contactMe: 'Contáctame',
       // Navigation
       home: 'Inicio',
       projects: 'Proyectos',
+      experience: 'Experiencia',
       skills: 'Habilidades',
       contact: 'Contacto',
       // Projects section
       // Skills section
       // Contact section
-      contactText: '¿Quieres trabajar juntos? ¿Tienes un proyecto en mente? ¡No dudes en contactarme!',
+      contactText:
+        '¿Quieres trabajar juntos? ¿Tienes un proyecto en mente? ¡No dudes en contactarme!',
       name: 'Nombre',
       email: 'Correo electrónico',
       message: 'Mensaje',

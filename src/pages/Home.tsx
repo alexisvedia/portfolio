@@ -30,7 +30,9 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded }) => {
         <ContentWrapper>
           <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
           <BioSection />
-          <ProjectsSection />
+        </ContentWrapper>
+        <ProjectsSection />
+        <ContentWrapper>
           <SkillsSection />
           <Footer />
         </ContentWrapper>
