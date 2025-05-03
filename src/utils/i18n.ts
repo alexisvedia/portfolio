@@ -14,7 +14,7 @@ const resources = {
       heroSubtitle:
         'I create beautiful and functional digital experiences with React and TypeScript, focusing on usability and modern design.',
       viewProjects: 'View Projects',
-      contactMe: 'Contact Me',
+      contactMe: 'Contact me',
       // Navigation
       home: 'Home',
       projects: 'Projects',
