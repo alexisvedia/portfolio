@@ -52,6 +52,32 @@ const Description = styled(Panel)`
   padding: 2rem;
 `;
 
+const LogoContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 2rem;
+`;
+
+const LogoImage = styled.img`
+  width: 70%;
+  max-width: 600px;
+  height: auto;
+  object-fit: contain;
+  
+  @media (max-width: 768px) {
+    width: 90%;
+    max-width: 400px;
+  }
+  
+  @media (max-width: 480px) {
+    width: 90%;
+    max-width: 300px;
+  }
+`;
+
 const ProjectsSection: React.FC = () => {
   const { t } = useTranslation();
 
@@ -71,7 +97,7 @@ const ProjectsSection: React.FC = () => {
       },
     });
 
-    gsap.set('.panel', { zIndex: (i, target, targets) => targets.length - i });
+    gsap.set('.panel', { zIndex: (i, _, targets) => targets.length - i });
 
     return () => {
       // Limpieza de ScrollTrigger
@@ -86,23 +112,28 @@ const ProjectsSection: React.FC = () => {
       </TitleContainer>
 
       <Container id="scroll-container">
-        <Description className="panel" color="#3498db">
-          <div>
-            <h1>Layered pinning from bottom</h1>
-            <p>A simple example where overlapping panels reveal from the bottom.</p>
-          </div>
+        <Description className="panel" color="#262626">
+          <LogoContainer>
+            <LogoImage src="/images/projects/Condamind.svg" alt="Condamind" />
+          </LogoContainer>
         </Description>
 
-        <Panel className="panel" color="#e74c3c">
-          <div>ONE</div>
+        <Panel className="panel" color="#F7480B">
+          <LogoContainer>
+            <LogoImage src="/images/projects/Fusionads.svg" alt="Fusion" />
+          </LogoContainer>
         </Panel>
 
-        <Panel className="panel" color="#f39c12">
-          <div>TWO</div>
+        <Panel className="panel" color="#F70F43">
+          <LogoContainer>
+            <LogoImage src="/images/projects/Bandit.svg" alt="Bandit" />
+          </LogoContainer>
         </Panel>
 
-        <Panel className="panel" color="#9b59b6">
-          <div>THREE</div>
+        <Panel className="panel" color="#15814B">
+          <LogoContainer>
+            <LogoImage src="/images/projects/XCONS.svg" alt="XCONS" />
+          </LogoContainer>
         </Panel>
       </Container>
     </SectionContainer>
