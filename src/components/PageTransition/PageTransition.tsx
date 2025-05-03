@@ -15,7 +15,6 @@ const PageContainer = styled(motion.div)`
   flex-direction: column;
   /* align-items: center; */ /* Eliminado para permitir ancho completo */
   overflow-y: auto;
-  padding-bottom: 2rem;
 `;
 
 const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {

@@ -7,11 +7,15 @@ const SectionContainer = styled.section`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-size: 80px;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 3rem;
   text-align: center;
-  margin-bottom: ${({ theme }) => theme.space.xl};
   color: ${({ theme }) => theme.colors.text};
-  font-weight: 700;
+  position: relative;
+  font-family: 'Morganite', sans-serif;
+  letter-spacing: 0;
 `;
 
 const ContactContent = styled.div`

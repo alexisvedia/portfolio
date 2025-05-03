@@ -8,10 +8,11 @@ const FooterContainer = styled.footer`
   margin-top: ${({ theme }) => theme.space['2xl']};
   border-top: 1px solid ${({ theme }) => theme.colors.border};
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  width: 100%;
 `;
 
 const FooterContent = styled.div`
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.space.lg};
   display: flex;
@@ -108,7 +109,6 @@ const Footer: React.FC = () => {
         <NavLinks>
           <NavLink href="#home">{t('home')}</NavLink>
           <NavLink href="#projects">{t('projects')}</NavLink>
-          <NavLink href="#skills">{t('skills')}</NavLink>
           <NavLink href="#contact">{t('contact')}</NavLink>
         </NavLinks>
         
