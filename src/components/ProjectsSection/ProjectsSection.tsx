@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { MicaCard } from '../ProjectCard';
-import TiltedCompanyCards from '../TiltedCompanyCards/TiltedCompanyCards';
+import gsap from 'gsap';
+import ScrollTrigger from 'gsap/ScrollTrigger';
 
 const SectionContainer = styled.section`
   padding: 0 0 ${({ theme }) => theme.space['2xl']};
@@ -25,87 +25,88 @@ const SectionTitle = styled.h2`
   color: ${({ theme }) => theme.colors.text};
   position: relative;
   font-family: 'Morganite', sans-serif;
-  letter-spacing: 4px;
+  letter-spacing: 0;
 `;
 
-const ProjectsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: ${({ theme }) => theme.space.xl};
-  margin-top: 2rem;
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+const Container = styled.div`
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
 `;
 
-// Función para generar URLs de imágenes de placeholder
-const getPlaceholderImage = (index: number) => {
-  // Definimos colores para generar imágenes con diferentes tonalidades
-  const colors = ['#4361ee', '#3a0ca3', '#7209b7', '#f72585'];
-  const color = colors[index % colors.length];
-  
-  // Creamos una imagen SVG en base64 con un color de fondo único para cada proyecto
-  // y un texto indicando el número de proyecto
-  const svgContent = `
-  <svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
-    <rect width="600" height="400" fill="${color}"/>
-    <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="36" 
-      text-anchor="middle" dominant-baseline="middle" fill="white">
-      Proyecto ${index + 1}
-    </text>
-  </svg>`;
-  
-  // Convertimos el SVG a base64
-  const base64 = btoa(svgContent);
-  return `data:image/svg+xml;base64,${base64}`;
-};
+const Panel = styled.section<{ color?: string }>`
+  position: absolute;
+  will-change: transform;
+  width: 100%;
+  height: 100%;
+  background-color: ${({ color }) => color || 'transparent'};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  color: white;
+`;
 
-// Datos para los proyectos
-const createProjectsData = () => [
-  {
-    title: 'App de Gestión de Tareas',
-    description: 'Aplicación web que permite organizar tareas, crear listas y colaborar con otros usuarios en tiempo real. Incluye notificaciones, recordatorios y análisis de productividad.',
-    imageUrl: getPlaceholderImage(0),
-    technologies: ['React', 'TypeScript', 'Firebase', 'Styled Components'],
-  },
-  {
-    title: 'Dashboard Analítico',
-    description: 'Panel de control interactivo para visualizar datos de negocio con gráficos personalizables y filtros avanzados. Permite exportar informes y programar alertas automáticas.',
-    imageUrl: getPlaceholderImage(1),
-    technologies: ['React', 'Chart.js', 'Material UI', 'Redux'],
-  },
-  {
-    title: 'E-commerce Mobile',
-    description: 'Aplicación móvil para compras en línea con integración de pagos, gestión de inventario y seguimiento de pedidos. Incluye sistema de recomendaciones basado en IA.',
-    imageUrl: getPlaceholderImage(2),
-    technologies: ['React Native', 'Redux', 'Node.js', 'MongoDB'],
-  },
-  {
-    title: 'Plataforma de Aprendizaje',
-    description: 'Sistema de gestión de cursos online con foros, evaluaciones y seguimiento de progreso. Incorpora videoconferencias en tiempo real y materiales educativos interactivos.',
-    imageUrl: getPlaceholderImage(3),
-    technologies: ['React', 'Node.js', 'Express', 'PostgreSQL'],
-  },
-];
+const Description = styled(Panel)`
+  padding: 2rem;
+`;
 
 const ProjectsSection: React.FC = () => {
   const { t } = useTranslation();
-  const projectsData = createProjectsData();
-  
+
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.to('.panel:not(:last-child)', {
+      yPercent: -100,
+      ease: 'none',
+      stagger: 0.5,
+      scrollTrigger: {
+        trigger: '#scroll-container',
+        start: 'top top',
+        end: '+=300%',
+        scrub: true,
+        pin: true,
+      },
+    });
+
+    gsap.set('.panel', { zIndex: (i, target, targets) => targets.length - i });
+
+    return () => {
+      // Limpieza de ScrollTrigger
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   return (
     <SectionContainer id="projects">
-      <TiltedCompanyCards />
       <TitleContainer>
-        <SectionTitle>{t('projects')}</SectionTitle>
+        <SectionTitle>{t('experience')}</SectionTitle>
       </TitleContainer>
-      <ProjectsGrid>
-        {projectsData.map((project, index) => (
-          <MicaCard key={index} {...project} />
-        ))}
-      </ProjectsGrid>
+
+      <Container id="scroll-container">
+        <Description className="panel" color="#3498db">
+          <div>
+            <h1>Layered pinning from bottom</h1>
+            <p>A simple example where overlapping panels reveal from the bottom.</p>
+          </div>
+        </Description>
+
+        <Panel className="panel" color="#e74c3c">
+          <div>ONE</div>
+        </Panel>
+
+        <Panel className="panel" color="#f39c12">
+          <div>TWO</div>
+        </Panel>
+
+        <Panel className="panel" color="#9b59b6">
+          <div>THREE</div>
+        </Panel>
+      </Container>
     </SectionContainer>
   );
 };
 
-export default ProjectsSection; 
+export default ProjectsSection;

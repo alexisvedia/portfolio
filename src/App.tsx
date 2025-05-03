@@ -7,6 +7,7 @@ import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
 import LanguageSelector from '@components/LanguageSelector';
 import ThemeToggle from '@components/ThemeToggle';
+import ContactButton from '@components/ContactButton';
 import { ThemeProvider } from './context/ThemeContext';
 import FontLoader from '@components/FontLoader/FontLoader';
 import GrainOverlay from '@components/GrainOverlay';
@@ -47,7 +48,7 @@ const Container = styled.div`
 const LanguageSelectorStyled = styled(LanguageSelector)<{ $hideOnScroll: boolean }>`
   position: fixed;
   top: 1.5rem;
-  right: 1.5rem;
+  left: 1.5rem;
   z-index: 100;
   transition: transform 0.3s ease;
   
@@ -56,11 +57,11 @@ const LanguageSelectorStyled = styled(LanguageSelector)<{ $hideOnScroll: boolean
   }
 `;
 
-// Theme Toggle position con exactamente las propiedades solicitadas
+// Theme Toggle position
 const ThemeToggleStyled = styled(ThemeToggle)<{ $hideOnScroll: boolean }>`
   position: fixed;
   top: 1.6rem;
-  right: 6.8rem;
+  left: 6.8rem;
   z-index: 100;
   --toggle-size: 14px;
   height: 40px;
@@ -71,6 +72,19 @@ const ThemeToggleStyled = styled(ThemeToggle)<{ $hideOnScroll: boolean }>`
     width: 42px;
     height: 42px;
   }
+  
+  @media (max-width: 768px) {
+    transform: translateY(${props => props.$hideOnScroll ? '-100px' : '0'});
+  }
+`;
+
+// Contact Button position
+const ContactButtonStyled = styled(ContactButton)<{ $hideOnScroll: boolean }>`
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+  transition: transform 0.3s ease;
   
   @media (max-width: 768px) {
     transform: translateY(${props => props.$hideOnScroll ? '-100px' : '0'});
@@ -180,6 +194,7 @@ const AppContent = () => {
       <GrainOverlay />
       <LanguageSelectorStyled initialDelay={500} $hideOnScroll={hideControls} />
       <ThemeToggleStyled initialDelay={500} $hideOnScroll={hideControls} />
+      <ContactButtonStyled initialDelay={500} $hideOnScroll={hideControls} />
       {chatbotVisible && (
         <React.Suspense fallback={null}>
           <ChatbotAssistant initialDelay={500} />

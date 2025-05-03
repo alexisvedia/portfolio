@@ -23,7 +23,7 @@
     "@reduxjs/toolkit": "^2.2.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.0.8",
-    "gsap": "^3.12.7",
+    "gsap": "^3.13.0",
     "i18next": "^23.10.0",
     "i18next-browser-languagedetector": "^7.2.0",
     "lucide-react": "^0.477.0",

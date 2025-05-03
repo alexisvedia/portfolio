@@ -1,0 +1,98 @@
+.star-border-container {
+  display: inline-block;
+  padding: 1px 0;
+  position: relative;
+  border-radius: 100px;
+  overflow: hidden;
+  --animation-enabled: running;
+}
+
+.star-border-container:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Estilo para el botón deshabilitado en modo light */
+.light-mode.star-border-container:disabled .inner-content {
+  background: rgba(240, 240, 240, 0.6);
+  color: #666;
+}
+
+/* Estilo para el botón deshabilitado en modo dark */
+.dark-mode.star-border-container:disabled .inner-content {
+  background: rgba(6, 6, 6, 0.4);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.border-gradient-bottom {
+  position: absolute;
+  width: 300%;
+  height: 50%;
+  opacity: 0.7;
+  bottom: -11px;
+  right: -250%;
+  border-radius: 50%;
+  animation: star-movement-bottom linear infinite alternate;
+  animation-play-state: var(--animation-enabled);
+  z-index: 0;
+}
+
+.border-gradient-top {
+  position: absolute;
+  opacity: 0.7;
+  width: 300%;
+  height: 50%;
+  top: -10px;
+  left: -250%;
+  border-radius: 50%;
+  animation: star-movement-top linear infinite alternate;
+  animation-play-state: var(--animation-enabled);
+  z-index: 0;
+}
+
+.inner-content {
+  position: relative;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 100px;
+  z-index: 1;
+}
+
+/* Ajustes específicos para modo light */
+.light-mode .inner-content {
+  background: rgba(6, 6, 6, 0.6);
+  color: white;
+}
+
+/* Ajustes específicos para modo dark */
+.dark-mode .inner-content {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+@keyframes star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+  }
+} 

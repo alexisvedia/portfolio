@@ -13,7 +13,7 @@ const PageContainer = styled(motion.div)`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */ /* Eliminado para permitir ancho completo */
   overflow-y: auto;
   padding-bottom: 2rem;
 `;

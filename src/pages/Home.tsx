@@ -5,6 +5,7 @@ import HeroSection from '@components/HeroSection/HeroSection';
 import BioSection from '@components/BioSection';
 import ProjectsSection from '@components/ProjectsSection/ProjectsSection';
 import SkillsSection from '@components/SkillsSection/SkillsSection';
+import ContactSection from '@components/ContactSection/ContactSection';
 import Footer from '@components/Footer/Footer';
 
 const HomeContainer = styled.div`
@@ -30,8 +31,11 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded }) => {
         <ContentWrapper>
           <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
           <BioSection />
-          <ProjectsSection />
+        </ContentWrapper>
+        <ProjectsSection />
+        <ContentWrapper>
           <SkillsSection />
+          <ContactSection />
           <Footer />
         </ContentWrapper>
       </HomeContainer>
