@@ -6,15 +6,15 @@
   height: 100%;
 }
 
-/* Estado inicial oculto */
-.toggle-container.hidden {
+/* Estado inicial oculto - Comentamos para evitar conflictos */
+/* .toggle-container.hidden {
   opacity: 0;
 }
 
-/* Estado visible */
-.toggle-container.visible {
+/* Estado visible - Comentamos para evitar conflictos */
+/* .toggle-container.visible {
   opacity: 1;
-}
+} */
 
 .toggle {
   width: 42px;
