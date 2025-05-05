@@ -105,10 +105,13 @@ const ChatWindow = styled.div<{ $isDark: boolean }>`
     bottom: 0;
     right: 0;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     border-radius: 0;
     display: flex;
     flex-direction: column;
+    /* Ajuste para empezar debajo de la barra del navegador */
+    height: calc(100% - env(safe-area-inset-top, 50px));
+    margin-top: env(safe-area-inset-top, 50px);
   }
 `;
 
@@ -128,6 +131,8 @@ const ChatHeader = styled.div<{ $isDark: boolean }>`
     position: sticky;
     top: 0;
     z-index: 1000;
+    /* Hacer header más visible y con botones más grandes */
+    padding: 18px 16px;
   }
 `;
 
@@ -136,6 +141,10 @@ const ChatHeaderActions = styled.div`
   gap: 10px;
   align-items: center;
   position: relative;
+
+  @media (max-width: 768px) {
+    gap: 15px; /* Más espacio entre botones en móvil para mejor usabilidad */
+  }
 `;
 
 const IconButton = styled.button<{ $isDark?: boolean }>`
@@ -154,6 +163,17 @@ const IconButton = styled.button<{ $isDark?: boolean }>`
 
   &:hover {
     background: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+  }
+
+  @media (max-width: 768px) {
+    width: 44px;
+    height: 44px;
+
+    /* Hacer los iconos internos un poco más grandes en móvil */
+    svg,
+    i {
+      transform: scale(1.25);
+    }
   }
 `;
 
