@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
-import { Home, User } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useScrollDirection } from '../../utils/useScrollDirection';
 

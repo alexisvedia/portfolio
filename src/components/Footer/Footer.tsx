@@ -20,13 +20,6 @@ const FooterContent = styled.div`
   align-items: center;
 `;
 
-const Logo = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: 700;
-  margin-bottom: ${({ theme }) => theme.space.lg};
-  color: ${({ theme }) => theme.colors.text};
-`;
-
 const SocialLinks = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space.lg};
