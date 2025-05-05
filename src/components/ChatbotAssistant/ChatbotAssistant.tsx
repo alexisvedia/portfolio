@@ -110,8 +110,11 @@ const ChatWindow = styled.div<{ $isDark: boolean }>`
     display: flex;
     flex-direction: column;
     /* Ajuste para empezar debajo de la barra del navegador */
-    height: calc(100% - env(safe-area-inset-top, 50px));
-    margin-top: env(safe-area-inset-top, 50px);
+    height: 100%;
+    margin-top: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
   }
 `;
 
@@ -128,11 +131,15 @@ const ChatHeader = styled.div<{ $isDark: boolean }>`
   background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
 
   @media (max-width: 768px) {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
     /* Hacer header más visible y con botones más grandes */
     padding: 18px 16px;
+    /* Ajustar a la barra del navegador */
+    margin-top: env(safe-area-inset-top, 0);
   }
 `;
 
@@ -224,6 +231,15 @@ const ChatMessages = styled.div`
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     overflow-y: auto;
+    /* Ajustes para mostrar correctamente con header y footer fijos */
+    padding-top: calc(70px + env(safe-area-inset-top, 0));
+    padding-bottom: 76px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
   }
 `;
 
@@ -291,8 +307,10 @@ const ChatInputArea = styled.div<{ $isDark: boolean }>`
   background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
 
   @media (max-width: 768px) {
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 1000;
   }
 `;
