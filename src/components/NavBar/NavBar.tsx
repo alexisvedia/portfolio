@@ -180,7 +180,6 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
   // Definir los elementos de navegación con sus nombres y URLs
   const items: NavItem[] = [
     { name: 'Home', nameKey: 'navbar.home', url: '/', icon: Home },
-    { name: 'About', nameKey: 'navbar.about', url: '/about', icon: User },
   ];
 
   const [isMobile, setIsMobile] = useState(false);
