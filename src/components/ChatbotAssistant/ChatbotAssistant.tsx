@@ -1,1181 +1,592 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { HiSparkles } from 'react-icons/hi2';
+import { FaTrash } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import { sendMessageToN8N, initializeN8NServer } from '../../services/n8nService';
 import { useTheme } from '../../context/ThemeContext';
 
-// Animations
-const morphToChat = keyframes`
-  0% {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    opacity: 1;
-  }
-  20% {
-    width: 48px;
-    height: 48px;
-    border-radius: 16px;
-    opacity: 1;
-  }
-  100% {
-    width: 320px;
-    height: 400px;
-    border-radius: 16px;
-    opacity: 1;
-  }
-`;
-
-// Mobile-specific animations - simplificar para mejor rendimiento
-const morphToButton = keyframes`
-  0% {
-    width: 320px;
-    height: 400px;
-    border-radius: 16px;
-  }
-  100% {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-  }
-`;
-
+// Animaciones
 const pulse = keyframes`
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.7; }
 `;
 
-const fadeInContent = keyframes`
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+const fadeIn = keyframes`
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 `;
 
-const fadeOutContent = keyframes`
-  0% {
-    opacity: 1;
-  }
-  40% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
+// Estilo glass unificado y reforzado que mantiene consistencia
+const glassStyle = (isDark: boolean) => css`
+  background: ${isDark ? 'rgba(30, 30, 35, 0.5)' : 'rgba(240, 240, 245, 0.5)'};
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
+  box-shadow: 0 8px 32px rgba(0, 0, 0, ${isDark ? '0.3' : '0.1'});
+
+  /* Refuerzo para mantener el efecto consistente */
+  transform: translateZ(0);
+  will-change: backdrop-filter;
 `;
 
-const smoothAppear = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
-const float = keyframes`
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
-`;
-
-const AppOverlay = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 999;
-  pointer-events: ${props => (props.$isOpen && props.$isMobile ? 'auto' : 'none')};
-  opacity: ${props => (props.$isOpen && props.$isMobile ? 0.5 : 0)};
-  background-color: ${props =>
-    props.$isOpen && props.$isMobile ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0)'};
-  transition: ${props => (props.$isMobile ? 'opacity 0.2s linear' : 'none')};
-  will-change: opacity;
-  backdrop-filter: none;
-
-  @media (max-width: 768px) {
-    height: calc(var(--vh, 1vh) * 100);
-  }
-`;
-
-const ChatbotContainer = styled.div<{ $isOpen: boolean; $visible: boolean; $isReady: boolean }>`
+// Componente de botón flotante simple (sin animación pulsante)
+const ChatButton = styled.button<{ $isDark: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
-  z-index: 1000;
-  opacity: 0;
-  transform: translateY(20px);
-  animation: ${props =>
-    props.$visible
-      ? css`
-          ${smoothAppear} 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards
-        `
-      : 'none'};
-  animation-delay: 0s;
-  overscroll-behavior: contain;
-
-  @media (max-width: 768px) {
-    bottom: ${props => (props.$isOpen ? '0' : '30px')};
-    right: ${props => (props.$isOpen ? '0' : '20px')};
-    width: ${props => (props.$isOpen ? '100%' : 'auto')};
-    height: ${props => (props.$isOpen ? '100%' : 'auto')};
-    z-index: 1001;
-    transform: none;
-    will-change: bottom, right, width, height;
-  }
-`;
-
-const FloatingWrapper = styled.div<{ $isReady: boolean; $isOpen: boolean; $isMobile: boolean }>`
-  animation: ${props =>
-    props.$isReady && !props.$isOpen && !props.$isMobile
-      ? css`
-          ${float} 6s ease-in-out infinite
-        `
-      : 'none'};
-  animation-delay: 0.3s;
-
-  @media (max-width: 768px) {
-    width: ${props => (props.$isOpen ? '100%' : 'auto')};
-    height: ${props => (props.$isOpen ? '100%' : 'auto')};
-    position: ${props => (props.$isOpen ? 'absolute' : 'relative')};
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
-`;
-
-const ChatElement = styled.div<{ $isOpen: boolean; $isInitialRender: boolean; $isMobile: boolean }>`
-  width: ${props => (props.$isOpen ? '320px' : '48px')};
-  height: ${props => (props.$isOpen ? '400px' : '48px')};
-  border-radius: ${props => (props.$isOpen ? '16px' : '50%')};
-  background: ${({ theme, $isOpen }) => 
-    $isOpen 
-      ? theme.isDark 
-        ? 'rgba(30, 30, 35, 0.95)' 
-        : 'rgba(240, 240, 245, 0.95)'
-      : theme.isDark 
-        ? 'rgba(255, 255, 255, 0.1)' 
-        : 'rgba(0, 0, 0, 0.05)'
-  };
-  backdrop-filter: none;
-  border: 1px solid ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
-  box-shadow: 0 4px 20px ${({ theme }) => 
-    theme.isDark ? 'rgba(0, 0, 0, 0.2)' : 'rgba(0, 0, 0, 0.1)'};
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  animation: ${props =>
-    !props.$isMobile &&
-    !props.$isInitialRender &&
-    (props.$isOpen
-      ? css`
-          ${morphToChat} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards
-        `
-      : css`
-          ${morphToButton} 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards
-        `)};
-  transform-origin: bottom right;
-  transition: ${props => 
-    props.$isMobile 
-      ? 'none' 
-      : 'all 0.3s ease'
-  };
-  visibility: visible;
-  opacity: 1;
-
-  &:before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    backdrop-filter: none;
-    z-index: -1;
-  }
-
-  @media (max-width: 768px) {
-    width: ${props => (props.$isOpen ? '100%' : '48px')};
-    height: ${props => (props.$isOpen ? 'calc(var(--vh, 1vh) * 100)' : '48px')};
-    border-radius: ${props => (props.$isOpen ? '0' : '50%')};
-    position: ${props => (props.$isOpen ? 'fixed' : 'relative')};
-    top: ${props => (props.$isOpen ? '0' : 'auto')};
-    right: ${props => (props.$isOpen ? '0' : 'auto')};
-    bottom: ${props => (props.$isOpen ? '0' : 'auto')};
-    left: ${props => (props.$isOpen ? '0' : 'auto')};
-    will-change: width, height, border-radius, position;
-    border: ${props => (props.$isOpen ? 'none' : '1px solid rgba(255, 255, 255, 0.1)')};
-  }
-`;
-
-const ChatButton = styled.button<{ $isOpen: boolean; $isMobile: boolean }>`
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.text};
-  cursor: pointer;
   border: none;
-  background: transparent;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: ${props => (props.$isOpen ? '0' : '2')};
-  opacity: ${props => (props.$isOpen ? '0' : '1')};
-  transition: opacity 0.2s ease-out;
-  animation: none;
-  overflow: hidden;
-  touch-action: manipulation;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 9999;
+  pointer-events: auto !important;
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
+
+  ${({ $isDark }) => glassStyle($isDark)}
 
   &:hover {
-    background: ${({ theme }) => 
-      theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
-  }
-
-  &:active {
-    transform: scale(0.95);
-    transition: transform 0.1s ease-in-out;
-  }
-
-  &:before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    border-radius: 50%;
-    background: ${({ theme }) => 
-      theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
-    z-index: -1;
-    opacity: ${props => (props.$isOpen ? '0' : '0.6')};
-    animation: ${pulse} 3s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  @media (max-width: 768px) {
-    width: 48px;
-    height: 48px;
-    /* Área de toque aumentada para mejorar accesibilidad en móviles */
-    &:after {
-      content: '';
-      position: absolute;
-      top: -10px;
-      left: -10px;
-      right: -10px;
-      bottom: -10px;
-    }
+    transform: translateZ(0) scale(1.05);
   }
 `;
 
-const RippleSpan = styled.span<{ $x: number; $y: number; $size: number }>`
-  position: absolute;
-  border-radius: 50%;
-  transform: scale(0);
-  animation: ripple 600ms cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: rgba(255, 255, 255, 0.7);
-  width: ${props => props.$size}px;
-  height: ${props => props.$size}px;
-  top: ${props => props.$y - props.$size / 2}px;
-  left: ${props => props.$x - props.$size / 2}px;
-
-  @keyframes ripple {
-    to {
-      transform: scale(2);
-      opacity: 0;
-    }
-  }
-`;
-
-const IconContainer = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-`;
-
-const ChatContent = styled.div<{ $isOpen: boolean; $isMobile: boolean }>`
+// Ventana de chat con efecto acrylic de Microsoft Fluent Design
+const ChatWindow = styled.div<{ $isDark: boolean }>`
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 350px;
+  height: 500px;
+  border-radius: 16px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100%;
-  opacity: ${props => (props.$isOpen ? '1' : '0')};
-  animation: ${props =>
-    !props.$isMobile && props.$isOpen
-      ? css`
-          ${fadeInContent} 0.4s forwards
-        `
-      : !props.$isMobile
-        ? css`
-            ${fadeOutContent} 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards
-          `
-        : 'none'};
-  z-index: ${props => (props.$isOpen ? '2' : '0')};
-  pointer-events: ${props => (props.$isOpen ? 'auto' : 'none')};
-  transition: ${props => (props.$isMobile ? 'none' : 'none')};
-  transform: scale(1);
+  animation: ${fadeIn} 0.3s ease forwards;
+  z-index: 9999;
+  pointer-events: auto !important;
+
+  /* Efecto Acrylic Material de Microsoft Fluent Design */
+  background: ${({ $isDark }) =>
+    $isDark
+      ? 'linear-gradient(rgba(30, 30, 35, 0.6), rgba(30, 30, 35, 0.6))'
+      : 'linear-gradient(rgba(240, 240, 245, 0.6), rgba(240, 240, 245, 0.6))'};
+  backdrop-filter: blur(30px) saturate(125%);
+  -webkit-backdrop-filter: blur(30px) saturate(125%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, ${({ $isDark }) => ($isDark ? '0.4' : '0.2')});
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+
+  /* Textura granular superpuesta */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.02;
+    pointer-events: none;
+    background-image: url('/images/AcrylicTexture.png');
+    background-repeat: repeat;
+    mix-blend-mode: ${({ $isDark }) => ($isDark ? 'lighten' : 'darken')};
+  }
+
+  transform: translateZ(0);
+  will-change: backdrop-filter;
 
   @media (max-width: 768px) {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    border-radius: 0;
   }
 `;
 
-const ChatHeader = styled.div`
+const ChatHeader = styled.div<{ $isDark: boolean }>`
   padding: 16px;
-  background: ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
-  color: ${props => props.theme.colors.text};
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top-left-radius: 16px;
-  border-top-right-radius: 16px;
-  border-bottom: 1px solid ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
-  backdrop-filter: none;
+  border-bottom: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)')};
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
 
-  .header-buttons {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-    align-items: center;
-    margin-left: auto;
-  }
-
-  @media (max-width: 768px) {
-    border-radius: 0;
-    padding: 20px 16px;
-    padding-top: max(20px, env(safe-area-inset-top, 20px));
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
+  ${({ $isDark }) => glassStyle($isDark)}
+  background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
 `;
 
-const HeaderTitle = styled.h3`
-  margin: 0;
-  font-size: ${props => props.theme.fontSizes.lg};
-  font-weight: 600;
-  font-family: inherit;
+const ChatHeaderActions = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  position: relative;
+`;
+
+const IconButton = styled.button<{ $isDark?: boolean }>`
+  background: transparent;
+  border: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+  position: relative;
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
 
-  svg {
-    display: flex;
-    vertical-align: middle;
+  &:hover {
+    background: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
   }
 `;
 
+// Tooltip como componente separado para evitar ser cortado por overflow:hidden
+const Tooltip = styled.div<{ $isDark?: boolean; $isVisible: boolean }>`
+  position: fixed;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  background: ${({ $isDark }) => ($isDark ? 'rgba(20, 20, 25, 0.9)' : 'rgba(240, 240, 245, 0.9)')};
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+  transition: opacity 0.2s ease;
+  z-index: 10000;
+`;
+
+// Área de mensajes con fondo transparente para mantener efecto acrylic
 const ChatMessages = styled.div`
   flex: 1;
-  padding: 16px;
   overflow-y: auto;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  -webkit-overflow-scrolling: touch; /* Para scroll suave en iOS */
+  overscroll-behavior: contain;
+  background: transparent;
+
+  /* Scrollbar mejorada */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
 
   &::-webkit-scrollbar {
     width: 6px;
   }
 
   &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 3px;
+    background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 20px;
-    flex: 1;
-    height: 100%;
-    max-height: calc(var(--vh, 1vh) * 100 - 130px);
-    padding-bottom: env(safe-area-inset-bottom, 20px);
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
   }
 `;
 
-const dotAnimation = keyframes`
-  0%, 20% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-5px);
-  }
-  60%, 100% {
-    transform: translateY(0);
-  }
-`;
-
-const TypingIndicator = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
+const MessageBubble = styled.div<{ $isUser: boolean; $isDark: boolean }>`
+  max-width: 85%;
   padding: 12px 16px;
-  background: ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
   border-radius: 16px;
-  max-width: 80px;
-  margin: 4px 0;
-  align-self: flex-start;
-
-  span {
-    width: 6px;
-    height: 6px;
-    background: ${props => props.theme.colors.text};
-    border-radius: 50%;
-    display: inline-block;
-    opacity: 0.8;
-
-    &:nth-child(1) {
-      animation: ${dotAnimation} 1.4s infinite 0s;
-    }
-    &:nth-child(2) {
-      animation: ${dotAnimation} 1.4s infinite 0.2s;
-    }
-    &:nth-child(3) {
-      animation: ${dotAnimation} 1.4s infinite 0.4s;
-    }
-  }
-`;
-
-const MessageBubble = styled.div<{
-  $isUser?: boolean;
-  $index: number;
-  $shouldAnimate: boolean;
-  $isMobile: boolean;
-}>`
-  max-width: 80%;
-  padding: 10px 14px;
-  border-radius: 16px;
-  background: ${props =>
-    props.$isUser
-      ? `linear-gradient(135deg, ${props.theme.colors.primary}, ${props.theme.colors.accent})`
-      : props.theme.isDark 
-        ? 'rgba(255, 255, 255, 0.1)' 
-        : 'rgba(0, 0, 0, 0.05)'};
-  color: ${props => 
-    props.$isUser 
-      ? "white" 
-      : props.theme.colors.text};
   align-self: ${props => (props.$isUser ? 'flex-end' : 'flex-start')};
-  font-size: ${props => props.theme.fontSizes.sm};
-  line-height: 1.5;
-  box-shadow: 0 2px 10px ${({ theme }) => 
-    theme.isDark ? 'rgba(0, 0, 0, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
-  opacity: 1;
-  animation: none;
-  animation-delay: 0s;
-  transform-origin: ${props => (props.$isUser ? 'bottom right' : 'bottom left')};
 
-  @media (max-width: 768px) {
-    max-width: 85%;
-    padding: 12px 16px;
-    font-size: calc(${props => props.theme.fontSizes.sm} + 1px);
+  background: ${({ $isUser, $isDark }) =>
+    $isUser
+      ? $isDark
+        ? 'rgba(50, 50, 60, 0.7)'
+        : 'rgba(50, 50, 60, 0.2)'
+      : $isDark
+        ? 'rgba(40, 40, 45, 0.7)'
+        : 'rgba(230, 230, 240, 0.7)'};
+
+  border: 1px solid
+    ${({ $isUser, $isDark }) =>
+      $isUser
+        ? $isDark
+          ? 'rgba(255, 255, 255, 0.1)'
+          : 'rgba(0, 0, 0, 0.05)'
+        : $isDark
+          ? 'rgba(255, 255, 255, 0.05)'
+          : 'rgba(0, 0, 0, 0.03)'};
+
+  /* Aplicamos backdrop-filter solo a las burbujas */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: translateZ(0);
+
+  /* Estilos de markdown */
+  p,
+  ul,
+  ol,
+  li {
+    margin: 0.5em 0;
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  code {
+    background: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.07)')};
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
   }
 `;
 
-const ChatInputContainer = styled.div`
-  padding: 12px 16px;
-  border-top: 1px solid ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
+const ChatInputArea = styled.div<{ $isDark: boolean }>`
+  padding: 16px;
   display: flex;
   gap: 10px;
-  background: ${({ theme }) => 
-    theme.isDark ? 'rgba(20, 20, 25, 0.3)' : 'rgba(240, 240, 245, 0.9)'};
-  backdrop-filter: none;
+  border-top: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)')};
 
-  @media (max-width: 768px) {
-    padding: 16px 20px;
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-    position: sticky;
-    bottom: 0;
-    width: 100%;
-    z-index: 10;
-    backdrop-filter: none;
-  }
+  ${({ $isDark }) => glassStyle($isDark)}
+  background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
 `;
 
-const ChatInput = styled.input`
+const ChatInput = styled.input<{ $isDark: boolean }>`
   flex: 1;
   padding: 12px 16px;
-  border-radius: 20px;
+  border-radius: 24px;
   border: none;
-  background: ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
-  color: ${props => props.theme.colors.text};
-  font-size: ${props => props.theme.fontSizes.sm};
   outline: none;
-  transition: all 0.2s;
+  font-size: 14px;
+
+  background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(250, 250, 255, 0.7)')};
+  color: ${({ theme }) => theme.colors.text};
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   &:focus {
-    background: ${({ theme }) => 
-      theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
-    box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.3);
-  }
-
-  &::placeholder {
-    color: ${({ theme }) => 
-      theme.isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.4)'};
+    box-shadow: 0 0 0 2px
+      ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
   }
 
   @media (max-width: 768px) {
-    padding: 14px 18px;
-    font-size: calc(${props => props.theme.fontSizes.sm} + 1px);
-    min-height: 48px;
+    font-size: 16px;
   }
 `;
 
-const SendButton = styled.button`
-  width: 36px;
-  height: 36px;
+const SendButton = styled.button<{ $isDark: boolean }>`
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
-  background: ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
-  backdrop-filter: none;
-  color: ${props => props.theme.colors.text};
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'};
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
+
+  background: ${({ $isDark }) => ($isDark ? 'rgba(50, 50, 55, 0.8)' : 'rgba(50, 50, 60, 0.2)')};
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   &:hover {
-    transform: scale(1.05);
-    background: ${({ theme }) => 
-      theme.isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'};
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  @media (max-width: 768px) {
-    width: 44px;
-    height: 44px;
-    backdrop-filter: none;
+    background: ${({ $isDark }) => ($isDark ? 'rgba(60, 60, 65, 0.9)' : 'rgba(60, 60, 70, 0.3)')};
   }
 `;
 
-// Memoizar el componente AIStarsIcon para reducir re-renderizados
-const AIStarsIcon = React.memo(({ className }: { className?: string }) => {
-  const { themeMode } = useTheme();
-  return (
-    <span
-      className={className}
-      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
-    >
-      <HiSparkles size={22} color={themeMode === 'dark' ? "white" : "black"} />
-    </span>
-  );
-});
+// Animación para los puntos de carga
+const LoadingDot = styled.div<{ $delay: number }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+  animation: ${pulse} 1s infinite;
+  animation-delay: ${props => props.$delay}s;
+`;
 
-// Sample messages for demo
-const initialMessages = [
-  { text: '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?', isUser: false },
-];
-
-interface ChatbotAssistantProps {
-  initialDelay?: number;
-}
-
-const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({ initialDelay = 500 }) => {
+// Componente principal
+const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 500 }) => {
+  const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState(initialMessages);
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const { themeMode } = useTheme();
+  const isDark = themeMode === 'dark';
+
+  // Estado para los tooltips
+  const [tooltipText, setTooltipText] = useState('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  // Mensaje de bienvenida en un ref para comparar cambios
+  const welcomeMessageKey = '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?';
+
+  // Inicializar los mensajes con el texto traducido
+  const [messages, setMessages] = useState(() => [{ text: t(welcomeMessageKey), isUser: false }]);
+
   const [inputValue, setInputValue] = useState('');
-  const [visible, setVisible] = useState(false);
-  const [shouldAnimateMessages, setShouldAnimateMessages] = useState(false);
-  const [isInitialRender, setIsInitialRender] = useState(true);
-  const [isReady, setIsReady] = useState(false);
-  const initRetryCountRef = useRef(0);
-  const [ripples, setRipples] = useState<
-    Array<{ x: number; y: number; size: number; key: number }>
-  >([]);
   const [isTyping, setIsTyping] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatbotRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { t } = useTranslation();
+  const chatWindowRef = useRef<HTMLDivElement>(null);
+  const prevLangRef = useRef(currentLanguage);
 
-  // Añadir efecto para establecer la variable vh para viewport en móviles
+  // Actualizar UI cuando cambia el idioma
   useEffect(() => {
-    // Crear una variable CSS para la altura real de la ventana en dispositivos móviles
-    const setVh = () => {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-    };
+    // Solo ejecutar si realmente cambió el idioma
+    if (prevLangRef.current !== currentLanguage) {
+      // Guardar el nuevo idioma como referencia
+      prevLangRef.current = currentLanguage;
 
-    // Establecer el valor inicial
-    setVh();
-
-    // Actualizar en cambios de orientación o redimensionamiento
-    window.addEventListener('resize', setVh);
-    window.addEventListener('orientationchange', setVh);
-
-    return () => {
-      window.removeEventListener('resize', setVh);
-      window.removeEventListener('orientationchange', setVh);
-    };
-  }, []);
-
-  const handleClearChat = () => {
-    setMessages([
-      { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
-    ]);
-  };
-
-  // Verificar si estamos en un dispositivo móvil - memoizado para evitar recálculos
-  const isMobile = React.useMemo(() => 
-    typeof window !== 'undefined' && window.innerWidth <= 768, 
-    []
-  );
-
-  // Optimizar inicialización para no bloquear el hilo principal
-  const initializeService = async () => {
-    if (!isReady) {
-      try {
-        // Usamos setTimeout para no bloquear el hilo principal
-        await new Promise(resolve => setTimeout(resolve, 0));
-        const isInitialized = await initializeN8NServer();
-        if (isInitialized) {
-          // Solo después de que el servicio esté listo, iniciamos la animación del chat
-          requestAnimationFrame(() => {
-            setVisible(true);
-            setTimeout(() => {
-              setIsReady(true);
-            }, 300);
-          });
-        } else {
-          // Si la inicialización falla y no hemos excedido el límite de intentos, reintentamos
-          if (initRetryCountRef.current < 2) { // Reducir número de reintentos
-            initRetryCountRef.current += 1;
-            setTimeout(initializeService, 3000); // Aumentar intervalo para reducir carga
-          }
+      // Actualizar el primer mensaje si es un mensaje del sistema
+      setMessages(prev => {
+        const newMessages = [...prev];
+        if (newMessages.length > 0 && !newMessages[0].isUser) {
+          newMessages[0] = {
+            ...newMessages[0],
+            text: t(welcomeMessageKey),
+          };
         }
-      } catch (error) {
-        console.error('Error al inicializar el servicio:', error);
-        if (initRetryCountRef.current < 2) {
-          initRetryCountRef.current += 1;
-          setTimeout(initializeService, 3000);
-        }
-      }
-    }
-  };
-
-  // Optimizar el efecto useEffect para la inicialización
-  useEffect(() => {
-    // Retrasar inicialización en dispositivos móviles para mejorar LCP
-    const delay = typeof window !== 'undefined' && window.innerWidth <= 768 ? 1000 : initialDelay;
-    
-    const initTimer = setTimeout(() => {
-      initializeService();
-    }, delay);
-    
-    return () => clearTimeout(initTimer);
-  }, []);
-
-  // Auto scroll to bottom when new messages are added
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Modificar el efecto para el manejo del scroll
-  useEffect(() => {
-    if (isMobile && isOpen) {
-      // Guardar la posición actual del scroll
-      const scrollY = window.scrollY;
-      
-      // Aplicar estilos para prevenir scroll
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.overscrollBehavior = 'none';
-      
-      // Establecer una clase para manejar iOS
-      document.documentElement.classList.add('chat-open');
-      
-      // Ajustar altura para dispositivos con notch
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
-      
-      // Manejar iOS focus en input
-      if (inputRef.current) {
-        const handleKeyboardShow = () => {
-          // Esperar a que el teclado aparezca
-          setTimeout(() => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-          }, 300);
-        };
-        
-        inputRef.current.addEventListener('focus', handleKeyboardShow);
-        
-        return () => {
-          inputRef.current?.removeEventListener('focus', handleKeyboardShow);
-        };
-      }
-    } else {
-      // Restaurar el scroll
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      document.body.style.overscrollBehavior = '';
-      document.documentElement.classList.remove('chat-open');
-      
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-      }
-    }
-
-    return () => {
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      document.body.style.overscrollBehavior = '';
-      document.documentElement.classList.remove('chat-open');
-    };
-  }, [isOpen, isMobile]);
-
-  // Añadir un efecto para manejar cambios de orientación
-  useEffect(() => {
-    const handleOrientationChange = () => {
-      if (isOpen && isMobile) {
-        // Ajustar altura en cambios de orientación
-        setTimeout(() => {
-          const vh = window.innerHeight * 0.01;
-          document.documentElement.style.setProperty('--vh', `${vh}px`);
-          // Asegurar scroll al final
-          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
-      }
-    };
-    
-    window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
-    
-    return () => {
-      window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleOrientationChange);
-    };
-  }, [isOpen, isMobile]);
-
-  // Focus input when chat opens
-  useEffect(() => {
-    if (isOpen && inputRef.current) {
-      setTimeout(
-        () => {
-          inputRef.current?.focus();
-        },
-        isMobile ? 100 : 400
-      ); // Tiempo más rápido para móviles
-    }
-  }, [isOpen, isMobile]);
-
-  // Trigger message animation when chat opens
-  useEffect(() => {
-    if (isOpen) {
-      // Immediate animation for messages
-      setShouldAnimateMessages(true);
-    } else {
-      setShouldAnimateMessages(false);
-    }
-
-    // After first toggle, no longer initial render
-    if (isInitialRender && isOpen) {
-      setIsInitialRender(false);
-    }
-  }, [isOpen, isInitialRender]);
-
-  const toggleChat = () => {
-    // Only allow toggle when component is fully ready
-    if (!isReady) return;
-
-    // Sin usar requestAnimationFrame en móvil para que sea instantáneo
-    if (isMobile) {
-      if (isInitialRender) {
-        setIsInitialRender(false);
-        setIsOpen(true);
-      } else {
-        setIsOpen(!isOpen);
-      }
-
-      // Si estamos abriendo y no hay mensajes, añadir mensaje de bienvenida
-      if (!isOpen && messages.length === 0) {
-        setMessages([
-          { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
-        ]);
-      }
-    } else {
-      // Mantener animación en desktop
-      requestAnimationFrame(() => {
-        if (isInitialRender) {
-          setIsInitialRender(false);
-          setIsOpen(true);
-        } else {
-          setIsOpen(!isOpen);
-        }
-
-        if (!isOpen && messages.length === 0) {
-          setMessages([
-            { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
-          ]);
-        }
+        return newMessages;
       });
     }
-  };
+  }, [currentLanguage, t, welcomeMessageKey]);
 
-  // MOVIDO: Después de la definición de toggleChat
-  const handleClickOutside = React.useCallback((event: MouseEvent) => {
-    try {
-      if (
-        chatbotRef.current &&
-        !chatbotRef.current.contains(event.target as Node) &&
-        isOpen
-      ) {
-        // Usar el toggleChat en lugar de setIsOpen para cerrar correctamente
-        toggleChat();
-      }
-    } catch (error) {
-      console.error("Error en handleClickOutside:", error);
-    }
-  }, [isOpen, chatbotRef, toggleChat]);
-
-  // Optimizar manejo de click outside
+  // Inicializar componente con retraso
   useEffect(() => {
-    // Siempre agregar el event listener cuando el chat está abierto, independientemente del dispositivo
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+      initializeN8NServer(); // Precalentar el servicio
+    }, initialDelay);
+
+    return () => clearTimeout(timer);
+  }, [initialDelay]);
+
+  // Cerrar el chat cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isOpen && chatWindowRef.current && !chatWindowRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    // Cerrar el chat cuando se presiona ESC
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isOpen && e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
+      document.addEventListener('keydown', handleKeyDown);
     }
-  }, [isOpen, handleClickOutside]);
 
-  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent multiple clicks
-    if (!isReady) return;
-    
-    // Debounce click handling to improve performance
-    e.preventDefault();
-    e.stopPropagation(); // Prevenir propagación del evento
-    
-    try {
-      // Call toggle function directly without ripple calculation on low-end devices
-      if (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4) {
-        toggleChat();
-        return;
-      }
-      
-      // Guardar las coordenadas inmediatamente para evitar errores si el botón desaparece
-      const button = e.currentTarget;
-      if (!button) {
-        toggleChat();
-        return;
-      }
-      
-      const rect = button.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const size = Math.max(rect.width, rect.height) * 1.5;
-      
-      // Use requestAnimationFrame para la UI
-      requestAnimationFrame(() => {
-        // Create new ripple with improved sizing
-        const ripple = {
-          x,
-          y,
-          size,
-          key: Date.now(),
-        };
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
 
-        // Add new ripple to state - limit to one ripple for mobile
-        setRipples([ripple]);
-
-        // Remove ripple after animation completes
-        setTimeout(() => {
-          setRipples([]);
-        }, 600); // Match the animation duration
-      });
-
-      // Call toggle function immediately for better responsiveness
-      toggleChat();
-    } catch (error) {
-      console.error("Error en handleButtonClick:", error);
-      // En caso de error, al menos asegurar que el toggle funcione
-      toggleChat();
+  // Scroll automático al final cuando hay nuevos mensajes o se abre el chat
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, [messages, isOpen]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
+  // Focus en el input cuando se abre
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 300);
+    }
+  }, [isOpen]);
 
+  // Limpiar el chat (usando el idioma actual)
+  const handleClearChat = useCallback(() => {
+    setMessages([{ text: t(welcomeMessageKey), isUser: false }]);
+  }, [t, welcomeMessageKey]);
+
+  // Manejo de mensajes
   const handleSendMessage = async () => {
-    if (inputValue.trim()) {
-      const userMessage = { text: inputValue, isUser: true };
-      setInputValue('');
-      inputRef.current?.focus();
-      setShouldAnimateMessages(true);
-      setMessages([...messages, userMessage]);
-      setIsTyping(true);
+    if (!inputValue.trim()) return;
 
-      try {
-        const response = await sendMessageToN8N(inputValue);
-        setIsTyping(false);
-        setMessages(prev => [...prev, response]);
-      } catch (error) {
-        console.error('Error al enviar mensaje:', error);
-        setIsTyping(false);
+    // Agregar mensaje del usuario
+    setMessages(prev => [...prev, { text: inputValue, isUser: true }]);
+    setInputValue('');
+    setIsTyping(true);
 
-        // Mensaje personalizado basado en el tipo de error
-        let errorMessage =
-          'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo más tarde.';
+    try {
+      // Enviar mensaje al servicio
+      const response = await sendMessageToN8N(inputValue);
+      setIsTyping(false);
+      setMessages(prev => [...prev, response]);
+    } catch (error) {
+      console.error('Error al enviar mensaje:', error);
+      setIsTyping(false);
 
-        // Si es un error específico de arranque en frío o conexión
-        if (error instanceof Error) {
-          if (
-            error.message.includes('iniciando') ||
-            error.message.includes('después de varios intentos') ||
-            error.message.includes('failed to fetch') ||
-            error.message.includes('network') ||
-            error.message.includes('connection')
-          ) {
-            errorMessage =
-              'Parece que el servicio está iniciando o hay problemas de conexión. Por favor, espera unos segundos y vuelve a intentarlo.';
-          }
-        }
-
-        setMessages(prev => [
-          ...prev,
-          {
-            text: errorMessage,
-            isUser: false,
-          },
-        ]);
-      }
+      setMessages(prev => [
+        ...prev,
+        {
+          text: 'Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.',
+          isUser: false,
+        },
+      ]);
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
+  // Manejadores de tooltip
+  const handleShowTooltip = (text: string, e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipText(text);
+    setTooltipPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10,
+    });
+    setTooltipVisible(true);
   };
 
-  // Optimizar renderizado usando React.memo para componentes internos
-  const MessageBubbleContent = React.memo(({ message }: { message: { text: string; isUser: boolean } }) => (
-    <ReactMarkdown>{message.text}</ReactMarkdown>
-  ));
+  const handleHideTooltip = () => {
+    setTooltipVisible(false);
+  };
 
-  // Return nothing until we're ready to start the animation
-  if (!visible && !isReady) return null;
+  // Cerrar el chat y ocultar cualquier tooltip visible
+  const handleCloseChat = () => {
+    setIsOpen(false);
+    setTooltipVisible(false); // Asegurarse de que no quede ningún tooltip visible
+  };
+
+  if (!isVisible) return null;
 
   return (
     <>
-      <AppOverlay $isOpen={isOpen} $isMobile={isMobile} />
-      <ChatbotContainer 
-        $isOpen={isOpen} 
-        ref={chatbotRef} 
-        $visible={visible} 
-        $isReady={isReady}
+      {/* Tooltip global */}
+      <Tooltip
+        $isDark={isDark}
+        $isVisible={tooltipVisible}
+        style={{
+          left: `${tooltipPosition.x}px`,
+          top: `${tooltipPosition.y}px`,
+          transform: 'translate(-50%, -100%)',
+        }}
       >
-        <FloatingWrapper $isReady={isReady} $isOpen={isOpen} $isMobile={isMobile}>
-          <ChatElement $isOpen={isOpen} $isInitialRender={isInitialRender} $isMobile={isMobile}>
-            <ChatButton onClick={handleButtonClick} $isOpen={isOpen} $isMobile={isMobile}>
-              <IconContainer>
-                <AIStarsIcon />
-              </IconContainer>
-              {ripples.map(ripple => (
-                <RippleSpan key={ripple.key} $x={ripple.x} $y={ripple.y} $size={ripple.size} />
-              ))}
-            </ChatButton>
+        {tooltipText}
+      </Tooltip>
 
-            {/* Solo renderizar el contenido cuando esté abierto para optimizar rendimiento */}
-            {isOpen && (
-              <ChatContent $isOpen={isOpen} $isMobile={isMobile}>
-                <ChatHeader>
-                  <HeaderTitle>
-                    <AIStarsIcon className="header-icon" />
-                    {t('AI Portfolio Assistant')}
-                  </HeaderTitle>
-                  <div className="header-buttons">
-                    <HeaderButton onClick={handleClearChat} title="Limpiar chat">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M3 6h18" />
-                        <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                        <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                      </svg>
-                    </HeaderButton>
-                    <HeaderButton onClick={toggleChat} title="Cerrar chat">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M18 6L6 18" />
-                        <path d="M6 6l12 12" />
-                      </svg>
-                    </HeaderButton>
-                  </div>
-                </ChatHeader>
+      {!isOpen ? (
+        <ChatButton $isDark={isDark} onClick={() => setIsOpen(true)}>
+          <HiSparkles size={24} />
+        </ChatButton>
+      ) : (
+        <ChatWindow $isDark={isDark} ref={chatWindowRef}>
+          <ChatHeader $isDark={isDark}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <HiSparkles size={20} />
+              <span style={{ fontWeight: 600 }}>{t('AI Portfolio Assistant')}</span>
+            </div>
+            <ChatHeaderActions>
+              {/* Botón de limpiar chat */}
+              <IconButton
+                onClick={handleClearChat}
+                $isDark={isDark}
+                aria-label={t('Limpiar chat')}
+                onMouseEnter={e => handleShowTooltip(t('Limpiar chat'), e)}
+                onMouseLeave={handleHideTooltip}
+              >
+                <FaTrash size={16} />
+              </IconButton>
 
-                <ChatMessages>
-                  {messages.map((message, index) => (
-                    <MessageBubble
-                      key={index}
-                      $isUser={message.isUser}
-                      $index={index}
-                      $shouldAnimate={shouldAnimateMessages}
-                      $isMobile={isMobile}
-                    >
-                      <MessageBubbleContent message={message} />
-                    </MessageBubble>
+              {/* Botón de cerrar */}
+              <IconButton
+                onClick={handleCloseChat}
+                $isDark={isDark}
+                aria-label={t('Cerrar chat')}
+                onMouseEnter={e => handleShowTooltip(t('Cerrar chat'), e)}
+                onMouseLeave={handleHideTooltip}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6L6 18"></path>
+                  <path d="M6 6L18 18"></path>
+                </svg>
+              </IconButton>
+            </ChatHeaderActions>
+          </ChatHeader>
+
+          <ChatMessages>
+            {messages.map((message, index) => (
+              <MessageBubble key={index} $isUser={message.isUser} $isDark={isDark}>
+                {message.isUser ? message.text : <ReactMarkdown>{message.text}</ReactMarkdown>}
+              </MessageBubble>
+            ))}
+
+            {isTyping && (
+              <MessageBubble $isUser={false} $isDark={isDark}>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {[0, 0.2, 0.4].map((delay, i) => (
+                    <LoadingDot key={i} $delay={delay} />
                   ))}
-                  {isTyping && (
-                    <TypingIndicator>
-                      <span></span>
-                      <span></span>
-                      <span></span>
-                    </TypingIndicator>
-                  )}
-                  <div ref={messagesEndRef} />
-                </ChatMessages>
-
-                <ChatInputContainer>
-                  <ChatInput
-                    type="text"
-                    placeholder={t('Escribe un mensaje...')}
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onKeyPress={handleKeyPress}
-                    ref={inputRef}
-                  />
-                  <SendButton onClick={handleSendMessage}>
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                    >
-                      <path
-                        d="M22 2L11 13"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M22 2L15 22L11 13L2 9L22 2Z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </SendButton>
-                </ChatInputContainer>
-              </ChatContent>
+                </div>
+              </MessageBubble>
             )}
-          </ChatElement>
-        </FloatingWrapper>
-      </ChatbotContainer>
+
+            <div ref={messagesEndRef} />
+          </ChatMessages>
+
+          <ChatInputArea $isDark={isDark}>
+            <ChatInput
+              type="text"
+              placeholder={t('Escribe un mensaje...')}
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
+              ref={inputRef}
+              $isDark={isDark}
+            />
+            <SendButton $isDark={isDark} onClick={handleSendMessage}>
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+              </svg>
+            </SendButton>
+          </ChatInputArea>
+        </ChatWindow>
+      )}
     </>
   );
 };
 
-// Aplicar memo al componente completo para evitar renderizados innecesarios
-export default React.memo(ChatbotAssistant);
-
-const HeaderButton = styled.button`
-  background: transparent;
-  border: none;
-  color: ${props => props.theme.colors.text};
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background: ${({ theme }) => 
-      theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-
-  svg {
-    width: 16px;
-    height: 16px;
-  }
-
-  @media (max-width: 768px) {
-    padding: 10px;
-    /* Aumentar área táctil en móviles */
-    min-width: 44px;
-    min-height: 44px;
-  }
-`;
+export default ChatbotAssistant;

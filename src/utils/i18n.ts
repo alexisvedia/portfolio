@@ -15,6 +15,15 @@ const resources = {
         'I create beautiful and functional digital experiences with React and TypeScript, focusing on usability and modern design.',
       viewProjects: 'View Projects',
       contactMe: 'Contact me',
+
+      // Chat translations
+      'AI Portfolio Assistant': 'AI Portfolio Assistant',
+      '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?':
+        "Hello! I'm your AI Portfolio Assistant. How can I help you today?",
+      'Escribe un mensaje...': 'Type a message...',
+      'Limpiar chat': 'Clean chat',
+      'Cerrar chat': 'Close chat',
+
       // Navigation
       home: 'Home',
       projects: 'Projects',
@@ -105,6 +114,15 @@ const resources = {
         'Creo experiencias digitales hermosas y funcionales con React y TypeScript, enfocándome en la usabilidad y el diseño moderno.',
       viewProjects: 'Ver Proyectos',
       contactMe: 'Contáctame',
+
+      // Chat translations
+      'AI Portfolio Assistant': 'AI Portfolio Assistant',
+      '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?':
+        '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?',
+      'Escribe un mensaje...': 'Escribe un mensaje...',
+      'Limpiar chat': 'Limpiar chat',
+      'Cerrar chat': 'Cerrar chat',
+
       // Navigation
       home: 'Inicio',
       projects: 'Proyectos',

@@ -5,11 +5,13 @@ import './toggle-styles.css';
 interface ThemeToggleProps {
   className?: string;
   initialDelay?: number;
+  $hideOnScroll?: boolean;
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ 
   className, 
-  initialDelay = 500
+  initialDelay = 500,
+  $hideOnScroll = false
 }) => {
   const { themeMode, toggleTheme } = useTheme();
   const isDark = themeMode === 'dark';
@@ -33,7 +35,13 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   };
   
   return (
-    <div className={`toggle-container ${className || ''} ${isVisible ? 'visible' : 'hidden'}`}>
+    <div className={`toggle-container ${className || ''} ${isVisible ? 'visible' : 'hidden'}`}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: `translateY(${isVisible ? 0 : -10}px)${$hideOnScroll ? ' translateY(-100px)' : ''}`,
+        transition: 'opacity 0.6s ease-in-out, transform 0.3s ease'
+      }}
+    >
       <label htmlFor="switch" className="toggle" style={toggleStyle}>
         <input 
           type="checkbox" 

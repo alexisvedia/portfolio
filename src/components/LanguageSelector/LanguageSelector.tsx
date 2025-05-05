@@ -9,6 +9,7 @@ const LANGUAGE_CHANGE_COOLDOWN = 3000;
 interface LanguageSelectorProps {
   className?: string;
   initialDelay?: number; // Retraso inicial para la aparición en ms
+  $hideOnScroll?: boolean; // Añadimos esta propiedad para controlar la ocultación
 }
 
 // Animación de carga
@@ -93,7 +94,8 @@ const LanguageIcon = styled(MdOutlineLanguage)<{ $changing?: boolean }>`
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   className,
-  initialDelay = 1300, // Por defecto, aparece 300ms después de la navbar (que aparece a los 1000ms)
+  initialDelay = 500,
+  $hideOnScroll = false,
 }) => {
   const { i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language?.startsWith('es') ? 'es' : 'en');
@@ -152,7 +154,15 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <LanguageSelectorContainer className={className} $visible={isVisible}>
+    <LanguageSelectorContainer 
+      className={className} 
+      $visible={isVisible}
+      style={{
+        opacity: isVisible ? 1 : 0,
+        transform: `translateY(${isVisible ? 0 : -10}px)${$hideOnScroll ? ' translateY(-100px)' : ''}`,
+        transition: 'opacity 0.6s ease-in-out, transform 0.3s ease'
+      }}
+    >
       <LanguageButton onClick={toggleLanguage} $changing={isDisabled}>
         <LanguageIcon $changing={isDisabled} />
         {currentLang === 'es' ? 'ES' : 'EN'}

@@ -7,6 +7,7 @@ import { ArrowUp } from 'lucide-react';
 interface ContactButtonProps {
   className?: string;
   initialDelay?: number;
+  $hideOnScroll?: boolean;
 }
 
 const ButtonWrapper = styled.div`
@@ -23,7 +24,7 @@ const ButtonContent = styled.div`
   justify-content: center;
 `;
 
-const ContactButton: React.FC<ContactButtonProps> = ({ className, initialDelay = 1000 }) => {
+const ContactButton: React.FC<ContactButtonProps> = ({ className, initialDelay = 500, $hideOnScroll = false }) => {
   const { t, i18n } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [isAtContact, setIsAtContact] = useState(false);
@@ -98,8 +99,8 @@ const ContactButton: React.FC<ContactButtonProps> = ({ className, initialDelay =
       className={className} 
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: `translateY(${isVisible ? 0 : -10}px)`,
-        transition: 'opacity 0.6s ease-in-out, transform 0.6s ease-in-out'
+        transform: `translateY(${isVisible ? 0 : -10}px)${$hideOnScroll ? ' translateY(-100px)' : ''}`,
+        transition: 'opacity 0.6s ease-in-out, transform 0.3s ease'
       }}
     >
       <StarBorder 
