@@ -107,6 +107,8 @@ const ChatWindow = styled.div<{ $isDark: boolean }>`
     width: 100%;
     height: 100vh;
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
   }
 `;
 
@@ -121,6 +123,12 @@ const ChatHeader = styled.div<{ $isDark: boolean }>`
 
   ${({ $isDark }) => glassStyle($isDark)}
   background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
+
+  @media (max-width: 768px) {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
 `;
 
 const ChatHeaderActions = styled.div`
@@ -191,6 +199,12 @@ const ChatMessages = styled.div`
     background-color: rgba(155, 155, 155, 0.5);
     border-radius: 20px;
   }
+
+  @media (max-width: 768px) {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
 `;
 
 const MessageBubble = styled.div<{ $isUser: boolean; $isDark: boolean }>`
@@ -255,6 +269,12 @@ const ChatInputArea = styled.div<{ $isDark: boolean }>`
 
   ${({ $isDark }) => glassStyle($isDark)}
   background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
+
+  @media (max-width: 768px) {
+    position: sticky;
+    bottom: 0;
+    z-index: 1000;
+  }
 `;
 
 const ChatInput = styled.input<{ $isDark: boolean }>`
@@ -472,6 +492,31 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
     setTooltipVisible(false); // Asegurarse de que no quede ningún tooltip visible
   };
 
+  // Prevenir scroll en el body cuando el chat está abierto en móvil
+  useEffect(() => {
+    const preventBodyScroll = () => {
+      if (isOpen && window.innerWidth <= 768) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
+    };
+
+    preventBodyScroll();
+    window.addEventListener('resize', preventBodyScroll);
+
+    return () => {
+      window.removeEventListener('resize', preventBodyScroll);
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Manejar clic en el área de mensajes para evitar cierre accidental
+  const handleMessagesClick = (e: React.MouseEvent) => {
+    // Prevenir la propagación del evento para evitar que active handleClickOutside
+    e.stopPropagation();
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -537,7 +582,7 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
             </ChatHeaderActions>
           </ChatHeader>
 
-          <ChatMessages>
+          <ChatMessages onClick={handleMessagesClick}>
             {messages.map((message, index) => (
               <MessageBubble key={index} $isUser={message.isUser} $isDark={isDark}>
                 {message.isUser ? message.text : <ReactMarkdown>{message.text}</ReactMarkdown>}
