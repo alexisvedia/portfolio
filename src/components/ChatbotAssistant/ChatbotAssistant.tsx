@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { HiSparkles } from 'react-icons/hi2';
+import { FaTrash } from 'react-icons/fa';
 import ReactMarkdown from 'react-markdown';
 import { sendMessageToN8N, initializeN8NServer } from '../../services/n8nService';
 import { useTheme } from '../../context/ThemeContext';
@@ -31,13 +32,13 @@ const glassStyle = (isDark: boolean) => css`
   will-change: backdrop-filter;
 `;
 
-// Componente de botón flotante simple
+// Componente de botón flotante simple (sin animación pulsante)
 const ChatButton = styled.button<{ $isDark: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -47,29 +48,16 @@ const ChatButton = styled.button<{ $isDark: boolean }>`
   transition: all 0.3s ease;
   z-index: 9999;
   pointer-events: auto !important;
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
 
   ${({ $isDark }) => glassStyle($isDark)}
 
   &:hover {
     transform: translateZ(0) scale(1.05);
   }
-
-  /* Efecto de pulso */
-  &::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: -5px;
-    right: -5px;
-    bottom: -5px;
-    border-radius: 50%;
-    z-index: -1;
-    background: ${({ $isDark }) => ($isDark ? 'rgba(200, 200, 200, 0.08)' : 'rgba(0, 0, 0, 0.05)')};
-    animation: ${pulse} 2s infinite;
-  }
 `;
 
-// Ventana de chat con efecto glass garantizado
+// Ventana de chat con efecto acrylic de Microsoft Fluent Design
 const ChatWindow = styled.div<{ $isDark: boolean }>`
   position: fixed;
   bottom: 20px;
@@ -84,7 +72,34 @@ const ChatWindow = styled.div<{ $isDark: boolean }>`
   z-index: 9999;
   pointer-events: auto !important;
 
-  ${({ $isDark }) => glassStyle($isDark)}
+  /* Efecto Acrylic Material de Microsoft Fluent Design */
+  background: ${({ $isDark }) =>
+    $isDark
+      ? 'linear-gradient(rgba(30, 30, 35, 0.6), rgba(30, 30, 35, 0.6))'
+      : 'linear-gradient(rgba(240, 240, 245, 0.6), rgba(240, 240, 245, 0.6))'};
+  backdrop-filter: blur(30px) saturate(125%);
+  -webkit-backdrop-filter: blur(30px) saturate(125%);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, ${({ $isDark }) => ($isDark ? '0.4' : '0.2')});
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+
+  /* Textura granular superpuesta */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.02;
+    pointer-events: none;
+    background-image: url('/images/AcrylicTexture.png');
+    background-repeat: repeat;
+    mix-blend-mode: ${({ $isDark }) => ($isDark ? 'lighten' : 'darken')};
+  }
+
+  transform: translateZ(0);
+  will-change: backdrop-filter;
 
   @media (max-width: 768px) {
     bottom: 0;
@@ -102,11 +117,54 @@ const ChatHeader = styled.div<{ $isDark: boolean }>`
   justify-content: space-between;
   border-bottom: 1px solid
     ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)')};
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
 
   ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ $isDark }) => ($isDark ? 'rgba(25, 25, 35, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
 `;
 
+const ChatHeaderActions = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  position: relative;
+`;
+
+const IconButton = styled.button<{ $isDark?: boolean }>`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background 0.2s ease;
+  position: relative;
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
+
+  &:hover {
+    background: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+  }
+`;
+
+// Tooltip como componente separado para evitar ser cortado por overflow:hidden
+const Tooltip = styled.div<{ $isDark?: boolean; $isVisible: boolean }>`
+  position: fixed;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  background: ${({ $isDark }) => ($isDark ? 'rgba(20, 20, 25, 0.9)' : 'rgba(240, 240, 245, 0.9)')};
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
+  transition: opacity 0.2s ease;
+  z-index: 10000;
+`;
+
+// Área de mensajes con fondo transparente para mantener efecto acrylic
 const ChatMessages = styled.div`
   flex: 1;
   overflow-y: auto;
@@ -115,6 +173,7 @@ const ChatMessages = styled.div`
   flex-direction: column;
   gap: 12px;
   overscroll-behavior: contain;
+  background: transparent;
 
   /* Scrollbar mejorada */
   scrollbar-width: thin;
@@ -195,7 +254,7 @@ const ChatInputArea = styled.div<{ $isDark: boolean }>`
     ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)')};
 
   ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ $isDark }) => ($isDark ? 'rgba(25, 25, 35, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
 `;
 
 const ChatInput = styled.input<{ $isDark: boolean }>`
@@ -233,9 +292,9 @@ const SendButton = styled.button<{ $isDark: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
 
-  background: ${({ $isDark }) => ($isDark ? 'rgba(50, 50, 60, 0.8)' : 'rgba(50, 50, 60, 0.2)')};
-  color: ${({ theme }) => theme.colors.text};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(50, 50, 55, 0.8)' : 'rgba(50, 50, 60, 0.2)')};
   border: 1px solid
     ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
 
@@ -243,7 +302,7 @@ const SendButton = styled.button<{ $isDark: boolean }>`
   -webkit-backdrop-filter: blur(8px);
 
   &:hover {
-    background: ${({ $isDark }) => ($isDark ? 'rgba(60, 60, 70, 0.9)' : 'rgba(60, 60, 70, 0.3)')};
+    background: ${({ $isDark }) => ($isDark ? 'rgba(60, 60, 65, 0.9)' : 'rgba(60, 60, 70, 0.3)')};
   }
 `;
 
@@ -260,20 +319,59 @@ const LoadingDot = styled.div<{ $delay: number }>`
 
 // Componente principal
 const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 500 }) => {
+  // Estados y refs
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { text: '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?', isUser: false },
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
+  const { themeMode } = useTheme();
+  const isDark = themeMode === 'dark';
+
+  const [tooltipText, setTooltipText] = useState('');
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+
+  // Forzar actualización cuando cambie el idioma
+  const [, forceUpdate] = useState({});
+
+  // Inicializar los mensajes con el texto traducido
+  const [messages, setMessages] = useState(() => [
+    { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const chatWindowRef = useRef<HTMLDivElement>(null);
+  const initialMessageRef = useRef(
+    t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?')
+  );
 
-  const { t } = useTranslation();
-  const { themeMode } = useTheme();
-  const isDark = themeMode === 'dark';
+  // Forzar actualización cuando cambie el idioma
+  useEffect(() => {
+    forceUpdate({});
+  }, [currentLanguage]);
+
+  // Actualizar el mensaje inicial cuando cambia el idioma
+  useEffect(() => {
+    // Obtenemos el texto actualizado según el idioma actual
+    const updatedMessage = t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?');
+
+    // Solo actualizar si realmente cambió la traducción
+    if (initialMessageRef.current !== updatedMessage) {
+      initialMessageRef.current = updatedMessage;
+
+      setMessages(prev => {
+        // Crear una nueva lista de mensajes con el primero actualizado
+        const newMessages = [...prev];
+        if (newMessages.length > 0 && !newMessages[0].isUser) {
+          newMessages[0] = { ...newMessages[0], text: updatedMessage };
+        }
+        return newMessages;
+      });
+    }
+  }, [currentLanguage, t]);
 
   // Inicializar componente con retraso
   useEffect(() => {
@@ -285,10 +383,38 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
     return () => clearTimeout(timer);
   }, [initialDelay]);
 
-  // Scroll automático al final
+  // Cerrar el chat cuando se hace clic fuera
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isOpen && chatWindowRef.current && !chatWindowRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    // Cerrar el chat cuando se presiona ESC
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isOpen && e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  // Scroll automático al final cuando hay nuevos mensajes o se abre el chat
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isOpen]);
 
   // Focus en el input cuando se abre
   useEffect(() => {
@@ -298,6 +424,16 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
       }, 300);
     }
   }, [isOpen]);
+
+  // Limpiar el chat
+  const handleClearChat = useCallback(() => {
+    setMessages([
+      {
+        text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'),
+        isUser: false,
+      },
+    ]);
+  }, [t]);
 
   // Manejo de mensajes
   const handleSendMessage = async () => {
@@ -327,47 +463,90 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
     }
   };
 
+  // Manejadores de tooltip
+  const handleShowTooltip = (text: string, e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltipText(text);
+    setTooltipPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10,
+    });
+    setTooltipVisible(true);
+  };
+
+  const handleHideTooltip = () => {
+    setTooltipVisible(false);
+  };
+
+  // Cerrar el chat y ocultar cualquier tooltip visible
+  const handleCloseChat = () => {
+    setIsOpen(false);
+    setTooltipVisible(false); // Asegurarse de que no quede ningún tooltip visible
+  };
+
   if (!isVisible) return null;
 
   return (
     <>
+      {/* Tooltip global */}
+      <Tooltip
+        $isDark={isDark}
+        $isVisible={tooltipVisible}
+        style={{
+          left: `${tooltipPosition.x}px`,
+          top: `${tooltipPosition.y}px`,
+          transform: 'translate(-50%, -100%)',
+        }}
+      >
+        {tooltipText}
+      </Tooltip>
+
       {!isOpen ? (
         <ChatButton $isDark={isDark} onClick={() => setIsOpen(true)}>
           <HiSparkles size={24} />
         </ChatButton>
       ) : (
-        <ChatWindow $isDark={isDark}>
+        <ChatWindow $isDark={isDark} ref={chatWindowRef}>
           <ChatHeader $isDark={isDark}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <HiSparkles size={20} />
               <span style={{ fontWeight: 600 }}>{t('AI Portfolio Assistant')}</span>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-              aria-label={t('Cerrar chat')}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <ChatHeaderActions>
+              {/* Botón de limpiar chat */}
+              <IconButton
+                onClick={handleClearChat}
+                $isDark={isDark}
+                aria-label={t('Limpiar chat')}
+                onMouseEnter={e => handleShowTooltip(t('Limpiar chat'), e)}
+                onMouseLeave={handleHideTooltip}
               >
-                <path d="M18 6L6 18"></path>
-                <path d="M6 6L18 18"></path>
-              </svg>
-            </button>
+                <FaTrash size={16} />
+              </IconButton>
+
+              {/* Botón de cerrar */}
+              <IconButton
+                onClick={handleCloseChat}
+                $isDark={isDark}
+                aria-label={t('Cerrar chat')}
+                onMouseEnter={e => handleShowTooltip(t('Cerrar chat'), e)}
+                onMouseLeave={handleHideTooltip}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 6L6 18"></path>
+                  <path d="M6 6L18 18"></path>
+                </svg>
+              </IconButton>
+            </ChatHeaderActions>
           </ChatHeader>
 
           <ChatMessages>
