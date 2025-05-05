@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import ScrollReveal from '@components/ScrollReveal';
+import TechSlider from '@components/TechSlider';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -90,11 +91,20 @@ const BioTextContainer = styled.div`
   }
 `;
 
+const TechSliderContainer = styled.div`
+  width: 100%;
+  margin-top: 3rem;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+`;
+
 const BioSection: React.FC = () => {
   const { t, i18n } = useTranslation();
   const imageRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
+  const sliderRef = useRef<HTMLDivElement>(null);
   
   // Obtener los textos completos
   const bioPart1 = t('about.bio.part1');
@@ -103,8 +113,9 @@ const BioSection: React.FC = () => {
   useEffect(() => {
     const imageElement = imageRef.current;
     const titleElement = titleRef.current;
+    const sliderElement = sliderRef.current;
     
-    if (!imageElement || !titleElement || !sectionRef.current) return;
+    if (!imageElement || !titleElement || !sectionRef.current || !sliderElement) return;
     
     // Configuración inicial de la imagen y título
     gsap.set([imageElement, titleElement], { 
@@ -112,6 +123,12 @@ const BioSection: React.FC = () => {
       y: 30,
       scale: 0.95,
       filter: 'blur(10px)'
+    });
+    
+    // Configuración inicial del slider
+    gsap.set(sliderElement, {
+      opacity: 0,
+      y: 20
     });
     
     // Animación de la imagen
@@ -143,6 +160,20 @@ const BioSection: React.FC = () => {
         trigger: sectionRef.current,
         start: 'top 85%',
         end: 'top 40%',
+        scrub: true,
+      }
+    });
+    
+    // Animación del slider (aparece más tarde)
+    gsap.to(sliderElement, {
+      opacity: 1,
+      y: 0,
+      duration: 0.8,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: sliderElement,
+        start: 'top 85%',
+        end: 'top 50%',
         scrub: true,
       }
     });
@@ -201,6 +232,10 @@ const BioSection: React.FC = () => {
           </BioTextContainer>
         </TextContainer>
       </ContentWrapper>
+      
+      <TechSliderContainer ref={sliderRef}>
+        <TechSlider />
+      </TechSliderContainer>
     </SectionContainer>
   );
 };
