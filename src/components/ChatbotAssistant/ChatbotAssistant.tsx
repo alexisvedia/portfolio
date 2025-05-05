@@ -319,7 +319,6 @@ const LoadingDot = styled.div<{ $delay: number }>`
 
 // Componente principal
 const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 500 }) => {
-  // Estados y refs
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { t, i18n } = useTranslation();
@@ -327,51 +326,45 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
   const { themeMode } = useTheme();
   const isDark = themeMode === 'dark';
 
+  // Estado para los tooltips
   const [tooltipText, setTooltipText] = useState('');
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [tooltipVisible, setTooltipVisible] = useState(false);
 
-  // Forzar actualización cuando cambie el idioma
-  const [, forceUpdate] = useState({});
+  // Mensaje de bienvenida en un ref para comparar cambios
+  const welcomeMessageKey = '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?';
 
   // Inicializar los mensajes con el texto traducido
-  const [messages, setMessages] = useState(() => [
-    { text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'), isUser: false },
-  ]);
+  const [messages, setMessages] = useState(() => [{ text: t(welcomeMessageKey), isUser: false }]);
+
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const chatWindowRef = useRef<HTMLDivElement>(null);
-  const initialMessageRef = useRef(
-    t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?')
-  );
+  const prevLangRef = useRef(currentLanguage);
 
-  // Forzar actualización cuando cambie el idioma
+  // Actualizar UI cuando cambia el idioma
   useEffect(() => {
-    forceUpdate({});
-  }, [currentLanguage]);
+    // Solo ejecutar si realmente cambió el idioma
+    if (prevLangRef.current !== currentLanguage) {
+      // Guardar el nuevo idioma como referencia
+      prevLangRef.current = currentLanguage;
 
-  // Actualizar el mensaje inicial cuando cambia el idioma
-  useEffect(() => {
-    // Obtenemos el texto actualizado según el idioma actual
-    const updatedMessage = t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?');
-
-    // Solo actualizar si realmente cambió la traducción
-    if (initialMessageRef.current !== updatedMessage) {
-      initialMessageRef.current = updatedMessage;
-
+      // Actualizar el primer mensaje si es un mensaje del sistema
       setMessages(prev => {
-        // Crear una nueva lista de mensajes con el primero actualizado
         const newMessages = [...prev];
         if (newMessages.length > 0 && !newMessages[0].isUser) {
-          newMessages[0] = { ...newMessages[0], text: updatedMessage };
+          newMessages[0] = {
+            ...newMessages[0],
+            text: t(welcomeMessageKey),
+          };
         }
         return newMessages;
       });
     }
-  }, [currentLanguage, t]);
+  }, [currentLanguage, t, welcomeMessageKey]);
 
   // Inicializar componente con retraso
   useEffect(() => {
@@ -425,15 +418,10 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
     }
   }, [isOpen]);
 
-  // Limpiar el chat
+  // Limpiar el chat (usando el idioma actual)
   const handleClearChat = useCallback(() => {
-    setMessages([
-      {
-        text: t('¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?'),
-        isUser: false,
-      },
-    ]);
-  }, [t]);
+    setMessages([{ text: t(welcomeMessageKey), isUser: false }]);
+  }, [t, welcomeMessageKey]);
 
   // Manejo de mensajes
   const handleSendMessage = async () => {
