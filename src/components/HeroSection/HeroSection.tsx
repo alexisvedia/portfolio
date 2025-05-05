@@ -10,10 +10,12 @@ const HeroContainer = styled.section`
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  height: 100vh; /* Asegurar que ocupe exactamente la altura de la ventana */
   padding: ${({ theme }) => theme.space.xl};
   text-align: center;
   position: relative;
   overflow: hidden;
+  margin-bottom: 0; /* Eliminado el margen inferior */
 `;
 
 const Title = styled.h1`
@@ -72,14 +74,31 @@ const fadeOut = keyframes`
   }
 `;
 
+// Contenedor con efecto parallax
+const ParallaxTitle = styled.div`
+  position: relative;
+  will-change: transform, filter, opacity;
+`;
+
+// Contenedor para el subtítulo con efecto parallax
+const ParallaxSubtitle = styled.div`
+  position: relative;
+  will-change: transform, filter, opacity;
+  margin-top: -37px;
+  max-width: 800px;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    margin-top: 10px;
+  }
+`;
+
+// Subtítulo con animación de aparición original
 const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 1.3rem;
   font-weight: 400;
   margin-bottom: ${({ theme }) => theme.space.xl};
-  margin-top: -37px;
   color: ${({ theme }) => `${theme.colors.text}cc`};
-  max-width: 800px;
   position: relative;
   z-index: 2;
   opacity: ${props => props.$visible ? 1 : 0};
@@ -92,19 +111,11 @@ const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     font-size: 18px;
-    margin-top: 10px;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
     font-size: 1.3rem;
-    margin-top: -37px;
   }
-`;
-
-// Contenedor con efecto parallax
-const ParallaxTitle = styled.div`
-  position: relative;
-  will-change: transform, filter, opacity;
 `;
 
 interface HeroSectionProps {
@@ -123,6 +134,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoa
   const [currentSubtitleText, setCurrentSubtitleText] = useState('');
   const [startAnimations, setStartAnimations] = useState(false);
   const titleRef = useRef<HTMLDivElement>(null);
+  const subtitleRef = useRef<HTMLDivElement>(null);
   const prevLangRef = useRef(i18n.language);
   
   // Inicializar el texto del subtítulo
@@ -203,10 +215,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoa
   // Efecto parallax para el título con blur y desvanecimiento gradual
   useEffect(() => {
     const titleElement = titleRef.current;
-    if (!titleElement) return;
+    const subtitleElement = subtitleRef.current;
+    if (!titleElement || !subtitleElement) return;
     
     // Factor para el efecto parallax (movimiento)
     const parallaxFactor = -0.4;
+    // Factor para el subtítulo (ligeramente diferente para efecto escalonado)
+    const subtitleParallaxFactor = -0.5;
     
     // Altura aproximada de la sección hero para calcular efectos
     const heroHeight = window.innerHeight;
@@ -217,20 +232,28 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoa
         
         // Efecto parallax (movimiento)
         const offsetY = scrollY * parallaxFactor;
+        const subtitleOffsetY = scrollY * subtitleParallaxFactor;
         
         // Efecto de blur (0px a 20px) - se incrementa gradualmente con el scroll
         // Se calcula como porcentaje del desplazamiento respecto a la altura de la sección
         const scrollProgress = Math.min(scrollY / heroHeight, 1);
-        const blurAmount = scrollProgress * 20; // Máximo blur: 20px (aumentado de 10px)
+        const blurAmount = scrollProgress * 20; // Máximo blur: 20px
         
         // Opacidad (1 a 0) - se reduce gradualmente con el scroll
-        const opacity = Math.max(1 - scrollProgress * 2, 0); // Factor aumentado a 2 para llegar a 0 más rápido
+        const opacity = Math.max(1 - scrollProgress * 2, 0);
         
         if (titleElement) {
           // Aplicamos los tres efectos a la vez
           titleElement.style.transform = `translateY(${offsetY}px)`;
           titleElement.style.filter = `blur(${blurAmount}px)`;
           titleElement.style.opacity = opacity.toString();
+        }
+        
+        if (subtitleElement) {
+          // Aplicamos los mismos efectos al subtítulo
+          subtitleElement.style.transform = `translateY(${subtitleOffsetY}px)`;
+          subtitleElement.style.filter = `blur(${blurAmount}px)`;
+          subtitleElement.style.opacity = opacity.toString();
         }
       });
     };
@@ -289,12 +312,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoa
           )}
         </Title>
       </ParallaxTitle>
-      <Subtitle 
-        $visible={subtitleVisible} 
-        $fadeOut={subtitleFadeOut}
-      >
-        {currentSubtitleText}
-      </Subtitle>
+      
+      <ParallaxSubtitle ref={subtitleRef}>
+        <Subtitle 
+          $visible={subtitleVisible} 
+          $fadeOut={subtitleFadeOut}
+        >
+          {currentSubtitleText}
+        </Subtitle>
+      </ParallaxSubtitle>
     </HeroContainer>
   );
 };

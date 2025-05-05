@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
-import { Home, User } from 'lucide-react';
+import { Home } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useScrollDirection } from '../../utils/useScrollDirection';
 
@@ -180,7 +180,6 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
   // Definir los elementos de navegación con sus nombres y URLs
   const items: NavItem[] = [
     { name: 'Home', nameKey: 'navbar.home', url: '/', icon: Home },
-    { name: 'About', nameKey: 'navbar.about', url: '/about', icon: User },
   ];
 
   const [isMobile, setIsMobile] = useState(false);

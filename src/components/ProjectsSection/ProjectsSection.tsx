@@ -1,8 +1,7 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import gsap from 'gsap';
-import ScrollTrigger from 'gsap/ScrollTrigger';
+import FlowingMenu from '@components/FlowingMenu';
 
 const SectionContainer = styled.section`
   padding: 0 0 ${({ theme }) => theme.space['2xl']};
@@ -28,82 +27,47 @@ const SectionTitle = styled.h2`
   letter-spacing: 0;
 `;
 
-const Container = styled.div`
+const MenuContainer = styled.div`
   width: 100%;
-  height: 100vh;
+  height: 600px;
   position: relative;
   overflow: hidden;
-`;
-
-const Panel = styled.section<{ color?: string }>`
-  position: absolute;
-  will-change: transform;
-  width: 100%;
-  height: 100%;
-  background-color: ${({ color }) => color || 'transparent'};
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 3rem;
-  color: white;
-`;
-
-const Description = styled(Panel)`
-  padding: 2rem;
-`;
-
-const LogoContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  padding: 2rem;
-`;
-
-const LogoImage = styled.img`
-  width: 70%;
-  max-width: 600px;
-  height: auto;
-  object-fit: contain;
-  
-  @media (max-width: 768px) {
-    width: 90%;
-    max-width: 400px;
-  }
-  
-  @media (max-width: 480px) {
-    width: 90%;
-    max-width: 300px;
-  }
 `;
 
 const ProjectsSection: React.FC = () => {
   const { t } = useTranslation();
 
-  useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-
-    gsap.to('.panel:not(:last-child)', {
-      yPercent: -100,
-      ease: 'none',
-      stagger: 0.5,
-      scrollTrigger: {
-        trigger: '#scroll-container',
-        start: 'top top',
-        end: '+=300%',
-        scrub: true,
-        pin: true,
-      },
-    });
-
-    gsap.set('.panel', { zIndex: (i, _, targets) => targets.length - i });
-
-    return () => {
-      // Limpieza de ScrollTrigger
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-    };
-  }, []);
+  // Definir los elementos del menú con los logos y colores de las empresas
+  const companyItems = [
+    { 
+      link: '#condamind', 
+      text: 'Condamind', 
+      image: '/images/projects/Condamind.svg',
+      color: '#262626',
+      description: t('companyDescriptions.condamind', 'Empresa líder en tecnologías cognitivas y soluciones de IA avanzadas.')
+    },
+    { 
+      link: '#fusionads', 
+      text: 'FusionAds', 
+      image: '/images/projects/Fusionads.svg',
+      color: '#F7480B',
+      description: t('companyDescriptions.fusionads', 'Plataforma innovadora de publicidad digital que integra tecnologías emergentes.')
+    },
+    { 
+      link: '#bandit', 
+      text: 'Bandit', 
+      image: '/images/projects/Bandit.svg',
+      color: '#F70F43',
+      description: t('companyDescriptions.bandit', 'Soluciones disruptivas en seguridad informática y protección de datos.')
+    },
+    { 
+      link: '#xcons', 
+      text: 'XCONS', 
+      image: '/images/projects/XCONS.svg',
+      color: '#15814B',
+      description: t('companyDescriptions.xcons', 'Constructora innovadora con enfoque en soluciones sustentables y tecnología avanzada.')
+    }
+  ];
 
   return (
     <SectionContainer id="projects">
@@ -111,31 +75,9 @@ const ProjectsSection: React.FC = () => {
         <SectionTitle>{t('experience')}</SectionTitle>
       </TitleContainer>
 
-      <Container id="scroll-container">
-        <Description className="panel" color="#262626">
-          <LogoContainer>
-            <LogoImage src="/images/projects/Condamind.svg" alt="Condamind" />
-          </LogoContainer>
-        </Description>
-
-        <Panel className="panel" color="#F7480B">
-          <LogoContainer>
-            <LogoImage src="/images/projects/Fusionads.svg" alt="Fusion" />
-          </LogoContainer>
-        </Panel>
-
-        <Panel className="panel" color="#F70F43">
-          <LogoContainer>
-            <LogoImage src="/images/projects/Bandit.svg" alt="Bandit" />
-          </LogoContainer>
-        </Panel>
-
-        <Panel className="panel" color="#15814B">
-          <LogoContainer>
-            <LogoImage src="/images/projects/XCONS.svg" alt="XCONS" />
-          </LogoContainer>
-        </Panel>
-      </Container>
+      <MenuContainer>
+        <FlowingMenu items={companyItems} />
+      </MenuContainer>
     </SectionContainer>
   );
 };

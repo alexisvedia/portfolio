@@ -24,8 +24,8 @@ import { initializeN8NServer } from '@services/n8nService';
 // Importar páginas
 import Home from './pages/Home';
 // Using dynamic imports for code splitting
-const About = React.lazy(() => import('./pages/About'));
-const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
+// const About = React.lazy(() => import('./pages/About'));
+// const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -205,8 +205,6 @@ const AppContent = () => {
         <React.Suspense fallback={<div>Loading...</div>}>
           <Routes>
             <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} fontsLoaded={fontsLoaded} />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/font-example" element={<MorganiteExample />} />
           </Routes>
         </React.Suspense>
       </Container>

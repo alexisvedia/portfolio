@@ -20,13 +20,6 @@ const FooterContent = styled.div`
   align-items: center;
 `;
 
-const Logo = styled.h2`
-  font-size: ${({ theme }) => theme.fontSizes['2xl']};
-  font-weight: 700;
-  margin-bottom: ${({ theme }) => theme.space.lg};
-  color: ${({ theme }) => theme.colors.text};
-`;
-
 const SocialLinks = styled.div`
   display: flex;
   gap: ${({ theme }) => theme.space.lg};
@@ -89,21 +82,15 @@ const Footer: React.FC = () => {
   return (
     <FooterContainer>
       <FooterContent>
-        <Logo>Portfolio</Logo>
         
         <SocialLinks>
-          <SocialLink href="https://github.com/yourusername" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <SocialLink href="https://github.com/AxSRockS/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
             <i className="fab fa-github"></i>
           </SocialLink>
-          <SocialLink href="https://linkedin.com/in/yourusername" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+          <SocialLink href="https://www.linkedin.com/in/alexis-vedia-80b936190/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
             <i className="fab fa-linkedin-in"></i>
           </SocialLink>
-          <SocialLink href="https://twitter.com/yourusername" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-            <i className="fab fa-twitter"></i>
-          </SocialLink>
-          <SocialLink href="https://dribbble.com/yourusername" target="_blank" rel="noopener noreferrer" aria-label="Dribbble">
-            <i className="fab fa-dribbble"></i>
-          </SocialLink>
+         
         </SocialLinks>
         
         <NavLinks>

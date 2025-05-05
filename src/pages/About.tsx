@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import LanguageMorphingTitle from '@components/LanguageMorphingTitle';
 import PageTransition from '@components/PageTransition/PageTransition';
+import ScrollReveal from '@components/ScrollReveal';
 import profileImage from '../assets/profile-image.webp';
 
 const StyledMorphingTitle = styled(LanguageMorphingTitle)`
@@ -88,35 +89,48 @@ const About: React.FC = () => {
             </div>
 
             <div style={{ order: 2 }}>
-              <p>{t('about.bio.part1')}</p>
-              <p>{t('about.bio.part2')}</p>
+              <ScrollReveal
+                baseOpacity={0}
+                enableBlur={true}
+                baseRotation={10}
+                blurStrength={15}
+              >
+                {t('about.bio.part1')}
+              </ScrollReveal>
+              <ScrollReveal
+                baseOpacity={0}
+                enableBlur={true}
+                baseRotation={10}
+                blurStrength={15}
+              >
+                {t('about.bio.part2')}
+              </ScrollReveal>
             </div>
           </div>
         </SectionContent>
 
         <SectionContent>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h3
-              style={{
-                fontSize: '1.8rem',
-                marginBottom: '1rem',
-                color: 'rgba(255, 255, 255, 0.9)',
-              }}
+            <ScrollReveal
+              baseOpacity={0}
+              enableBlur={true}
+              baseRotation={8}
+              blurStrength={15}
+              containerClassName="section-title"
             >
               {t('about.professionalExperience')}
-            </h3>
+            </ScrollReveal>
           </div>
 
           <div style={{ marginBottom: '2rem' }}>
-            <h4
-              style={{
-                fontSize: '1.4rem',
-                marginBottom: '0.5rem',
-                color: 'rgba(255, 255, 255, 0.9)',
-              }}
+            <ScrollReveal
+              baseOpacity={0}
+              enableBlur={true}
+              baseRotation={8}
+              blurStrength={15}
             >
               {t('about.jobs.fullStackEngineer')}
-            </h4>
+            </ScrollReveal>
             <p
               style={{
                 fontSize: '1.1rem',
@@ -136,15 +150,14 @@ const About: React.FC = () => {
           </div>
 
           <div>
-            <h4
-              style={{
-                fontSize: '1.4rem',
-                marginBottom: '0.5rem',
-                color: 'rgba(255, 255, 255, 0.9)',
-              }}
+            <ScrollReveal
+              baseOpacity={0}
+              enableBlur={true}
+              baseRotation={8}
+              blurStrength={15}
             >
               {t('about.jobs.uiUxDesigner')}
-            </h4>
+            </ScrollReveal>
             <p
               style={{
                 fontSize: '1.1rem',
@@ -166,15 +179,15 @@ const About: React.FC = () => {
 
         <SectionContent>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h3
-              style={{
-                fontSize: '1.8rem',
-                marginBottom: '1rem',
-                color: 'rgba(255, 255, 255, 0.9)',
-              }}
+            <ScrollReveal
+              baseOpacity={0}
+              enableBlur={true}
+              baseRotation={10}
+              blurStrength={20}
+              containerClassName="section-title"
             >
               {t('about.featuredProjects')}
-            </h3>
+            </ScrollReveal>
           </div>
 
           <div
@@ -201,15 +214,14 @@ const About: React.FC = () => {
                 e.currentTarget.style.boxShadow = '';
               }}
             >
-              <h4
-                style={{
-                  fontSize: '1.3rem',
-                  marginBottom: '1rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                }}
+              <ScrollReveal
+                baseOpacity={0}
+                enableBlur={true}
+                baseRotation={8}
+                blurStrength={15}
               >
                 {t('about.projects.personalPortfolio')}
-              </h4>
+              </ScrollReveal>
               <p>{t('about.projects.personalPortfolioDesc')}</p>
               <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span
@@ -262,15 +274,14 @@ const About: React.FC = () => {
                 e.currentTarget.style.boxShadow = '';
               }}
             >
-              <h4
-                style={{
-                  fontSize: '1.3rem',
-                  marginBottom: '1rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                }}
+              <ScrollReveal
+                baseOpacity={0}
+                enableBlur={true}
+                baseRotation={8}
+                blurStrength={15}
               >
                 {t('about.projects.ecommerceApp')}
-              </h4>
+              </ScrollReveal>
               <p>{t('about.projects.ecommerceAppDesc')}</p>
               <div style={{ marginTop: '1rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 <span
@@ -310,15 +321,15 @@ const About: React.FC = () => {
 
         <SectionContent>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h3
-              style={{
-                fontSize: '1.8rem',
-                marginBottom: '1rem',
-                color: 'rgba(255, 255, 255, 0.9)',
-              }}
+            <ScrollReveal
+              baseOpacity={0}
+              enableBlur={true}
+              baseRotation={10}
+              blurStrength={20}
+              containerClassName="section-title"
             >
               {t('about.skills')}
-            </h3>
+            </ScrollReveal>
           </div>
 
           <div
@@ -329,15 +340,14 @@ const About: React.FC = () => {
             }}
           >
             <div>
-              <h4
-                style={{
-                  fontSize: '1.3rem',
-                  marginBottom: '1rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                }}
+              <ScrollReveal
+                baseOpacity={0}
+                enableBlur={true}
+                baseRotation={8}
+                blurStrength={15}
               >
                 {t('about.skillCategories.fullStack')}
-              </h4>
+              </ScrollReveal>
               <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
                 <li>React / React Native</li>
                 <li>TypeScript / JavaScript</li>
@@ -349,15 +359,14 @@ const About: React.FC = () => {
             </div>
 
             <div>
-              <h4
-                style={{
-                  fontSize: '1.3rem',
-                  marginBottom: '1rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                }}
+              <ScrollReveal
+                baseOpacity={0}
+                enableBlur={true}
+                baseRotation={8}
+                blurStrength={15}
               >
                 {t('about.skillCategories.backend')}
-              </h4>
+              </ScrollReveal>
               <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
                 <li>Node.js</li>
                 <li>Express</li>
@@ -368,15 +377,14 @@ const About: React.FC = () => {
             </div>
 
             <div>
-              <h4
-                style={{
-                  fontSize: '1.3rem',
-                  marginBottom: '1rem',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                }}
+              <ScrollReveal
+                baseOpacity={0}
+                enableBlur={true}
+                baseRotation={8}
+                blurStrength={15}
               >
                 {t('about.skillCategories.tools')}
-              </h4>
+              </ScrollReveal>
               <ul style={{ color: 'rgba(255, 255, 255, 0.8)', paddingLeft: '1.5rem' }}>
                 <li>Git / GitHub / Bitbucket / Jira / Trello</li>
                 <li>WordPress (nivel avanzado) / Elementor</li>
