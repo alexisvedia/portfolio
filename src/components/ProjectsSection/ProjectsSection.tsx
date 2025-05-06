@@ -39,34 +39,46 @@ const ProjectsSection: React.FC = () => {
 
   // Definir los elementos del menú con los logos y colores de las empresas
   const companyItems = [
-    { 
-      link: '#condamind', 
-      text: 'Condamind', 
+    {
+      link: '/condamind',
+      text: 'Condamind',
       image: '/images/projects/Condamind.svg',
       color: '#262626',
-      description: t('companyDescriptions.condamind', 'Empresa líder en tecnologías cognitivas y soluciones de IA avanzadas.')
+      description: t(
+        'companyDescriptions.condamind',
+        'Empresa líder en tecnologías cognitivas y soluciones de IA avanzadas.'
+      ),
     },
-    { 
-      link: '#fusionads', 
-      text: 'FusionAds', 
+    {
+      link: '/fusionads',
+      text: 'FusionAds',
       image: '/images/projects/Fusionads.svg',
       color: '#F7480B',
-      description: t('companyDescriptions.fusionads', 'Plataforma innovadora de publicidad digital que integra tecnologías emergentes.')
+      description: t(
+        'companyDescriptions.fusionads',
+        'Plataforma innovadora de publicidad digital que integra tecnologías emergentes.'
+      ),
     },
-    { 
-      link: '#bandit', 
-      text: 'Bandit', 
+    {
+      link: '/bandit',
+      text: 'Bandit',
       image: '/images/projects/Bandit.svg',
       color: '#F70F43',
-      description: t('companyDescriptions.bandit', 'Soluciones disruptivas en seguridad informática y protección de datos.')
+      description: t(
+        'companyDescriptions.bandit',
+        'Soluciones disruptivas en seguridad informática y protección de datos.'
+      ),
     },
-    { 
-      link: '#xcons', 
-      text: 'XCONS', 
+    {
+      link: '/xcons',
+      text: 'XCONS',
       image: '/images/projects/XCONS.svg',
       color: '#15814B',
-      description: t('companyDescriptions.xcons', 'Constructora innovadora con enfoque en soluciones sustentables y tecnología avanzada.')
-    }
+      description: t(
+        'companyDescriptions.xcons',
+        'Constructora innovadora con enfoque en soluciones sustentables y tecnología avanzada.'
+      ),
+    },
   ];
 
   return (
