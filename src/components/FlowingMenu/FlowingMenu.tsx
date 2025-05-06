@@ -29,13 +29,7 @@ const FlowingMenu: React.FC<FlowingMenuProps> = ({ items = [] }) => {
   );
 };
 
-const MenuItem: React.FC<MenuItemProps> = ({
-  link,
-  text,
-  image,
-  _color = '#fff',
-  _description = '',
-}) => {
+const MenuItem: React.FC<MenuItemProps> = ({ link, text, image }) => {
   const { themeMode } = useTheme();
   const isDarkMode = themeMode === 'dark';
   const navigate = useNavigate();
