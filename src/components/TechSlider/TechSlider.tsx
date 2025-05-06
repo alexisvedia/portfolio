@@ -1,10 +1,19 @@
-import React from 'react';
-import styled from 'styled-components';
+import React, { useEffect, useState, useRef } from 'react';
+import styled, { keyframes, css } from 'styled-components';
 import { useTheme } from '../../context/ThemeContext';
 
 interface TechSliderProps {
   className?: string;
 }
+
+const slideAnimation = keyframes`
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+`;
 
 const SliderContainer = styled.div`
   width: 100%;
@@ -40,12 +49,21 @@ const SliderInner = styled.div`
   justify-content: center;
 `;
 
-const SliderTrack = styled.div`
+const SliderTrack = styled.div<{ $animate: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-around;
   width: 100%;
   height: 100%;
+  
+  @media (max-width: 768px) {
+    ${({ $animate }) => $animate && css`
+      display: flex;
+      justify-content: flex-start;
+      min-width: 200%;
+      animation: ${slideAnimation} 20s linear infinite;
+    `}
+  }
 `;
 
 const SliderItem = styled.div`
@@ -54,6 +72,10 @@ const SliderItem = styled.div`
   justify-content: center;
   height: 100%;
   padding: 0 15px;
+  
+  @media (max-width: 768px) {
+    flex: 0 0 auto;
+  }
 `;
 
 const TechIcon = styled.img<{ $isDarkMode: boolean }>`
@@ -74,25 +96,52 @@ const TechIcon = styled.img<{ $isDarkMode: boolean }>`
 const TechSlider: React.FC<TechSliderProps> = ({ className }) => {
   const { themeMode } = useTheme();
   const isDarkMode = themeMode === 'dark';
+  const [isMobile, setIsMobile] = useState(false);
   
   // Lista de tecnologías con sus iconos actualizados
   const technologies = [
-    { name: 'figma', src: '/images/Logos/figma-icon-one-color.svg' },
-    { name: 'mongodb', src: '/images/Logos/mongodb-svgrepo-com.svg' },
+    { name: 'Figma', src: '/images/Logos/figma-icon-one-color.svg' },
+    { name: 'MongoDB', src: '/images/Logos/mongodb-svgrepo-com.svg' },
     { name: 'n8n', src: '/images/Logos/n8n.io.svg' },
-    { name: 'postman', src: '/images/Logos/postman-svgrepo-com.svg' },
-    { name: 'react', src: '/images/Logos/react-svgrepo-com.svg' },
-    { name: 'adobe-photoshop', src: '/images/Logos/adobe-photoshop-2 1.svg' },
-    { name: 'huggingface', src: '/images/Logos/huggingface-1 1.svg' },
-    { name: 'replicate', src: '/images/Logos/Replicate Ai.svg' }
+    { name: 'Postman', src: '/images/Logos/postman-svgrepo-com.svg' },
+    { name: 'React', src: '/images/Logos/react-svgrepo-com.svg' },
+    { name: 'Adobe Photoshop', src: '/images/Logos/adobe-photoshop-2 1.svg' },
+    { name: 'HuggingFace', src: '/images/Logos/huggingface-1 1.svg' },
+    { name: 'Replicate', src: '/images/Logos/Replicate Ai.svg' }
   ];
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    // Comprobar al cargar y cuando se redimensiona la ventana
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   return (
     <SliderContainer className={className}>
       <SliderInner>
-        <SliderTrack>
+        <SliderTrack $animate={isMobile}>
           {technologies.map((tech, index) => (
             <SliderItem key={`tech-${index}`}>
+              <TechIcon 
+                src={tech.src} 
+                alt={tech.name} 
+                title={tech.name}
+                $isDarkMode={isDarkMode}
+              />
+            </SliderItem>
+          ))}
+          
+          {/* Duplicamos los iconos para crear un efecto infinito en mobile */}
+          {isMobile && technologies.map((tech, index) => (
+            <SliderItem key={`tech-dup-${index}`}>
               <TechIcon 
                 src={tech.src} 
                 alt={tech.name} 
