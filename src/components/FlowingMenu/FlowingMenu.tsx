@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import './FlowingMenu.css';
@@ -33,8 +33,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
   link,
   text,
   image,
-  color = '#fff',
-  description = '',
+  _color = '#fff',
+  _description = '',
 }) => {
   const { themeMode } = useTheme();
   const isDarkMode = themeMode === 'dark';

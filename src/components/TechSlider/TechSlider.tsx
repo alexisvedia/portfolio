@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -16,7 +16,7 @@ const Tooltip = styled.div<{ $isVisible: boolean; $isDarkMode: boolean }>`
   border-radius: 100px;
   font-size: 12px;
   white-space: nowrap;
-  background: ${({ $isDarkMode }) => 
+  background: ${({ $isDarkMode }) =>
     $isDarkMode ? 'rgba(20, 20, 25, 0.9)' : 'rgba(240, 240, 245, 0.9)'};
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -25,7 +25,7 @@ const Tooltip = styled.div<{ $isVisible: boolean; $isDarkMode: boolean }>`
   transition: opacity 0.2s ease;
   pointer-events: none;
   z-index: 10000;
-  color: ${({ $isDarkMode }) => $isDarkMode ? '#ffffff' : '#000000'};
+  color: ${({ $isDarkMode }) => ($isDarkMode ? '#ffffff' : '#000000')};
 `;
 
 const slideAnimation = keyframes`
@@ -43,24 +43,24 @@ const SliderContainer = styled.div`
   padding: 20px 0;
   margin: 30px 0;
   position: relative;
-  background: ${({ theme }) => theme.isDark 
-    ? 'rgba(29, 31, 35, 0.7)' 
-    : 'rgba(246, 246, 246, 0.7)'};
-  border-top: 1px solid ${({ theme }) => theme.isDark 
-    ? 'rgba(255, 255, 255, 0.1)' 
-    : 'rgba(0, 0, 0, 0.1)'};
-  border-bottom: 1px solid ${({ theme }) => theme.isDark 
-    ? 'rgba(255, 255, 255, 0.1)' 
-    : 'rgba(0, 0, 0, 0.1)'};
+  background: ${({ theme }) =>
+    theme.isDark ? 'rgba(29, 31, 35, 0.7)' : 'rgba(246, 246, 246, 0.7)'};
+  border-top: 1px solid
+    ${({ theme }) => (theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)')};
+  border-bottom: 1px solid
+    ${({ theme }) => (theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)')};
   border-radius: 16px;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: ${({ theme }) => theme.isDark 
-    ? '0 8px 32px rgba(0, 0, 0, 0.2)' 
-    : '0 8px 32px rgba(0, 0, 0, 0.05)'};
+  box-shadow: ${({ theme }) =>
+    theme.isDark ? '0 8px 32px rgba(0, 0, 0, 0.2)' : '0 8px 32px rgba(0, 0, 0, 0.05)'};
   max-width: 1000px;
   margin-left: auto;
   margin-right: auto;
+
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
 `;
 
 const SliderInner = styled.div`
@@ -77,14 +77,16 @@ const SliderTrack = styled.div<{ $animate: boolean }>`
   justify-content: space-around;
   width: 100%;
   height: 100%;
-  
+
   @media (max-width: 768px) {
-    ${({ $animate }) => $animate && css`
-      display: flex;
-      justify-content: flex-start;
-      min-width: 200%;
-      animation: ${slideAnimation} 20s linear infinite;
-    `}
+    ${({ $animate }) =>
+      $animate &&
+      css`
+        display: flex;
+        justify-content: flex-start;
+        min-width: 200%;
+        animation: ${slideAnimation} 20s linear infinite;
+      `}
   }
 `;
 
@@ -95,7 +97,7 @@ const SliderItem = styled.div`
   height: 100%;
   padding: 0 15px;
   position: relative;
-  
+
   @media (max-width: 768px) {
     flex: 0 0 auto;
   }
@@ -108,8 +110,10 @@ const TechIcon = styled.img<{ $isDarkMode: boolean }>`
   max-width: 100px;
   object-fit: contain;
   opacity: 1;
-  transition: transform 0.3s ease, filter 0.3s ease;
-  filter: ${({ $isDarkMode }) => $isDarkMode ? 'brightness(0) invert(1)' : 'none'};
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease;
+  filter: ${({ $isDarkMode }) => ($isDarkMode ? 'brightness(0) invert(1)' : 'none')};
 
   &:hover {
     transform: translateY(-5px);
@@ -121,7 +125,7 @@ const TechSlider: React.FC<TechSliderProps> = ({ className }) => {
   const isDarkMode = themeMode === 'dark';
   const [isMobile, setIsMobile] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
-  
+
   // Lista de tecnologías con sus iconos actualizados
   const technologies = [
     { name: 'Figma', src: '/images/Logos/figma-icon-one-color.svg' },
@@ -131,18 +135,18 @@ const TechSlider: React.FC<TechSliderProps> = ({ className }) => {
     { name: 'React', src: '/images/Logos/react-svgrepo-com.svg' },
     { name: 'Adobe Photoshop', src: '/images/Logos/adobe-photoshop-2 1.svg' },
     { name: 'HuggingFace', src: '/images/Logos/huggingface-1 1.svg' },
-    { name: 'Replicate', src: '/images/Logos/Replicate Ai.svg' }
+    { name: 'Replicate', src: '/images/Logos/Replicate Ai.svg' },
   ];
 
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     // Comprobar al cargar y cuando se redimensiona la ventana
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
-    
+
     return () => {
       window.removeEventListener('resize', checkIfMobile);
     };
@@ -161,49 +165,36 @@ const TechSlider: React.FC<TechSliderProps> = ({ className }) => {
       <SliderInner>
         <SliderTrack $animate={isMobile}>
           {technologies.map((tech, index) => (
-            <SliderItem 
+            <SliderItem
               key={`tech-${index}`}
               onMouseEnter={() => handleMouseEnter(tech.name)}
               onMouseLeave={handleMouseLeave}
             >
-              <TechIcon 
-                src={tech.src} 
-                alt={tech.name} 
-                $isDarkMode={isDarkMode}
-              />
-              <Tooltip 
-                $isVisible={activeTooltip === tech.name}
-                $isDarkMode={isDarkMode}
-              >
+              <TechIcon src={tech.src} alt={tech.name} $isDarkMode={isDarkMode} />
+              <Tooltip $isVisible={activeTooltip === tech.name} $isDarkMode={isDarkMode}>
                 {tech.name}
               </Tooltip>
             </SliderItem>
           ))}
-          
+
           {/* Duplicamos los iconos para crear un efecto infinito en mobile */}
-          {isMobile && technologies.map((tech, index) => (
-            <SliderItem 
-              key={`tech-dup-${index}`}
-              onMouseEnter={() => handleMouseEnter(`dup-${tech.name}`)}
-              onMouseLeave={handleMouseLeave}
-            >
-              <TechIcon 
-                src={tech.src} 
-                alt={tech.name}
-                $isDarkMode={isDarkMode}
-              />
-              <Tooltip 
-                $isVisible={activeTooltip === `dup-${tech.name}`}
-                $isDarkMode={isDarkMode}
+          {isMobile &&
+            technologies.map((tech, index) => (
+              <SliderItem
+                key={`tech-dup-${index}`}
+                onMouseEnter={() => handleMouseEnter(`dup-${tech.name}`)}
+                onMouseLeave={handleMouseLeave}
               >
-                {tech.name}
-              </Tooltip>
-            </SliderItem>
-          ))}
+                <TechIcon src={tech.src} alt={tech.name} $isDarkMode={isDarkMode} />
+                <Tooltip $isVisible={activeTooltip === `dup-${tech.name}`} $isDarkMode={isDarkMode}>
+                  {tech.name}
+                </Tooltip>
+              </SliderItem>
+            ))}
         </SliderTrack>
       </SliderInner>
     </SliderContainer>
   );
 };
 
-export default TechSlider; 
+export default TechSlider;
