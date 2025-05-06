@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import styled, { css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
+import emailjs from '@emailjs/browser';
+import Toast, { ToastType } from '../Toast/Toast';
 
 const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space['2xl']} 0;
@@ -159,58 +161,85 @@ const SubmitButton = styled.button<{ $isDark: boolean }>`
   }
 `;
 
-const SuccessMessage = styled.div<{ $isDark: boolean }>`
-  ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ $isDark }) =>
-    $isDark
-      ? 'linear-gradient(rgba(30, 70, 40, 0.6), rgba(30, 70, 40, 0.6))'
-      : 'linear-gradient(rgba(235, 255, 240, 0.6), rgba(235, 255, 240, 0.6))'};
-  color: ${({ theme }) => theme.colors.success};
-  padding: ${({ theme }) => theme.space.md};
-  border-radius: 8px;
-  text-align: center;
-  margin-top: ${({ theme }) => theme.space.md};
-`;
-
-const ErrorMessage = styled.div<{ $isDark: boolean }>`
-  ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ $isDark }) =>
-    $isDark
-      ? 'linear-gradient(rgba(70, 30, 30, 0.6), rgba(70, 30, 30, 0.6))'
-      : 'linear-gradient(rgba(255, 235, 235, 0.6), rgba(255, 235, 235, 0.6))'};
-  color: ${({ theme }) => theme.colors.error};
-  padding: ${({ theme }) => theme.space.md};
-  border-radius: 8px;
-  text-align: center;
-  margin-top: ${({ theme }) => theme.space.md};
-`;
-
 const ContactSection: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { themeMode } = useTheme();
   const isDark = themeMode === 'dark';
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [formData, setFormData] = useState({
     name: '',
+    title: '',
     email: '',
     message: '',
   });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+
+  // Reemplazamos el estado de status con estados para el Toast
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState<{
+    visible: boolean;
+    message: string;
+    type: ToastType;
+  }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('submitting');
 
-    // Simulando el envío de formulario con un timeout
-    setTimeout(() => {
-      setStatus('success');
-      setFormData({ name: '', email: '', message: '' });
-    }, 1500);
+    try {
+      setIsLoading(true);
+
+      // Credenciales de EmailJS proporcionadas por el usuario
+      const serviceId = 'service_srdurzn';
+      // Seleccionar la plantilla según el idioma actual
+      const templateId = i18n.language.startsWith('es') ? 'template_es' : 'template_en';
+      const publicKey = 'CoI3CL1-8DQHvdStw';
+
+      // Preparar los datos para enviar
+      const templateParams = {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        title: formData.title,
+      };
+
+      // Enviar el correo usando el método send
+      const result = await emailjs.send(serviceId, templateId, templateParams, publicKey);
+
+      console.log('SUCCESS!', result.text);
+      setIsLoading(false);
+      setFormData({ name: '', title: '', email: '', message: '' });
+
+      // Mostrar Toast de éxito
+      setToast({
+        visible: true,
+        message: t('messageSent'),
+        type: 'success',
+      });
+    } catch (error) {
+      console.error('FAILED...', error);
+      setIsLoading(false);
+
+      // Mostrar Toast de error
+      setToast({
+        visible: true,
+        message: t('messageError'),
+        type: 'error',
+      });
+    }
+  };
+
+  // Función para cerrar el Toast
+  const closeToast = () => {
+    setToast(prev => ({ ...prev, visible: false }));
   };
 
   return (
@@ -218,7 +247,7 @@ const ContactSection: React.FC = () => {
       <SectionTitle>{t('contact')}</SectionTitle>
       <ContactContent>
         <ContactText>{t('contactText')}</ContactText>
-        <Form onSubmit={handleSubmit} $isDark={isDark}>
+        <Form onSubmit={handleSubmit} $isDark={isDark} ref={formRef}>
           <FormGroup>
             <Label htmlFor="name">{t('name')}</Label>
             <Input
@@ -230,6 +259,19 @@ const ContactSection: React.FC = () => {
               required
               $isDark={isDark}
               placeholder={t('namePlaceholder', 'Ej: Steve Jobs')}
+            />
+          </FormGroup>
+          <FormGroup>
+            <Label htmlFor="title">{t('subject', 'Asunto')}</Label>
+            <Input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              $isDark={isDark}
+              placeholder={t('subjectPlaceholder', 'Ej: Consulta sobre proyecto')}
             />
           </FormGroup>
           <FormGroup>
@@ -257,17 +299,20 @@ const ContactSection: React.FC = () => {
               placeholder={t('messagePlaceholder', 'Escribe un mensaje...')}
             />
           </FormGroup>
-          <SubmitButton type="submit" disabled={status === 'submitting'} $isDark={isDark}>
-            {status === 'submitting' ? t('sending') : t('send')}
+          <SubmitButton type="submit" disabled={isLoading} $isDark={isDark}>
+            {isLoading ? t('sending') : t('send')}
           </SubmitButton>
-
-          {status === 'success' && (
-            <SuccessMessage $isDark={isDark}>{t('messageSent')}</SuccessMessage>
-          )}
-
-          {status === 'error' && <ErrorMessage $isDark={isDark}>{t('messageError')}</ErrorMessage>}
         </Form>
       </ContactContent>
+
+      {/* Componente Toast */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.visible}
+        onClose={closeToast}
+        duration={5000}
+      />
     </SectionContainer>
   );
 };
