@@ -187,12 +187,14 @@ const IconButton = styled.button<{ $isDark?: boolean }>`
 // Tooltip como componente separado para evitar ser cortado por overflow:hidden
 const Tooltip = styled.div<{ $isDark?: boolean; $isVisible: boolean }>`
   position: fixed;
-  padding: 5px 8px;
-  border-radius: 4px;
+  padding: 8px 12px;
+  border-radius: 100px;
   font-size: 12px;
   white-space: nowrap;
-  background: ${({ $isDark }) => ($isDark ? 'rgba(20, 20, 25, 0.9)' : 'rgba(240, 240, 245, 0.9)')};
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  background: ${({ $isDark }) => ($isDark ? 'rgba(20, 20, 25, 0.65)' : 'rgba(240, 240, 245, 0.65)')};
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   pointer-events: none;
   opacity: ${({ $isVisible }) => ($isVisible ? 1 : 0)};
   transition: opacity 0.2s ease;

@@ -12,11 +12,12 @@ import { ThemeProvider } from './context/ThemeContext';
 import FontLoader from '@components/FontLoader/FontLoader';
 import GrainOverlay from '@components/GrainOverlay';
 // Cargar el componente del chatbot de manera diferida para mejorar el rendimiento inicial
-const ChatbotAssistant = React.lazy(() => 
-  // Añadimos un ligero retraso para mejorar métricas de rendimiento
-  new Promise<{ default: React.ComponentType<any> }>(resolve => 
-    setTimeout(() => resolve(import('@components/ChatbotAssistant')), 2000)
-  )
+const ChatbotAssistant = React.lazy(
+  () =>
+    // Añadimos un ligero retraso para mejorar métricas de rendimiento
+    new Promise<{ default: React.ComponentType<any> }>(resolve =>
+      setTimeout(() => resolve(import('@components/ChatbotAssistant')), 2000)
+    )
 );
 import { initScrollDetection } from '@utils/scrollDetection';
 import { initializeN8NServer } from '@services/n8nService';
@@ -24,7 +25,7 @@ import { initializeN8NServer } from '@services/n8nService';
 // Importar páginas
 import Home from './pages/Home';
 // Using dynamic imports for code splitting
-// const About = React.lazy(() => import('./pages/About'));
+const ProjectPage = React.lazy(() => import('./pages/ProjectPage'));
 // const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
 
 // Aseguramos que i18n se inicialice
@@ -51,9 +52,9 @@ const LanguageSelectorStyled = styled(LanguageSelector)<{ $hideOnScroll: boolean
   left: 1.5rem;
   z-index: 100;
   transition: transform 0.3s ease;
-  
+
   @media (max-width: 768px) {
-    transform: translateY(${props => props.$hideOnScroll ? '-100px' : '0'});
+    transform: translateY(${props => (props.$hideOnScroll ? '-100px' : '0')});
   }
 `;
 
@@ -66,15 +67,15 @@ const ThemeToggleStyled = styled(ThemeToggle)<{ $hideOnScroll: boolean }>`
   --toggle-size: 14px;
   height: 40px;
   transition: transform 0.3s ease;
-  
+
   /* Ajustar el tamaño del toggle */
   & label {
     width: 42px;
     height: 42px;
   }
-  
+
   @media (max-width: 768px) {
-    transform: translateY(${props => props.$hideOnScroll ? '-100px' : '0'});
+    transform: translateY(${props => (props.$hideOnScroll ? '-100px' : '0')});
   }
 `;
 
@@ -85,9 +86,9 @@ const ContactButtonStyled = styled(ContactButton)<{ $hideOnScroll: boolean }>`
   right: 1.5rem;
   z-index: 100;
   transition: transform 0.3s ease;
-  
+
   @media (max-width: 768px) {
-    transform: translateY(${props => props.$hideOnScroll ? '-100px' : '0'});
+    transform: translateY(${props => (props.$hideOnScroll ? '-100px' : '0')});
   }
 `;
 
@@ -97,12 +98,12 @@ const AppContent = () => {
   const [chatbotVisible, setChatbotVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [shouldShowLoader, setShouldShowLoader] = useState(false);
-  
+
   // Verificar si es la primera visita del usuario
   useEffect(() => {
     // Comprobar si es la primera visita
     const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
-    
+
     if (!hasVisitedBefore) {
       // Es la primera visita, mostrar el loader
       setShouldShowLoader(true);
@@ -113,7 +114,7 @@ const AppContent = () => {
       // y permitir que las animaciones comiencen inmediatamente
       setFontsLoaded(true);
     }
-    
+
     // Verificar si las fuentes ya están cargadas en el navegador
     document.fonts.ready.then(() => {
       if (hasVisitedBefore) {
@@ -122,7 +123,7 @@ const AppContent = () => {
       }
     });
   }, []);
-  
+
   // Inicializar el servidor n8n cuando la aplicación se carga
   useEffect(() => {
     // Retrasar la inicialización para mejorar métricas de rendimiento
@@ -130,7 +131,7 @@ const AppContent = () => {
       // Una única llamada de precalentamiento al servidor n8n
       initializeN8NServer();
     }, 2500);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -148,7 +149,7 @@ const AppContent = () => {
   // Controlar el scroll para ocultar controles en móvil
   useEffect(() => {
     if (!isMobile) return; // Solo aplicar en móvil
-    
+
     const handleScroll = () => {
       if (window.scrollY > 50) {
         setHideControls(true);
@@ -163,10 +164,13 @@ const AppContent = () => {
 
   // Mostrar chatbot después de un retraso para mejorar LCP
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setChatbotVisible(true);
-    }, isMobile ? 3000 : 2000); // Mayor retraso en móvil
-    
+    const timer = window.setTimeout(
+      () => {
+        setChatbotVisible(true);
+      },
+      isMobile ? 3000 : 2000
+    ); // Mayor retraso en móvil
+
     return () => clearTimeout(timer);
   }, [isMobile]);
 
@@ -190,7 +194,7 @@ const AppContent = () => {
   return (
     <AppWrapper>
       {shouldShowLoader && !fontsLoaded && <FontLoader onLoaded={handleFontsLoaded} />}
-      
+
       <GrainOverlay />
       <LanguageSelectorStyled initialDelay={500} $hideOnScroll={hideControls} />
       <ThemeToggleStyled initialDelay={500} $hideOnScroll={hideControls} />
@@ -204,7 +208,13 @@ const AppContent = () => {
       <Container>
         <React.Suspense fallback={<div>Loading...</div>}>
           <Routes>
-            <Route path="/" element={<Home onAnimationComplete={handleAnimationComplete} fontsLoaded={fontsLoaded} />} />
+            <Route
+              path="/"
+              element={
+                <Home onAnimationComplete={handleAnimationComplete} fontsLoaded={fontsLoaded} />
+              }
+            />
+            <Route path="/:projectId" element={<ProjectPage />} />
           </Routes>
         </React.Suspense>
       </Container>

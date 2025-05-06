@@ -37,10 +37,16 @@ const resources = {
       name: 'Name',
       email: 'Email',
       message: 'Message',
+      subject: 'Subject',
       send: 'Send Message',
       sending: 'Sending...',
       messageSent: 'Message sent successfully! I will get back to you soon.',
       messageError: 'There was an error sending your message. Please try again.',
+      // Placeholders
+      namePlaceholder: 'E.g: Steve Jobs',
+      emailPlaceholder: 'example@example.com',
+      messagePlaceholder: 'Write a message...',
+      subjectPlaceholder: 'E.g: Project Inquiry',
       // Footer
       yourName: 'Your Name',
       allRightsReserved: 'All Rights Reserved',
@@ -137,10 +143,16 @@ const resources = {
       name: 'Nombre',
       email: 'Correo electrónico',
       message: 'Mensaje',
+      subject: 'Asunto',
       send: 'Enviar Mensaje',
       sending: 'Enviando...',
       messageSent: '¡Mensaje enviado con éxito! Te responderé pronto.',
       messageError: 'Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo.',
+      // Placeholders
+      namePlaceholder: 'Ej: Steve Jobs',
+      emailPlaceholder: 'ejemplo@ejemplo.com',
+      messagePlaceholder: 'Escribe un mensaje...',
+      subjectPlaceholder: 'Ej: Consulta sobre proyecto',
       // Footer
       yourName: 'Tu Nombre',
       allRightsReserved: 'Todos los Derechos Reservados',
