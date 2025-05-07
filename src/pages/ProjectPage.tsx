@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import ferreyraImage from '../assets/ferreyra2.webp';
+// @ts-ignore
+import { SplineScene } from '../xcons';
 
 const ProjectContainer = styled.div`
   padding: 0 20px 40px;
@@ -16,7 +18,7 @@ const ProjectHeader = styled.div`
   text-align: center;
 `;
 
-// Mejorando el banner XCONS con degradado
+// Mejorando el banner con degradado para todos los proyectos
 const ProjectBanner = styled.div<{ $bgColor: string }>`
   background: linear-gradient(
     to bottom,
@@ -239,6 +241,22 @@ const ProjectLogoContainer = styled.div`
   margin-bottom: 40px;
 `;
 
+const SplineContainer = styled.div`
+  width: 100%;
+  height: auto;
+  margin-top: 80px;
+  margin-bottom: 40px;
+  position: relative;
+`;
+
+const SplineTitle = styled.h3`
+  font-size: 28px;
+  margin-bottom: 25px;
+  color: #15814B;
+  text-align: center;
+  font-weight: 600;
+`;
+
 interface Project {
   id: string;
   title: string;
@@ -406,6 +424,115 @@ const ProjectPage: React.FC = () => {
                 />
               </div>
             </div>
+            
+            <SplineContainer>
+              <SplineTitle>
+                {i18n.language.startsWith('es')
+                  ? 'Modelo 3D Interactivo'
+                  : 'Interactive 3D Model'}
+              </SplineTitle>
+              <SplineScene />
+            </SplineContainer>
+          </div>
+        </>
+      );
+    } else if (project.id === 'condamind') {
+      return (
+        <>
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <RoleTitle>Desarrollador Full Stack & Especialista en IA</RoleTitle>
+            <RolePeriod>
+              ene. 2023 - Actualidad · 1 año 6 meses
+              <LocationBadge>{t('remote', 'En remoto')}</LocationBadge>
+            </RolePeriod>
+
+            <SkillsContainer>
+              <SkillBadge>React</SkillBadge>
+              <SkillBadge>Node.js</SkillBadge>
+              <SkillBadge>Python</SkillBadge>
+              <SkillBadge>TensorFlow</SkillBadge>
+              <SkillBadge>+5 aptitudes</SkillBadge>
+            </SkillsContainer>
+
+            <RoleDescription>
+              {i18n.language.startsWith('es')
+                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
+                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
+            </RoleDescription>
+
+            <ExperienceDivider />
+
+            <RoleDescription>
+              {i18n.language.startsWith('es')
+                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
+                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
+            </RoleDescription>
+          </div>
+        </>
+      );
+    } else if (project.id === 'fusionads') {
+      return (
+        <>
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <RoleTitle>Marketing Digital & Especialista en Publicidad</RoleTitle>
+            <RolePeriod>
+              mar. 2021 - dic. 2022 · 1 año 9 meses
+              <LocationBadge>{t('remote', 'En remoto')}</LocationBadge>
+            </RolePeriod>
+
+            <SkillsContainer>
+              <SkillBadge>Google Ads</SkillBadge>
+              <SkillBadge>Facebook Ads</SkillBadge>
+              <SkillBadge>SEO</SkillBadge>
+              <SkillBadge>+4 aptitudes</SkillBadge>
+            </SkillsContainer>
+
+            <RoleDescription>
+              {i18n.language.startsWith('es')
+                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
+                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
+            </RoleDescription>
+
+            <ExperienceDivider />
+
+            <RoleDescription>
+              {i18n.language.startsWith('es')
+                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
+                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
+            </RoleDescription>
+          </div>
+        </>
+      );
+    } else if (project.id === 'bandit') {
+      return (
+        <>
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <RoleTitle>Ingeniero de Seguridad & Analista de Ciberseguridad</RoleTitle>
+            <RolePeriod>
+              jun. 2020 - feb. 2021 · 8 meses
+              <LocationBadge>{t('remote', 'En remoto')}</LocationBadge>
+            </RolePeriod>
+
+            <SkillsContainer>
+              <SkillBadge>Ethical Hacking</SkillBadge>
+              <SkillBadge>Pentesting</SkillBadge>
+              <SkillBadge>Firewall</SkillBadge>
+              <SkillBadge>+6 aptitudes</SkillBadge>
+            </SkillsContainer>
+
+            <RoleDescription>
+              {i18n.language.startsWith('es')
+                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
+                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
+            </RoleDescription>
+
+            <ExperienceDivider />
+
+            <RoleDescription>
+              {i18n.language.startsWith('es')
+                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
+                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
+            </RoleDescription>
           </div>
         </>
       );
@@ -424,31 +551,25 @@ const ProjectPage: React.FC = () => {
 
   return (
     <>
-      {project.id === 'xcons' && (
-        <ProjectBanner $bgColor={project.color}>
-          <BannerContent>
-            <BannerLeftContent>
-              <img
-                src={project.image}
-                alt={project.title}
-                style={{ width: '60%', maxWidth: '1000px', marginBottom: '0' }}
-              />
-              <BannerDescription>{project.description}</BannerDescription>
-            </BannerLeftContent>
+      <ProjectBanner $bgColor={project.color}>
+        <BannerContent>
+          <BannerLeftContent>
+            <img
+              src={project.image}
+              alt={project.title}
+              style={{ width: '60%', maxWidth: '1000px', marginBottom: '0' }}
+            />
+            <BannerDescription>{project.description}</BannerDescription>
+          </BannerLeftContent>
 
-            <BannerWebImage src="/images/web-xconx.png" alt="XCONS Website" />
-          </BannerContent>
-        </ProjectBanner>
-      )}
+          <BannerWebImage 
+            src={project.id === 'xcons' ? "/images/web-xconx.png" : "/images/projects/fallback-image.jpg"} 
+            alt={`${project.title} Website`} 
+          />
+        </BannerContent>
+      </ProjectBanner>
 
-      <ProjectContainer style={{ paddingTop: project.id === 'xcons' ? 0 : '120px' }}>
-        {project.id !== 'xcons' && (
-          <ProjectHeader>
-            <ProjectTitle style={{ color: project.color }}>{project.title}</ProjectTitle>
-            <ProjectDescription>{project.description}</ProjectDescription>
-          </ProjectHeader>
-        )}
-
+      <ProjectContainer style={{ paddingTop: 0 }}>
         <ProjectContent>{renderProjectContent()}</ProjectContent>
 
         <BackButton onClick={() => navigate('/')}>{t('backToHome', 'Volver al inicio')}</BackButton>
