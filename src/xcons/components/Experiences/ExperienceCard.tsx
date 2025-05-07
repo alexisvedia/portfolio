@@ -15,51 +15,52 @@ export interface ExperienceCardProps {
 }
 
 const CardContainer = styled.div`
-  background-color: ${props => props.theme === 'dark' ? '#1D1F23' : '#F6F6F6'};
-  border-radius: 12px;
-  padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  }
 `;
 
 const CardTitle = styled.h3`
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
   color: ${props => props.theme === 'dark' ? '#FFFFFF' : '#333333'};
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
 `;
 
 const Period = styled.p`
   font-size: 0.9rem;
   color: ${props => props.theme === 'dark' ? '#B8B8B8' : '#666666'};
   margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
 `;
 
 const Role = styled.h4`
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   margin-bottom: 1rem;
   color: ${props => props.theme === 'dark' ? '#E0E0E0' : '#444444'};
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
 `;
 
 const SectionTitle = styled.h5`
   font-size: 1rem;
   margin: 1rem 0 0.5rem 0;
   color: ${props => props.theme === 'dark' ? '#CCCCCC' : '#555555'};
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  text-transform: none;
 `;
 
 const List = styled.ul`
   padding-left: 1.5rem;
   margin-bottom: 1rem;
+  font-family: 'Inter', sans-serif;
 `;
 
 const ListItem = styled.li`
   margin-bottom: 0.5rem;
   color: ${props => props.theme === 'dark' ? '#AAAAAA' : '#666666'};
+  font-size: 0.95rem;
+  line-height: 1.6;
 `;
 
 const ToolsContainer = styled.div`
@@ -75,14 +76,7 @@ const Tool = styled.span`
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-size: 0.85rem;
-`;
-
-const ImagesGallery = styled.div`
-  display: flex;
-  overflow-x: auto;
-  gap: 1rem;
-  margin-top: 1.5rem;
-  padding-bottom: 0.5rem;
+  font-family: 'Inter', sans-serif;
 `;
 
 const GalleryImage = styled.img`
@@ -147,14 +141,6 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
             ))}
           </List>
         </>
-      )}
-      
-      {images && images.length > 0 && (
-        <ImagesGallery>
-          {images.map((image, index) => (
-            <GalleryImage key={index} src={image} alt={`${title} - ${index + 1}`} />
-          ))}
-        </ImagesGallery>
       )}
     </CardContainer>
   );

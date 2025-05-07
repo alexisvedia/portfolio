@@ -6,7 +6,7 @@ import { useRef, useEffect } from 'react';
 const SplineContainer = styled.div`
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 100%;
   z-index: 0;
 `;
 
@@ -28,7 +28,7 @@ const WatermarkCover = styled.div`
   right: 0;
   width: 170px;
   height: 80px;
-  background-color: ${props => props.$isDark ? '#1D1F23' : '#F6F6F6'};
+  background-color:#FFF;
   z-index: 10;
   
   &::after {

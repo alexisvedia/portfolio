@@ -351,16 +351,8 @@ const ProjectPage: React.FC = () => {
 
             <RoleDescription>
               {i18n.language.startsWith('es')
-                ? 'Desempeño el rol de diseñador de interfaces gráficas para desktop y móvil, y experiencias de usuario. Creé y organicé las bibliotecas de componentes UI para diferentes secciones de la empresa. Trabajé en el flujo de distintas secciones del e-commerce y en la creación de módulos para múltiples casos de uso. Algunas de las secciones son: check-out, flujo de compra, micrositios, vendor.'
-                : 'I play the role of designer of desktop and mobile graphic interfaces and user experiences. I created and organized the UI component libraries for different sections of the company. I worked on the flow of different sections of the e-commerce and on the creation of many use cases modules. Some of the sections are: check-out, purchase flow, microsites, vendor.'}
-            </RoleDescription>
-
-            <ExperienceDivider />
-
-            <RoleDescription>
-              {i18n.language.startsWith('es')
-                ? 'Trabajo junto al equipo de desarrolladores front-end donde también ejecuto tareas de desarrollo web. Ayudo a otros diseñadores a orientarse, entender el contexto y propósito de la empresa.'
-                : 'I work alongside the team of front-end developers where I also run web development tasks. I help other designers to find their way around, understand the context and purpose of the company.'}
+                ? 'Como diseñador UI/UX y gráfico, lideré la creación y organización de bibliotecas de componentes, definiendo experiencias de usuario para interfaces desktop y móviles y creando material visual para marketing. Optimicé flujos clave del e-commerce (incluyendo checkout, compra, micrositios y gestión de vendors) y participé activamente en la transición de marca y dominio desde ViviendaVerde a XCONS, contribuyendo a la nueva identidad visual. Colaboré estrechamente con el equipo de desarrollo front-end, ejecutando tareas de maquetación web y guiando a otros diseñadores en el contexto de la empresa.'
+                : 'As a UI/UX and Graphic Designer, I led the creation and organization of component libraries, defined user experiences for desktop and mobile interfaces, and created visual assets for marketing. I optimized key e-commerce flows (including checkout, purchasing, microsites, and vendor management) and actively participated in the brand and domain transition from ViviendaVerde to XCONS, contributing to the new visual identity. Collaborating closely with the front-end development team, I executed web development tasks and provided guidance to fellow designers regarding the company\'s context.'}
             </RoleDescription>
 
             <div
@@ -454,19 +446,6 @@ const ProjectPage: React.FC = () => {
               <SkillBadge>+5 aptitudes</SkillBadge>
             </SkillsContainer>
 
-            <RoleDescription>
-              {i18n.language.startsWith('es')
-                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
-                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
-            </RoleDescription>
-
-            <ExperienceDivider />
-
-            <RoleDescription>
-              {i18n.language.startsWith('es')
-                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
-                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
-            </RoleDescription>
           </div>
         </>
       );
@@ -487,19 +466,7 @@ const ProjectPage: React.FC = () => {
               <SkillBadge>+4 aptitudes</SkillBadge>
             </SkillsContainer>
 
-            <RoleDescription>
-              {i18n.language.startsWith('es')
-                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
-                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
-            </RoleDescription>
-
-            <ExperienceDivider />
-
-            <RoleDescription>
-              {i18n.language.startsWith('es')
-                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
-                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
-            </RoleDescription>
+           
           </div>
         </>
       );
@@ -520,19 +487,7 @@ const ProjectPage: React.FC = () => {
               <SkillBadge>+6 aptitudes</SkillBadge>
             </SkillsContainer>
 
-            <RoleDescription>
-              {i18n.language.startsWith('es')
-                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
-                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
-            </RoleDescription>
-
-            <ExperienceDivider />
-
-            <RoleDescription>
-              {i18n.language.startsWith('es')
-                ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'
-                : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl eget ultricies tincidunt, nisl nisl aliquam nisl, eget ultricies nisl nisl eget nisl.'}
-            </RoleDescription>
+          
           </div>
         </>
       );

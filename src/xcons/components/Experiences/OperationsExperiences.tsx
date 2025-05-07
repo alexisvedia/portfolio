@@ -4,45 +4,20 @@ import { useTheme } from '../../../context/ThemeContext';
 import ExperienceCard, { ExperienceCardProps } from './ExperienceCard';
 
 interface OperationsExperiencesProps {
+  title: React.ReactNode;
   experiences: Omit<ExperienceCardProps, 'language'>[];
   language?: 'es' | 'en';
 }
 
 const SectionContainer = styled.div`
   margin: 2rem 0;
+  padding: 1.5rem;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: ${props => props.theme === 'dark' ? '#FFFFFF' : '#333333'};
-  position: relative;
-  
-  &:after {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 60px;
-    height: 4px;
-    background: linear-gradient(90deg, #3B82F6 0%, #10B981 100%);
-    border-radius: 2px;
-  }
-`;
-
-const OperationsExperiences: React.FC<OperationsExperiencesProps> = ({ experiences, language = 'es' }) => {
-  const { themeMode } = useTheme();
-  
-  const translations = {
-    title: {
-      es: 'Experiencias en Operaciones',
-      en: 'Operations Experiences'
-    }
-  };
-  
+const OperationsExperiences: React.FC<OperationsExperiencesProps> = ({ title, experiences, language = 'es' }) => {
   return (
     <SectionContainer>
-      <SectionTitle theme={themeMode}>{translations.title[language]}</SectionTitle>
+      {title}
       {experiences.map((experience, index) => (
         <ExperienceCard
           key={index}

@@ -1,123 +1,104 @@
 import { createGlobalStyle } from 'styled-components';
-import './fonts.css'; // Importar el archivo de fuentes
+import './fonts.css'; // Importar el archivo de fuentes Morganite
 
-// Importar Google Fonts directamente en el archivo JS para evitar el error de CSS
-const googleFontsUrl = 'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap';
-const link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = googleFontsUrl;
-document.head.appendChild(link);
+// --- Importar Google Fonts --- 
+// Guardar las URLs en constantes para claridad
+const latoFontsUrl = 'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap';
+const openSansFontsUrl = 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap'; // Añadir Open Sans (Regular 400, Bold 700)
+
+// Función para añadir un link de fuente al head
+const addFontLink = (url: string) => {
+  if (!document.querySelector(`link[href="${url}"]`)) { // Evitar añadir duplicados
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = url;
+    document.head.appendChild(link);
+  }
+};
+
+// Añadir las fuentes
+addFontLink(latoFontsUrl);
+addFontLink(openSansFontsUrl);
+// --- Fin Importar Google Fonts ---
 
 export const GlobalStyles = createGlobalStyle`
-  * {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
   }
 
   html {
-    font-size: 16px;
     scroll-behavior: smooth;
-    
-    /* Personalización de la barra de desplazamiento */
-    scrollbar-width: thin;
-    scrollbar-color: ${({ theme }) => `${theme.colors.text}50`} transparent;
+    height: 100%;
+    font-size: 16px; // Base font size
   }
-  
-  /* Estilos para navegadores WebKit (Chrome, Safari, etc.) */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  
-  ::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => `${theme.colors.text}50`};
-    border-radius: 3px;
-    transition: opacity 1.5s ease;
-  }
-  
-  /* Ocultar la barra cuando no se está desplazando */
-  ::-webkit-scrollbar-thumb:hover {
-    background-color: ${({ theme }) => `${theme.colors.text}80`};
-  }
-  
-  /* Ocultar flechas de inicio y fin */
-  ::-webkit-scrollbar-button {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
-    opacity: 0;
-    visibility: hidden;
-  }
-  
-  /* Hacer que la barra de desplazamiento se desvanezca cuando no hay actividad */
-  body:not(.scrolling) ::-webkit-scrollbar-thumb {
-    background-color: transparent !important;
-    visibility: hidden !important;
-    opacity: 0;
-    width: 0;
-  }
-  
-  /* Mostrar la barra de desplazamiento durante el scroll */
-  body.scrolling ::-webkit-scrollbar-thumb {
-    background-color: ${({ theme }) => `${theme.colors.text}50`};
-    visibility: visible;
-  }
-  
+
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     background-color: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    position: relative;
+    font-family: ${({ theme }) => theme.fonts.body}; /* 'Inter' es el principal aquí */
+    line-height: 1.6;
+    min-height: 100%;
+    overflow-x: hidden; 
+    transition: background-color 0.3s ease, color 0.3s ease; 
   }
 
-  button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-family: inherit;
+  /* Estilos globales para párrafos */
+  p {
+    font-family: 'Open Sans', sans-serif; /* Aplicar Open Sans */
+    font-size: 16px; /* Tamaño estándar */
+    color: inherit; /* Heredar color para respetar temas */
+    margin-bottom: 1rem; /* Espaciado inferior estándar para párrafos */
   }
 
-  img {
-    max-width: 100%;
-    height: auto;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: ${({ theme }) => theme.fonts.heading}; /* Usa Morganite y luego Inter */
+    color: ${({ theme }) => theme.colors.text};
+    line-height: 1.2;
+    margin: 0 0 1rem 0;
+  }
+
+  a {
+    color: ${({ theme }) => theme.colors.primary};
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      text-decoration: underline;
+    }
   }
 
   ul, ol {
     list-style: none;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Morganite', ${({ theme }) => theme.fonts.heading};
-    font-weight: 700;
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
-  
-  /* Transiciones para el cambio de tema */
-  a, button, input, textarea, .card, .navbar, .footer {
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
   }
-  
-  /* Clases para utilizar la fuente Morganite */
-  .morganite {
-    font-family: 'Morganite', sans-serif;
-  }
-  
-  .morganite-bold {
-    font-family: 'Morganite', sans-serif;
-    font-weight: 700;
-  }
-  
-  .morganite-black {
-    font-family: 'Morganite', sans-serif;
-    font-weight: 900;
+
+  input, textarea, select {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.5rem;
+    border: 1px solid ${({ theme }) => theme.colors.border};
+    background-color: ${({ theme }) => theme.colors.inputBg};
+    color: ${({ theme }) => theme.colors.text};
+    border-radius: 4px;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: ${({ theme }) => theme.colors.primary};
+    }
   }
 `;

@@ -11,21 +11,20 @@ export const marketingExperiences: {
     {
       title: 'Diseño de Interfaces y UX',
       period: 'nov. 2022 - may. 2024',
-      role: 'UI/UX Designer',
+      role: 'UI/UX Designer & Diseñador Gráfico',
       tasks: [
-        'Diseño de interfaces gráficas para desktop y móvil',
+        'Diseño de interfaces gráficas para desktop y móvil, diseño gráfico para redes sociales, y creación de videos y animaciones 3D',
         'Creación y organización de bibliotecas de componentes UI',
-        'Diseño de piezas para redes sociales',
-        'Diseño 3D y edición de videos (Premiere/After Effects)',
         'Diseño y maquetado de la web comercial (HubSpot → WordPress)',
         'Análisis de interacción con Clarity (cards de producto, home)',
         'Propuestas de mejora basadas en análisis de datos'
       ],
-      tools: ['Figma', 'Photoshop', 'Clarity', 'HubSpot', 'WordPress', 'Premiere', 'After Effects'],
+      tools: ['Figma', 'Photoshop', 'Illustrator', 'Premiere Pro', 'After Effects', 'Blender', 'Clarity', 'HubSpot', 'WordPress'],
       results: [
         'Mejora en la experiencia de usuario basada en datos de Clarity',
         'Implementación exitosa de nuevos componentes UI',
-        'Migración completa de HubSpot a WordPress'
+        'Migración completa de HubSpot a WordPress',
+        'Creación de contenido visual atractivo para marketing y redes sociales'
       ],
       images: [
         '/images/projects/xcons/marketing1.jpg',
@@ -35,23 +34,22 @@ export const marketingExperiences: {
   ],
   en: [
     {
-      title: 'Interface Design and UX',
+      title: 'Interface and UX Design',
       period: 'Nov 2022 - May 2024',
-      role: 'UI/UX Designer',
+      role: 'UI/UX Designer & Graphic Designer',
       tasks: [
-        'Design of graphic interfaces for desktop and mobile',
+        'Design of graphical interfaces for desktop and mobile, graphic design for social media, and creation of videos and 3D animations',
         'Creation and organization of UI component libraries',
-        'Design of social media assets',
-        '3D design and video editing (Premiere/After Effects)',
         'Design and layout of the commercial website (HubSpot → WordPress)',
         'Interaction analysis with Clarity (product cards, home)',
         'Improvement proposals based on data analysis'
       ],
-      tools: ['Figma', 'Photoshop', 'Clarity', 'HubSpot', 'WordPress', 'Premiere', 'After Effects'],
+      tools: ['Figma', 'Photoshop', 'Illustrator', 'Premiere Pro', 'After Effects', 'Blender', 'Clarity', 'HubSpot', 'WordPress'],
       results: [
         'Improved user experience based on Clarity data',
         'Successful implementation of new UI components',
-        'Complete migration from HubSpot to WordPress'
+        'Complete migration from HubSpot to WordPress',
+        'Creation of engaging visual content for marketing and social media'
       ],
       images: [
         '/images/projects/xcons/marketing1.jpg',
