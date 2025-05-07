@@ -1,3 +1,4 @@
 import SplineScene from './SplineScene';
+import XConsExperiencePage from './XConsExperiencePage';
 
-export { SplineScene }; 
+export { SplineScene, XConsExperiencePage };
