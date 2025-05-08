@@ -47,7 +47,6 @@ const BannerBackground = styled.div`
   background-image: url(${xFondo});
   background-repeat: no-repeat;
   background-position: left center;
-
 `;
 
 const BannerContent = styled.div`
@@ -59,7 +58,7 @@ const BannerContent = styled.div`
   position: relative;
   z-index: 2;
   padding: 10px;
-  
+
   @media (max-width: 992px) {
     flex-direction: column;
     gap: 20px;
@@ -71,7 +70,7 @@ const LeftContent = styled.div`
   flex-direction: column;
   align-items: flex-start;
   max-width: 60%;
-  
+
   @media (max-width: 992px) {
     max-width: 100%;
     align-items: center;
@@ -93,11 +92,11 @@ const BannerText = styled.p`
 
 const RightContent = styled.div`
   max-width: 40%;
-  
+
   @media (max-width: 992px) {
     max-width: 80%;
   }
-  
+
   img {
     max-width: 131%;
     height: auto;
@@ -115,7 +114,7 @@ const Summary = styled.div<{ $themeMode: ThemeMode }>`
 const SummaryText = styled.p<{ $themeMode: ThemeMode }>`
   font-size: 1rem;
   line-height: 1.8;
-  color: ${props => props.$themeMode === 'dark' ? '#DDDDDD' : '#444444'};
+  color: ${props => (props.$themeMode === 'dark' ? '#DDDDDD' : '#444444')};
   margin-bottom: 1.5rem;
 `;
 
@@ -123,7 +122,7 @@ const ExperienceContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr;
   gap: 3rem;
-  
+
   @media (min-width: 992px) {
     grid-template-columns: 1fr 1fr;
   }
@@ -135,98 +134,105 @@ const MasonryWrapper = styled.div`
 
 const XConsExperiencePage: React.FC = () => {
   const { themeMode } = useTheme();
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
-  
+
   const masonryData = [
-    { 
-      id: 1, 
-      image: OGImage, 
-      height: 400, 
-      type: 'image' as const, 
+    {
+      id: 1,
+      image: OGImage,
+      height: 400,
+      type: 'image' as const,
       title: 'Imagen OG Portafolio',
-      description: 'Esta es la imagen principal utilizada para las vistas previas de enlaces del portafolio, diseñada para captar la atención y representar la identidad visual del proyecto.' 
+      description:
+        'Esta es la imagen principal utilizada para las vistas previas de enlaces del portafolio, diseñada para captar la atención y representar la identidad visual del proyecto.',
     },
-    { 
-      id: 2, 
-      image: RediseñoImage, 
-      height: 300, 
-      type: 'image' as const, 
+    {
+      id: 2,
+      image: RediseñoImage,
+      height: 300,
+      type: 'image' as const,
       title: 'Propuesta de Rediseño',
-      description: 'Concepto de rediseño para una plataforma existente, enfocado en mejorar la usabilidad y modernizar la interfaz de usuario. Incluye nuevos flujos y componentes visuales.' 
+      description:
+        'Concepto de rediseño para una plataforma existente, enfocado en mejorar la usabilidad y modernizar la interfaz de usuario. Incluye nuevos flujos y componentes visuales.',
     },
-    { 
-      id: 3, 
-      image: FerreyraImage, 
-      height: 350, 
-      type: 'image' as const, 
+    {
+      id: 3,
+      image: FerreyraImage,
+      height: 350,
+      type: 'image' as const,
       title: 'Proyecto Ferreyra',
-      description: 'Visualización del proyecto desarrollado para Ferreyra, destacando la integración de soluciones de e-commerce y la experiencia de usuario en el sector de construcción.' 
+      description:
+        'Visualización del proyecto desarrollado para Ferreyra, destacando la integración de soluciones de e-commerce y la experiencia de usuario en el sector de construcción.',
     },
-    { 
-      id: 'spline-scene', 
-      height: 300, 
-      type: 'spline' as const, 
+    {
+      id: 'spline-scene',
+      height: 300,
+      type: 'spline' as const,
       thumbnail: XConsComercialImage, // Usaremos esta como thumbnail temporal para Spline
-      splineSrc: "https://prod.spline.design/kFgAlvghlLyIp78Q/scene.splinecode",
+      splineSrc: 'https://prod.spline.design/kFgAlvghlLyIp78Q/scene.splinecode',
       title: 'Escena Interactiva 3D',
-      description: 'Una escena 3D interactiva creada con Spline. Muestra la capacidad de integrar elementos tridimensionales y animaciones en la web para una experiencia de usuario más inmersiva.' 
+      description:
+        'Una escena 3D interactiva creada con Spline. Muestra la capacidad de integrar elementos tridimensionales y animaciones en la web para una experiencia de usuario más inmersiva.',
     },
-    { 
-      id: 4, 
-      image: XFondoImage, 
-      height: 250, 
-      type: 'image' as const, 
+    {
+      id: 4,
+      image: XFondoImage,
+      height: 250,
+      type: 'image' as const,
       title: 'Fondo XCONS',
-      description: 'Imagen de fondo utilizada en la identidad visual de XCONS, representando la fusión de tecnología y construcción.' 
+      description:
+        'Imagen de fondo utilizada en la identidad visual de XCONS, representando la fusión de tecnología y construcción.',
     },
-    { 
-      id: 5, 
-      image: XConsComercialImage, 
-      height: 300, 
-      type: 'image' as const, 
+    {
+      id: 5,
+      image: XConsComercialImage,
+      height: 300,
+      type: 'image' as const,
       title: 'Vista Comercial XCONS',
-      description: 'Material gráfico diseñado para la presentación comercial de XCONS, mostrando la plataforma y sus beneficios clave para los usuarios.' 
+      description:
+        'Material gráfico diseñado para la presentación comercial de XCONS, mostrando la plataforma y sus beneficios clave para los usuarios.',
     },
-    { 
-      id: 6, 
-      image: XConLogoVerdeImage, 
-      height: 200, 
-      type: 'image' as const, 
+    {
+      id: 6,
+      image: XConLogoVerdeImage,
+      height: 200,
+      type: 'image' as const,
       title: 'Logo XCONS (Versión Verde)',
-      description: 'Versión del logotipo de XCONS en tonalidad verde, utilizada en contextos específicos de la marca para denotar crecimiento y sostenibilidad.' 
+      description:
+        'Versión del logotipo de XCONS en tonalidad verde, utilizada en contextos específicos de la marca para denotar crecimiento y sostenibilidad.',
     },
   ];
-  
+
   const translations = {
     mainTitle: {
       es: 'Un Vistazo a XCONS',
-      en: 'A Glimpse into XCONS'
+      en: 'A Glimpse into XCONS',
     },
     marketingTitle: {
-        es: 'Marketing y Diseño',
-        en: 'Marketing & Design'
+      es: 'Marketing y Diseño',
+      en: 'Marketing & Design',
     },
     operationsTitle: {
-        es: 'Operaciones y Calidad',
-        en: 'Operations & Quality'
+      es: 'Operaciones y Calidad',
+      en: 'Operations & Quality',
     },
     projectsTitle: {
-        es: 'Proyectos Destacados',
-        en: 'Featured Projects'
+      es: 'Proyectos Destacados',
+      en: 'Featured Projects',
     },
     summary: {
       es: 'Como diseñador UI/UX y gráfico, lideré la creación y organización de bibliotecas de componentes, definiendo experiencias de usuario para interfaces desktop y móviles y creando material visual para marketing. Optimicé flujos clave del e-commerce (incluyendo checkout, compra, micrositios y gestión de vendors) y participé activamente en la transición de marca y dominio desde ViviendaVerde a XCONS, contribuyendo a la nueva identidad visual. Colaboré estrechamente con el equipo de desarrollo front-end, ejecutando tareas de maquetación web y guiando a otros diseñadores en el contexto de la empresa.',
-      en: 'As a UI/UX and Graphic Designer, I led the creation and organization of component libraries, defined user experiences for desktop and mobile interfaces, and created visual assets for marketing. I optimized key e-commerce flows (including checkout, purchasing, microsites, and vendor management) and actively participated in the brand and domain transition from ViviendaVerde to XCONS, contributing to the new visual identity. Collaborating closely with the front-end development team, I executed web development tasks and provided guidance to fellow designers regarding the company\'s context.'
-    }
+      en: "As a UI/UX and Graphic Designer, I led the creation and organization of component libraries, defined user experiences for desktop and mobile interfaces, and created visual assets for marketing. I optimized key e-commerce flows (including checkout, purchasing, microsites, and vendor management) and actively participated in the brand and domain transition from ViviendaVerde to XCONS, contributing to the new visual identity. Collaborating closely with the front-end development team, I executed web development tasks and provided guidance to fellow designers regarding the company's context.",
+    },
   };
-  
+
   return (
     <PageContainer>
       <StandardSectionTitle as="h1" style={{ color: 'transparent', userSelect: 'none' }}>
         {translations.mainTitle[language]}
       </StandardSectionTitle>
-      
+
       <XconsBanner>
         <BannerBackground />
         <BannerContent>
@@ -234,8 +240,8 @@ const XConsExperiencePage: React.FC = () => {
             <LogoImage src={xconLogoVerde} alt="XCON Logo" />
             <BannerText>
               {language === 'es'
-                ? "Plataforma de e-commerce especializada en la venta omnicanal de materiales de construcción"
-                : "E-commerce platform specialized in omnichannel sales of construction materials"}
+                ? 'Plataforma de e-commerce especializada en la venta omnicanal de materiales de construcción'
+                : 'E-commerce platform specialized in omnichannel sales of construction materials'}
             </BannerText>
           </LeftContent>
           <RightContent>
@@ -243,27 +249,35 @@ const XConsExperiencePage: React.FC = () => {
           </RightContent>
         </BannerContent>
       </XconsBanner>
-      
+
       <Summary $themeMode={themeMode}>
-        <SummaryText $themeMode={themeMode}>
-            {translations.summary[language]}
-        </SummaryText>
+        <SummaryText $themeMode={themeMode}>{translations.summary[language]}</SummaryText>
       </Summary>
-      
+
       <ExperienceContainer>
-        <MarketingExperiences 
-          title={<StandardSectionTitle style={{ paddingLeft: '3.5rem', textAlign: 'left' }}>{translations.marketingTitle[language]}</StandardSectionTitle>}
+        <MarketingExperiences
+          title={
+            <StandardSectionTitle style={{ paddingLeft: '3.5rem', textAlign: 'left' }}>
+              {translations.marketingTitle[language]}
+            </StandardSectionTitle>
+          }
           experiences={marketingExperiences[language]}
           language={language}
         />
-        <OperationsExperiences 
-          title={<StandardSectionTitle style={{ paddingLeft: '3.5rem', textAlign: 'left' }}>{translations.operationsTitle[language]}</StandardSectionTitle>}
+        <OperationsExperiences
+          title={
+            <StandardSectionTitle style={{ paddingLeft: '3.5rem', textAlign: 'left' }}>
+              {translations.operationsTitle[language]}
+            </StandardSectionTitle>
+          }
           experiences={operationsExperiences[language]}
           language={language}
         />
       </ExperienceContainer>
 
-      <StandardSectionTitle style={{ paddingLeft: '3.5rem', textAlign: 'center', marginTop: '4rem' }}>
+      <StandardSectionTitle
+        style={{ paddingLeft: '3.5rem', textAlign: 'center', marginTop: '4rem' }}
+      >
         {translations.projectsTitle[language]}
       </StandardSectionTitle>
 
@@ -274,4 +288,4 @@ const XConsExperiencePage: React.FC = () => {
   );
 };
 
-export default XConsExperiencePage; 
+export default XConsExperiencePage;

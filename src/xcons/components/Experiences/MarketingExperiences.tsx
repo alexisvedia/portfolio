@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTheme } from '../../../context/ThemeContext';
 import ExperienceCard, { ExperienceCardProps } from './ExperienceCard';
 
 interface MarketingExperiencesProps {
@@ -14,19 +13,19 @@ const SectionContainer = styled.div`
   padding: 1.5rem;
 `;
 
-const MarketingExperiences: React.FC<MarketingExperiencesProps> = ({ title, experiences, language = 'es' }) => {
+const MarketingExperiences: React.FC<MarketingExperiencesProps> = ({
+  title,
+  experiences,
+  language = 'es',
+}) => {
   return (
     <SectionContainer>
       {title}
       {experiences.map((experience, index) => (
-        <ExperienceCard
-          key={index}
-          {...experience}
-          language={language}
-        />
+        <ExperienceCard key={index} {...experience} language={language} />
       ))}
     </SectionContainer>
   );
 };
 
-export default MarketingExperiences; 
+export default MarketingExperiences;

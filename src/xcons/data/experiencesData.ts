@@ -17,20 +17,26 @@ export const marketingExperiences: {
         'Creación y organización de bibliotecas de componentes UI',
         'Diseño y maquetado de la web comercial (HubSpot → WordPress)',
         'Análisis de interacción con Clarity (cards de producto, home)',
-        'Propuestas de mejora basadas en análisis de datos'
+        'Propuestas de mejora basadas en análisis de datos',
       ],
-      tools: ['Figma', 'Photoshop', 'Illustrator', 'Premiere Pro', 'After Effects', 'Blender', 'Clarity', 'HubSpot', 'WordPress'],
+      tools: [
+        'Figma',
+        'Photoshop',
+        'Illustrator',
+        'Premiere Pro',
+        'After Effects',
+        'Blender',
+        'Clarity',
+        'HubSpot',
+        'WordPress',
+      ],
       results: [
         'Mejora en la experiencia de usuario basada en datos de Clarity',
         'Implementación exitosa de nuevos componentes UI',
         'Migración completa de HubSpot a WordPress',
-        'Creación de contenido visual atractivo para marketing y redes sociales'
+        'Creación de contenido visual atractivo para marketing y redes sociales',
       ],
-      images: [
-        '/images/projects/xcons/marketing1.jpg',
-        '/images/projects/xcons/marketing2.jpg'
-      ]
-    }
+    },
   ],
   en: [
     {
@@ -42,21 +48,27 @@ export const marketingExperiences: {
         'Creation and organization of UI component libraries',
         'Design and layout of the commercial website (HubSpot → WordPress)',
         'Interaction analysis with Clarity (product cards, home)',
-        'Improvement proposals based on data analysis'
+        'Improvement proposals based on data analysis',
       ],
-      tools: ['Figma', 'Photoshop', 'Illustrator', 'Premiere Pro', 'After Effects', 'Blender', 'Clarity', 'HubSpot', 'WordPress'],
+      tools: [
+        'Figma',
+        'Photoshop',
+        'Illustrator',
+        'Premiere Pro',
+        'After Effects',
+        'Blender',
+        'Clarity',
+        'HubSpot',
+        'WordPress',
+      ],
       results: [
         'Improved user experience based on Clarity data',
         'Successful implementation of new UI components',
         'Complete migration from HubSpot to WordPress',
-        'Creation of engaging visual content for marketing and social media'
+        'Creation of engaging visual content for marketing and social media',
       ],
-      images: [
-        '/images/projects/xcons/marketing1.jpg',
-        '/images/projects/xcons/marketing2.jpg'
-      ]
-    }
-  ]
+    },
+  ],
 };
 
 // Datos para experiencias de Operaciones
@@ -76,19 +88,15 @@ export const operationsExperiences: {
         'Rediseño del sitio general que agrupa todos los e-commerce',
         'Testeo de flujos de usuario',
         'Creación y ejecución de test cases',
-        'Validación de UI junto a desarrolladores'
+        'Validación de UI junto a desarrolladores',
       ],
       tools: ['Magento', 'HTML', 'CSS', 'JavaScript', 'Git'],
       results: [
         'Mejora en la calidad del código y rendimiento del sitio',
         'Optimización de flujos de usuario',
-        'Unificación exitosa de múltiples e-commerce bajo una misma plataforma'
+        'Unificación exitosa de múltiples e-commerce bajo una misma plataforma',
       ],
-      images: [
-        '/images/projects/xcons/operations1.jpg',
-        '/images/projects/xcons/operations2.jpg'
-      ]
-    }
+    },
   ],
   en: [
     {
@@ -102,18 +110,14 @@ export const operationsExperiences: {
         'Redesign of the general site that groups all e-commerce platforms',
         'User flow testing',
         'Creation and execution of test cases',
-        'UI validation with developers'
+        'UI validation with developers',
       ],
       tools: ['Magento', 'HTML', 'CSS', 'JavaScript', 'Git'],
       results: [
         'Improved code quality and site performance',
         'Optimization of user flows',
-        'Successful unification of multiple e-commerce sites under one platform'
+        'Successful unification of multiple e-commerce sites under one platform',
       ],
-      images: [
-        '/images/projects/xcons/operations1.jpg',
-        '/images/projects/xcons/operations2.jpg'
-      ]
-    }
-  ]
-}; 
+    },
+  ],
+};

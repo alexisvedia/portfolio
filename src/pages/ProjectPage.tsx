@@ -13,11 +13,6 @@ const ProjectContainer = styled.div`
   color: ${({ theme }) => theme.colors.text};
 `;
 
-const ProjectHeader = styled.div`
-  margin-bottom: 40px;
-  text-align: center;
-`;
-
 // Mejorando el banner con degradado para todos los proyectos
 const ProjectBanner = styled.div<{ $bgColor: string }>`
   background: linear-gradient(
@@ -68,24 +63,6 @@ const BannerLeftContent = styled.div`
   }
 `;
 
-const BannerLogo = styled.img`
-  max-width: 650px;
-  margin-bottom: 70px;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
-
-  @media (max-width: 1200px) {
-    max-width: 550px;
-  }
-
-  @media (max-width: 992px) {
-    max-width: 480px;
-  }
-
-  @media (max-width: 576px) {
-    max-width: 380px;
-  }
-`;
-
 const BannerWebImage = styled.img`
   max-width: 500px;
   height: auto;
@@ -97,20 +74,6 @@ const BannerWebImage = styled.img`
 
   @media (max-width: 992px) {
     max-width: 90%;
-  }
-`;
-
-const BannerTitle = styled.h1`
-  font-family: 'Morganite', sans-serif;
-  font-size: 80px;
-  font-weight: 900;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-  color: white;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-  @media (max-width: 768px) {
-    font-size: 60px;
   }
 `;
 
@@ -127,21 +90,6 @@ const BannerDescription = styled.p`
     text-align: center;
     font-size: 18px;
   }
-`;
-
-const ProjectTitle = styled.h1`
-  font-family: 'Morganite', sans-serif;
-  font-size: 80px;
-  font-weight: 900;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-`;
-
-const ProjectDescription = styled.p`
-  font-size: 18px;
-  line-height: 1.6;
-  max-width: 800px;
-  margin: 0 auto;
 `;
 
 const ProjectContent = styled.div`
@@ -164,20 +112,6 @@ const BackButton = styled.button`
 `;
 
 // Nuevos componentes para la experiencia XCONS
-const ExperienceContainer = styled.div`
-  max-width: 900px;
-  margin: 0 auto 60px;
-  padding: 0;
-`;
-
-const ExperienceCard = styled.div`
-  background: transparent;
-  backdrop-filter: none;
-  padding: 0;
-  box-shadow: none;
-  margin-bottom: 40px;
-`;
-
 const RoleTitle = styled.h2`
   font-size: 32px;
   font-weight: 700;
@@ -229,18 +163,6 @@ const RoleDescription = styled.p`
   margin-bottom: 16px;
 `;
 
-const ExperienceDivider = styled.div`
-  height: 1px;
-  background: ${({ theme }) => `${theme.colors.text}33`};
-  margin: 32px 0;
-`;
-
-const ProjectLogoContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 40px;
-`;
-
 const SplineContainer = styled.div`
   width: 100%;
   height: auto;
@@ -252,7 +174,7 @@ const SplineContainer = styled.div`
 const SplineTitle = styled.h3`
   font-size: 28px;
   margin-bottom: 25px;
-  color: #15814B;
+  color: #15814b;
   text-align: center;
   font-weight: 600;
 `;
@@ -352,7 +274,7 @@ const ProjectPage: React.FC = () => {
             <RoleDescription>
               {i18n.language.startsWith('es')
                 ? 'Como diseñador UI/UX y gráfico, lideré la creación y organización de bibliotecas de componentes, definiendo experiencias de usuario para interfaces desktop y móviles y creando material visual para marketing. Optimicé flujos clave del e-commerce (incluyendo checkout, compra, micrositios y gestión de vendors) y participé activamente en la transición de marca y dominio desde ViviendaVerde a XCONS, contribuyendo a la nueva identidad visual. Colaboré estrechamente con el equipo de desarrollo front-end, ejecutando tareas de maquetación web y guiando a otros diseñadores en el contexto de la empresa.'
-                : 'As a UI/UX and Graphic Designer, I led the creation and organization of component libraries, defined user experiences for desktop and mobile interfaces, and created visual assets for marketing. I optimized key e-commerce flows (including checkout, purchasing, microsites, and vendor management) and actively participated in the brand and domain transition from ViviendaVerde to XCONS, contributing to the new visual identity. Collaborating closely with the front-end development team, I executed web development tasks and provided guidance to fellow designers regarding the company\'s context.'}
+                : "As a UI/UX and Graphic Designer, I led the creation and organization of component libraries, defined user experiences for desktop and mobile interfaces, and created visual assets for marketing. I optimized key e-commerce flows (including checkout, purchasing, microsites, and vendor management) and actively participated in the brand and domain transition from ViviendaVerde to XCONS, contributing to the new visual identity. Collaborating closely with the front-end development team, I executed web development tasks and provided guidance to fellow designers regarding the company's context."}
             </RoleDescription>
 
             <div
@@ -416,12 +338,10 @@ const ProjectPage: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <SplineContainer>
               <SplineTitle>
-                {i18n.language.startsWith('es')
-                  ? 'Modelo 3D Interactivo'
-                  : 'Interactive 3D Model'}
+                {i18n.language.startsWith('es') ? 'Modelo 3D Interactivo' : 'Interactive 3D Model'}
               </SplineTitle>
               <SplineScene />
             </SplineContainer>
@@ -445,7 +365,6 @@ const ProjectPage: React.FC = () => {
               <SkillBadge>TensorFlow</SkillBadge>
               <SkillBadge>+5 aptitudes</SkillBadge>
             </SkillsContainer>
-
           </div>
         </>
       );
@@ -465,8 +384,6 @@ const ProjectPage: React.FC = () => {
               <SkillBadge>SEO</SkillBadge>
               <SkillBadge>+4 aptitudes</SkillBadge>
             </SkillsContainer>
-
-           
           </div>
         </>
       );
@@ -486,8 +403,6 @@ const ProjectPage: React.FC = () => {
               <SkillBadge>Firewall</SkillBadge>
               <SkillBadge>+6 aptitudes</SkillBadge>
             </SkillsContainer>
-
-          
           </div>
         </>
       );
@@ -517,9 +432,13 @@ const ProjectPage: React.FC = () => {
             <BannerDescription>{project.description}</BannerDescription>
           </BannerLeftContent>
 
-          <BannerWebImage 
-            src={project.id === 'xcons' ? "/images/web-xconx.png" : "/images/projects/fallback-image.jpg"} 
-            alt={`${project.title} Website`} 
+          <BannerWebImage
+            src={
+              project.id === 'xcons'
+                ? '/images/web-xconx.png'
+                : '/images/projects/fallback-image.jpg'
+            }
+            alt={`${project.title} Website`}
           />
         </BannerContent>
       </ProjectBanner>
