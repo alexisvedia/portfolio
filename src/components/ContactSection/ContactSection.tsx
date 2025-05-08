@@ -162,7 +162,7 @@ const SubmitButton = styled.button<{ $isDark: boolean }>`
 `;
 
 const ContactSection: React.FC = () => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { themeMode } = useTheme();
   const isDark = themeMode === 'dark';
   const formRef = useRef<HTMLFormElement>(null);
@@ -199,8 +199,7 @@ const ContactSection: React.FC = () => {
 
       // Credenciales de EmailJS proporcionadas por el usuario
       const serviceId = 'service_srdurzn';
-      // Seleccionar la plantilla según el idioma actual
-      const templateId = i18n.language.startsWith('es') ? 'template_es' : 'template_en';
+      const templateId = 'template_efoo7fz';
       const publicKey = 'CoI3CL1-8DQHvdStw';
 
       // Preparar los datos para enviar
@@ -209,6 +208,7 @@ const ContactSection: React.FC = () => {
         email: formData.email,
         message: formData.message,
         title: formData.title,
+        time: new Date().toLocaleString(),
       };
 
       // Enviar el correo usando el método send

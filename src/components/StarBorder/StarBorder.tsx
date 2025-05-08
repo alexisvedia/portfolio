@@ -1,6 +1,5 @@
 import React from "react";
 import "./StarBorder.css";
-import { useTheme } from "../../context/ThemeContext";
 
 type StarBorderProps<T extends React.ElementType> =
   React.ComponentPropsWithoutRef<T> & {
@@ -20,25 +19,23 @@ const StarBorder = <T extends React.ElementType = "button">({
   ...rest
 }: StarBorderProps<T>) => {
   const Component = as || "button";
-  const { themeMode } = useTheme();
-  const isDarkMode = themeMode === 'dark';
 
   return (
     <Component 
-      className={`star-border-container ${className} ${isDarkMode ? 'dark-mode' : 'light-mode'}`} 
+      className={`star-border-container ${className}`}
       {...rest}
     >
       <div
         className="border-gradient-bottom"
         style={{
-          background: `radial-gradient(circle, ${color}, transparent 15%)`,
+          background: `radial-gradient(circle, ${color}, transparent 10%)`,
           animationDuration: speed,
         }}
       ></div>
       <div
         className="border-gradient-top"
         style={{
-          background: `radial-gradient(circle, ${color}, transparent 15%)`,
+          background: `radial-gradient(circle, ${color}, transparent 10%)`,
           animationDuration: speed,
         }}
       ></div>

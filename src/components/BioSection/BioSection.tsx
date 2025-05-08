@@ -6,6 +6,9 @@ import TechSlider from '@components/TechSlider';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
+// Nueva importación de imagen
+import alexisImage from '../../assets/images/projects/alexis.png';
+
 gsap.registerPlugin(ScrollTrigger);
 
 const SectionContainer = styled.section`
@@ -184,11 +187,11 @@ const BioSection: React.FC = () => {
   }, []);
   
   return (
-    <SectionContainer ref={sectionRef}>
+    <SectionContainer ref={sectionRef} id="about">
       <ContentWrapper>
         <ProfileImageContainer ref={imageRef}>
           <ProfileImage 
-            src="/images/projects/alexis.png" 
+            src={alexisImage}
             alt="Alexis Vedia" 
           />
         </ProfileImageContainer>

@@ -21,7 +21,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
   const location = useLocation();
 
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence>
       <PageContainer
         key={location.pathname}
         initial={{ opacity: 0, y: 20 }}

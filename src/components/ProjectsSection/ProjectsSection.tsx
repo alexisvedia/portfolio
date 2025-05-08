@@ -3,6 +3,12 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import FlowingMenu from '@components/FlowingMenu';
 
+// Nuevas importaciones de imágenes
+import condamindLogo from '../../assets/images/projects/Condamind.svg';
+import fusionadsLogo from '../../assets/images/projects/Fusionads.svg';
+import banditLogo from '../../assets/images/projects/Bandit.svg';
+import xconsLogo from '../../assets/images/projects/XCONS.svg';
+
 const SectionContainer = styled.section`
   padding: 0 0 ${({ theme }) => theme.space['2xl']};
   position: relative;
@@ -37,22 +43,22 @@ const MenuContainer = styled.div`
 const ProjectsSection: React.FC = () => {
   const { t } = useTranslation();
 
-  // Definir los elementos del menú con los logos y colores de las empresas
+  // Definir los elementos del menú con los logos y colores de las empresas (REORDENADO)
   const companyItems = [
     {
-      link: '/condamind',
-      text: 'Condamind',
-      image: '/images/projects/Condamind.svg',  
-      color: '#262626',
+      link: '/xcons', // 1. XCONS
+      text: 'XCONS',
+      image: xconsLogo,
+      color: '#15814B',
       description: t(
-        'companyDescriptions.condamind',
-        'Empresa líder en tecnologías cognitivas y soluciones de IA avanzadas.'
+        'companyDescriptions.xcons',
+        'Constructora innovadora con enfoque en soluciones sustentables y tecnología avanzada.'
       ),
     },
     {
-      link: '/fusionads',
+      link: '/fusionads', // 2. FusionAds
       text: 'FusionAds',
-      image: '/images/projects/Fusionads.svg',
+      image: fusionadsLogo, 
       color: '#F7480B',
       description: t(
         'companyDescriptions.fusionads',
@@ -60,9 +66,9 @@ const ProjectsSection: React.FC = () => {
       ),
     },
     {
-      link: '/bandit',
+      link: '/bandit', // 3. Bandit
       text: 'Bandit',
-      image: '/images/projects/Bandit.svg',
+      image: banditLogo, 
       color: '#F70F43',
       description: t(
         'companyDescriptions.bandit',
@@ -70,19 +76,19 @@ const ProjectsSection: React.FC = () => {
       ),
     },
     {
-      link: '/xcons',
-      text: 'XCONS',
-      image: '/images/projects/XCONS.svg',
-      color: '#15814B',
+      link: '/condamind', // 4. Condamind
+      text: 'Condamind',
+      image: condamindLogo,  
+      color: '#262626',
       description: t(
-        'companyDescriptions.xcons',
-        'Constructora innovadora con enfoque en soluciones sustentables y tecnología avanzada.'
+        'companyDescriptions.condamind',
+        'Empresa líder en tecnologías cognitivas y soluciones de IA avanzadas.'
       ),
     },
   ];
 
   return (
-    <SectionContainer id="projects">
+    <SectionContainer id="experience">
       <TitleContainer>
         <SectionTitle>{t('experience')}</SectionTitle>
       </TitleContainer>

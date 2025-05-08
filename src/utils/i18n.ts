@@ -16,6 +16,11 @@ const resources = {
       viewProjects: 'View Projects',
       contactMe: 'Contact me',
 
+      // Sidebar chats
+      'sidebar.chats.today': 'TODAY',
+      'sidebar.chats.yesterday': 'YESTERDAY',
+      'sidebar.chats.previous': 'PREVIOUS',
+
       // Chat translations
       'AI Portfolio Assistant': 'AI Portfolio Assistant',
       '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?':
@@ -56,6 +61,13 @@ const resources = {
         about: 'About Me',
         projects: 'Projects',
         resume: 'Resume',
+      },
+      // Tooltips for Sidebar Controls
+      tooltip: {
+        github: 'Visit GitHub Profile',
+        linkedin: 'Visit LinkedIn Profile',
+        toggleTheme: 'Toggle Theme',
+        selectLanguage: 'Select Language',
       },
       // About page
       about: {
@@ -121,6 +133,11 @@ const resources = {
       viewProjects: 'Ver Proyectos',
       contactMe: 'Contáctame',
 
+      // Sidebar chats
+      'sidebar.chats.today': 'HOY',
+      'sidebar.chats.yesterday': 'AYER',
+      'sidebar.chats.previous': 'ANTERIORES',
+
       // Chat translations
       'AI Portfolio Assistant': 'AI Portfolio Assistant',
       '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?':
@@ -162,6 +179,13 @@ const resources = {
         about: 'Sobre Mí',
         projects: 'Proyectos',
         resume: 'Currículum',
+      },
+      // Tooltips para Controles de Sidebar
+      tooltip: {
+        github: 'Visitar Perfil de GitHub',
+        linkedin: 'Visitar Perfil de LinkedIn',
+        toggleTheme: 'Cambiar Tema',
+        selectLanguage: 'Seleccionar Idioma',
       },
       // Página Sobre Mí
       about: {
