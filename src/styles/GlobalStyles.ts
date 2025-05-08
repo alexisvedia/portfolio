@@ -1,14 +1,17 @@
 import { createGlobalStyle } from 'styled-components';
 import './fonts.css'; // Importar el archivo de fuentes Morganite
 
-// --- Importar Google Fonts --- 
+// --- Importar Google Fonts ---
 // Guardar las URLs en constantes para claridad
-const latoFontsUrl = 'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap';
-const openSansFontsUrl = 'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap'; // Añadir Open Sans (Regular 400, Bold 700)
+const latoFontsUrl =
+  'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap';
+const openSansFontsUrl =
+  'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap'; // Añadir Open Sans (Regular 400, Bold 700)
 
 // Función para añadir un link de fuente al head
 const addFontLink = (url: string) => {
-  if (!document.querySelector(`link[href="${url}"]`)) { // Evitar añadir duplicados
+  if (!document.querySelector(`link[href="${url}"]`)) {
+    // Evitar añadir duplicados
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = url;
@@ -48,7 +51,7 @@ export const GlobalStyles = createGlobalStyle`
 
   /* Estilos globales para párrafos */
   p {
-    font-family: 'Open Sans', sans-serif; /* Aplicar Open Sans */
+    font-family: ${({ theme }) => theme.fonts.body}; /* Aplicar la fuente del tema para el cuerpo */
     font-size: 16px; /* Tamaño estándar */
     color: inherit; /* Heredar color para respetar temas */
     margin-bottom: 1rem; /* Espaciado inferior estándar para párrafos */

@@ -142,4 +142,12 @@
   font-weight: 200;
   font-style: italic;
   font-display: swap;
-} 
+}
+
+@font-face {
+  font-family: 'NHaasGroteskTXPro-55Rg';
+  src: url('/fonts/NHaasGrotesk/NHaasGroteskTXPro-55Rg.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
