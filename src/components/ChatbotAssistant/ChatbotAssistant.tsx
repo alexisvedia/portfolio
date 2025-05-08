@@ -105,12 +105,10 @@ const ChatWindow = styled.div<{ $isDark: boolean }>`
     bottom: 0;
     right: 0;
     width: 100%;
-    height: 100%;
+    height: 100dvh;
     border-radius: 0;
     display: flex;
     flex-direction: column;
-    /* Ajuste para empezar debajo de la barra del navegador */
-    height: 100%;
     margin-top: 0;
     position: fixed;
     top: 0;

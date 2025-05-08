@@ -72,7 +72,7 @@ const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean }>`
   background-color: ${({ theme }) => theme.colors.sidebarBackground};
   color: ${({ theme }) => theme.colors.text};
   padding: ${({ theme }) => theme.space.lg};
-  height: 100vh;
+  height: 100dvh;
   width: 280px;
   position: fixed;
   top: 0;
@@ -152,6 +152,23 @@ const ChatListContainer = styled.div`
   border-top: 1px solid ${({ theme }) => (theme.isDark ? theme.colors.border : '#dee2e6')};
   flex-grow: 2;
   overflow-y: auto;
+
+  /* Estilos de scrollbar consistentes */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
+  }
 `;
 
 const ChatGroupTitle = styled.h4`
@@ -543,12 +560,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     
     setActiveLink(href);
     
+    const isExperienceSublink = navLinks
+        .find(link => link.href === '#experience')
+        ?.subLinks?.some(subLink => subLink.href === href);
+
     if (subLinks && subLinks.length > 0) {
       if (openSubmenuKey === href) {
         setOpenSubmenuKey(null);
       } else {
         setOpenSubmenuKey(href);
       }
+    } else if (!isExperienceSublink) {
+      setOpenSubmenuKey(null);
     }
     
     if (href.startsWith('#')) {
@@ -582,8 +605,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       navigate(href);
     }
     
-    if (isMobile && isOpen && (!subLinks || subLinks.length === 0 || openSubmenuKey !== href)) {
-      toggleSidebar();
+    if (isMobile && isOpen) {
+      const isSublinkClick = navLinks.some(link => link.subLinks?.some(sl => sl.href === href));
+      if ((!subLinks || subLinks.length === 0) || isSublinkClick) {
+         toggleSidebar();
+      }
     }
   };
 

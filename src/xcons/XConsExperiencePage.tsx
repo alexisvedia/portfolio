@@ -152,7 +152,10 @@ const XConsExperiencePage: React.FC = () => {
     marketingTitle: { es: 'Marketing y Diseño', en: 'Marketing & Design' },
     operationsTitle: { es: 'Operaciones y Calidad', en: 'Operations & Quality' },
     projectsTitle: { es: 'Proyectos Destacados', en: 'Featured Projects' },
-    summary: { es: '...', en: '...' }, // Acortado para brevedad
+    summary: { 
+      es: 'Como Diseñador UI/UX y Gráfico, lideré la creación y mantenimiento de bibliotecas de componentes, definiendo experiencias coherentes en desktop y mobile, y produciendo piezas visuales para campañas en redes sociales. Colaboré con otros diseñadores en la optimización de los flujos críticos del e-commerce —checkout, compra, micrositios y gestión de proveedores—, mejorando la conversión y la usabilidad. Participé activamente en el rebranding de ViviendaVerde a XCONS, aplicando la nueva identidad visual en todos los puntos de contacto digitales. Trabajé codo a codo con el equipo front-end, ejecutando maquetación semántica y guiando a otros diseñadores para garantizar consistencia y calidad en el producto.', 
+      en: '...' // Mantener o añadir la traducción en inglés aquí si es necesario
+    }, 
   };
 
   return (

@@ -1,5 +1,6 @@
 import React from "react";
 import "./StarBorder.css";
+import { useTheme } from "../../context/ThemeContext";
 
 type StarBorderProps<T extends React.ElementType> =
   React.ComponentPropsWithoutRef<T> & {
@@ -19,23 +20,28 @@ const StarBorder = <T extends React.ElementType = "button">({
   ...rest
 }: StarBorderProps<T>) => {
   const Component = as || "button";
+  const { themeMode } = useTheme();
+  const isDarkMode = themeMode === 'dark';
+
+  // Determinar el color del borde según el tema
+  const borderColor = isDarkMode ? color : '#333'; // Usa el color prop en dark, #333 en light
 
   return (
     <Component 
-      className={`star-border-container ${className}`}
+      className={`star-border-container ${className} ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
       {...rest}
     >
       <div
         className="border-gradient-bottom"
         style={{
-          background: `radial-gradient(circle, ${color}, transparent 10%)`,
+          background: `radial-gradient(circle, ${borderColor}, transparent 10%)`,
           animationDuration: speed,
         }}
       ></div>
       <div
         className="border-gradient-top"
         style={{
-          background: `radial-gradient(circle, ${color}, transparent 10%)`,
+          background: `radial-gradient(circle, ${borderColor}, transparent 10%)`,
           animationDuration: speed,
         }}
       ></div>
