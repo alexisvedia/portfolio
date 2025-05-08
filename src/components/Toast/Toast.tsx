@@ -79,15 +79,16 @@ const ToastContainer = styled.div<{
   $isLeaving: boolean;
 }>`
   position: fixed;
-  bottom: 30px;
-  right: 30px;
+  top: 30px;
+  left: 45image.png%;
+  transform: translateX(-50%);
   padding: 16px 20px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
   z-index: 9999;
-  max-width: 400px;
+  max-width: 450px;
   color: ${({ theme }) => theme.colors.text};
   ${({ $isDark }) => glassStyle($isDark)}
   background: ${({ $type, $isDark }) => getBackground($type, $isDark)};
@@ -100,7 +101,27 @@ const ToastContainer = styled.div<{
   pointer-events: ${({ $isVisible }) => ($isVisible ? 'auto' : 'none')};
   opacity: ${({ $isVisible, $isLeaving }) => ($isVisible || $isLeaving ? 1 : 0)};
   
-  // Textura granular superpuesta
+  ${slideIn} {
+    from {
+      transform: translate(-50%, -20px);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+  }
+  ${slideOut} {
+    from {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+    to {
+      transform: translate(-50%, -20px);
+      opacity: 0;
+    }
+  }
+  
   &::before {
     content: '';
     position: absolute;
@@ -117,9 +138,11 @@ const ToastContainer = styled.div<{
   }
   
   @media (max-width: 500px) {
-    bottom: 20px;
-    right: 20px;
+    top: 20px;
     left: 20px;
+    right: 20px;
+    transform: translateX(0);
+    width: auto;
     max-width: none;
   }
 `;

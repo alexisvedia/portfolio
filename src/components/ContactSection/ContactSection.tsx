@@ -4,25 +4,26 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import emailjs from '@emailjs/browser';
 import Toast, { ToastType } from '../Toast/Toast';
+import confetti from 'canvas-confetti';
 
 const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space['2xl']} 0;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 80px;
-  font-weight: 900;
+  font-size: 2.5rem;
+  font-weight: 700;
   text-transform: uppercase;
-  margin-bottom: 3rem;
+  margin-bottom: 0;
   text-align: center;
   color: ${({ theme }) => theme.colors.text};
   position: relative;
-  font-family: 'Morganite', sans-serif;
-  letter-spacing: 0;
+  font-family: ${({ theme }) => theme.fonts.body};
+  letter-spacing: 0.1em;
+  width: auto;
 `;
 
 const ContactContent = styled.div`
-  max-width: 800px;
   margin: 0 auto;
   padding: 0 ${({ theme }) => theme.space.lg};
 `;
@@ -30,41 +31,36 @@ const ContactContent = styled.div`
 const ContactText = styled.p`
   font-size: ${({ theme }) => theme.fontSizes.lg};
   text-align: center;
-  margin-bottom: ${({ theme }) => theme.space.xl};
+  margin-bottom: 0;
   color: ${({ theme }) => `${theme.colors.text}ee`};
+  width: auto;
+  max-width: 600px;
+  padding: 0;
 `;
 
 // Estilo glass unificado y reforzado que mantiene consistencia
-const glassStyle = (isDark: boolean) => css`
-  background: ${isDark ? 'rgba(30, 30, 35, 0.5)' : 'rgba(240, 240, 245, 0.5)'};
+const glassEffect = css`
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
-  box-shadow: 0 8px 32px rgba(0, 0, 0, ${isDark ? '0.3' : '0.1'});
-
-  /* Refuerzo para mantener el efecto consistente */
-  transform: translateZ(0);
   will-change: backdrop-filter;
 `;
 
 const Form = styled.form<{ $isDark: boolean }>`
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.space.lg};
-  padding: ${({ theme }) => theme.space.xl};
-  border-radius: 16px;
+  align-items: center;
+  gap: ${({ theme }) => theme.space.md};
+  padding: 1.5rem 2.5rem 2.5rem;
+  border-radius: 20px;
   transition: all 0.3s ease;
-
-  /* Efecto Acrylic Material de Microsoft Fluent Design */
-  background: ${({ $isDark }) =>
-    $isDark
-      ? 'linear-gradient(rgba(30, 30, 35, 0.6), rgba(30, 30, 35, 0.6))'
-      : 'linear-gradient(rgba(240, 240, 245, 0.6), rgba(240, 240, 245, 0.6))'};
-  backdrop-filter: blur(30px) saturate(125%);
-  -webkit-backdrop-filter: blur(30px) saturate(125%);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, ${({ $isDark }) => ($isDark ? '0.4' : '0.2')});
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
   border: 1px solid
-    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.1)')};
 
   /* Textura granular superpuesta */
   &::before {
@@ -74,66 +70,95 @@ const Form = styled.form<{ $isDark: boolean }>`
     left: 0;
     right: 0;
     bottom: 0;
-    opacity: 0.02;
+    opacity: 0.03;
     pointer-events: none;
     background-image: url('/images/AcrylicTexture.png');
     background-repeat: repeat;
-    mix-blend-mode: ${({ $isDark }) => ($isDark ? 'lighten' : 'darken')};
+    mix-blend-mode: ${({ $isDark }) => ($isDark ? 'overlay' : 'multiply')};
   }
+`;
+
+const FormDivider = styled.hr<{ $isDark: boolean }>`
+  width: 100%;
+  border: none;
+  height: 1px;
+  background-color: ${({ $isDark, theme }) => $isDark ? theme.colors.border + '55' : theme.colors.border + '88'};
+  margin-top: 0;
+  margin-bottom: 0;
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
 `;
 
 const Label = styled.label`
   font-size: ${({ theme }) => theme.fontSizes.md};
   margin-bottom: ${({ theme }) => theme.space.xs};
   color: ${({ theme }) => theme.colors.text};
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: ${({ theme }) => theme.space.xs};
+  text-align: left;
 `;
 
 const Input = styled.input<{ $isDark: boolean }>`
-  padding: ${({ theme }) => theme.space.md};
-  border-radius: 8px;
+  padding: ${({ theme }) => `${theme.space.md} ${theme.space.lg}`};
+  border-radius: 12px;
   font-size: ${({ theme }) => theme.fontSizes.md};
   color: ${({ theme }) => theme.colors.text};
   font-family: inherit;
   transition: all 0.3s ease;
-
-  ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ $isDark }) => ($isDark ? 'rgba(20, 20, 25, 0.4)' : 'rgba(250, 250, 255, 0.4)')};
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid ${({ $isDark }) => $isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  ${glassEffect}
+  background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
 
   &:focus {
     outline: none;
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 2px ${({ theme }) => `${theme.colors.primary}33`};
+    border-color: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)')};
+    box-shadow: 0 0 0 2px ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)')};
   }
 `;
 
 const Textarea = styled.textarea<{ $isDark: boolean }>`
-  padding: ${({ theme }) => theme.space.md};
-  border-radius: 8px;
+  padding: ${({ theme }) => `${theme.space.md} ${theme.space.lg}`};
+  border-radius: 12px;
   font-size: ${({ theme }) => theme.fontSizes.md};
   color: ${({ theme }) => theme.colors.text};
   font-family: inherit;
   resize: vertical;
-  min-height: 150px;
+  min-height: 120px;
   transition: all 0.3s ease;
-
-  ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ $isDark }) => ($isDark ? 'rgba(20, 20, 25, 0.4)' : 'rgba(250, 250, 255, 0.4)')};
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid ${({ $isDark }) => $isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  ${glassEffect}
+  background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
 
   &:focus {
     outline: none;
-    border-color: ${({ theme }) => theme.colors.primary};
-    box-shadow: 0 0 0 2px ${({ theme }) => `${theme.colors.primary}33`};
+    border-color: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)')};
+    box-shadow: 0 0 0 2px ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)')};
   }
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+`;
+
 const SubmitButton = styled.button<{ $isDark: boolean }>`
-  padding: ${({ theme }) => `${theme.space.sm} ${theme.space.lg}`};
+  padding: 1rem 1.5rem;
   color: ${({ $isDark }) => ($isDark ? 'black !important' : 'white !important')};
   border: none;
   border-radius: 8px;
@@ -141,19 +166,8 @@ const SubmitButton = styled.button<{ $isDark: boolean }>`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  align-self: flex-end;
   width: auto;
-
-  /* Glass style no se aplica si queremos fondos sólidos blanco/negro */
-  /* ${({ $isDark }) => glassStyle($isDark)} */
-  
   background: ${({ $isDark }) => ($isDark ? 'white !important' : 'black !important')};
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    filter: brightness(${({ $isDark }) => ($isDark ? 0.95 : 1.15)});
-  }
 
   &:disabled {
     background: ${({ $isDark }) => ($isDark ? 'rgba(200, 200, 205, 0.5) !important' : 'rgba(60, 60, 65, 0.5) !important')};
@@ -226,6 +240,15 @@ const ContactSection: React.FC = () => {
         message: t('messageSent'),
         type: 'success',
       });
+
+      // ¡Lanzar confeti!
+      confetti({
+        particleCount: 150, // Más partículas
+        spread: 90,         // Mayor dispersión
+        origin: { y: 0.6 },  // Origen un poco más abajo de la mitad
+        colors: ['#bb0000', '#ffffff', '#00ff00'] // Colores (puedes personalizar)
+      });
+
     } catch (error) {
       console.error('FAILED...', error);
       setIsLoading(false);
@@ -246,10 +269,11 @@ const ContactSection: React.FC = () => {
 
   return (
     <SectionContainer id="contact">
-      <SectionTitle>{t('contact')}</SectionTitle>
       <ContactContent>
-        <ContactText>{t('contactText')}</ContactText>
         <Form onSubmit={handleSubmit} $isDark={isDark} ref={formRef}>
+          <SectionTitle>{t('contact')}</SectionTitle>
+          <ContactText>{t('contactText')}</ContactText>
+          <FormDivider $isDark={isDark} />
           <FormGroup>
             <Label htmlFor="name">{t('name')}</Label>
             <Input
@@ -301,9 +325,11 @@ const ContactSection: React.FC = () => {
               placeholder={t('messagePlaceholder', 'Escribe un mensaje...')}
             />
           </FormGroup>
-          <SubmitButton type="submit" disabled={isLoading} $isDark={isDark}>
-            {isLoading ? t('sending') : t('send')}
-          </SubmitButton>
+          <ButtonContainer>
+            <SubmitButton type="submit" disabled={isLoading} $isDark={isDark}>
+              {isLoading ? t('sending') : t('send')}
+            </SubmitButton>
+          </ButtonContainer>
         </Form>
       </ContactContent>
 

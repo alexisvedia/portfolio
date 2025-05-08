@@ -22,15 +22,15 @@ const TitleContainer = styled.div`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 80px;
-  font-weight: 900;
+  font-size: 2.5rem;
+  font-weight: 700;
   text-transform: uppercase;
   margin-bottom: 3rem;
   text-align: center;
   color: ${({ theme }) => theme.colors.text};
   position: relative;
-  font-family: 'Morganite', sans-serif;
-  letter-spacing: 0;
+  font-family: ${({ theme }) => theme.fonts.body};
+  letter-spacing: 0.1em;
 `;
 
 const MenuContainer = styled.div`

@@ -4,6 +4,7 @@ import PageTransition from '@components/PageTransition/PageTransition';
 import HeroSection from '@components/HeroSection/HeroSection';
 import BioSection from '@components/BioSection';
 import ProjectsSection from '@components/ProjectsSection/ProjectsSection';
+import TestimonialsSection from '@components/TestimonialsSection/TestimonialsSection';
 import ContactSection from '@components/ContactSection/ContactSection';
 
 const HomeContainer = styled.div`
@@ -13,8 +14,9 @@ const HomeContainer = styled.div`
 `;
 
 const ContentWrapper = styled.div`
-  max-width: 1400px;
+  max-width: 1000px;
   margin: 0 auto;
+  padding: 0 1rem;
 `;
 
 interface HomeProps {
@@ -30,7 +32,10 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded }) => {
           <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
           <BioSection />
         </ContentWrapper>
-        <ProjectsSection />
+        <ContentWrapper>
+          <ProjectsSection />
+        </ContentWrapper>
+        <TestimonialsSection />
         <ContentWrapper>
           <ContactSection />
         </ContentWrapper>

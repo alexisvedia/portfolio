@@ -424,7 +424,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
   const [activeLink, setActiveLink] = useState<string>("#home");
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
-  const sidebarRef = useRef<HTMLDivElement>(null); // Referencia al SidebarContainer
 
   // Efecto para controlar el scroll del body cuando el sidebar está abierto en móvil
   useEffect(() => {

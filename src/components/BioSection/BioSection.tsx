@@ -16,7 +16,7 @@ const SectionContainer = styled.section`
   position: relative;
   overflow: hidden;
   width: 100%;
-  margin: -5vh 0 10rem 0;
+  margin: -5vh 0 5rem 0;
   padding-top: 5vh;
 `;
 
@@ -65,16 +65,17 @@ const TextContainer = styled.div`
 
 const SectionTitleStyles = styled.div`
   .title-text {
-    font-family: 'Morganite', sans-serif;
-    font-weight: 900;
-    font-size: 5rem;
+    font-family: ${({ theme }) => theme.fonts.body};
+    font-weight: 700;
+    font-size: 2.5rem;
     text-transform: uppercase;
     color: ${({ theme }) => theme.colors.text};
     margin-bottom: 1.5rem;
-    line-height: 0.9;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
     
     @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-      font-size: 4rem;
+      font-size: 2rem;
       margin-bottom: 1rem;
     }
   }
@@ -145,13 +146,13 @@ const BioSection: React.FC = () => {
       ease: 'power2.out',
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 80%',
-        end: 'top 30%',
+        start: 'top 75%',
+        end: 'center center',
         scrub: true,
       }
     });
     
-    // Animación del título (ligeramente adelantada)
+    // Animación del título
     gsap.to(titleElement, {
       opacity: 1,
       y: 0,
@@ -161,13 +162,13 @@ const BioSection: React.FC = () => {
       ease: 'power2.out',
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 85%',
-        end: 'top 40%',
+        start: 'top 70%',
+        end: 'center center',
         scrub: true,
       }
     });
     
-    // Animación del slider (aparece más tarde)
+    // Animación del slider
     gsap.to(sliderElement, {
       opacity: 1,
       y: 0,
@@ -175,8 +176,8 @@ const BioSection: React.FC = () => {
       ease: 'power2.out',
       scrollTrigger: {
         trigger: sliderElement,
-        start: 'top 85%',
-        end: 'top 50%',
+        start: 'top 80%',
+        end: 'center 75%',
         scrub: true,
       }
     });

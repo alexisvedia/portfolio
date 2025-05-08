@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./StarBorder.css";
 import { useTheme } from "../../context/ThemeContext";
 
@@ -9,6 +9,7 @@ type StarBorderProps<T extends React.ElementType> =
     children?: React.ReactNode;
     color?: string;
     speed?: React.CSSProperties['animationDuration'];
+    hoverBorderColorLight?: string;
   }
 
 const StarBorder = <T extends React.ElementType = "button">({
@@ -17,33 +18,39 @@ const StarBorder = <T extends React.ElementType = "button">({
   color = "white",
   speed = "6s",
   children,
+  hoverBorderColorLight = "#cccccc",
   ...rest
 }: StarBorderProps<T>) => {
   const Component = as || "button";
   const { themeMode } = useTheme();
   const isDarkMode = themeMode === 'dark';
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Determinar el color del borde según el tema
-  const borderColor = isDarkMode ? color : '#333'; // Usa el color prop en dark, #333 en light
+  const getBorderStyle = () => {
+    let borderColorToUse = isDarkMode ? color : '#333';
+    if (!isDarkMode && isHovered) {
+      borderColorToUse = hoverBorderColorLight;
+    }
+    return {
+      background: `radial-gradient(circle, ${borderColorToUse}, transparent 10%) !important`,
+      animationDuration: speed,
+    };
+  };
 
   return (
     <Component 
       className={`star-border-container ${className} ${isDarkMode ? 'dark-mode' : 'light-mode'}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       {...rest}
     >
       <div
         className="border-gradient-bottom"
-        style={{
-          background: `radial-gradient(circle, ${borderColor}, transparent 10%)`,
-          animationDuration: speed,
-        }}
+        style={getBorderStyle()}
       ></div>
       <div
         className="border-gradient-top"
-        style={{
-          background: `radial-gradient(circle, ${borderColor}, transparent 10%)`,
-          animationDuration: speed,
-        }}
+        style={getBorderStyle()}
       ></div>
       <div className="inner-content">{children}</div>
     </Component>

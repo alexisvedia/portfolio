@@ -10,11 +10,11 @@ const resources = {
       english: 'English',
       spanish: 'Spanish',
       // Hero
-      heroTitle: 'UX/UI Designer & Frontend Developer',
+      heroTitle: 'UX/UI Designer and Frontend Developer',
       heroSubtitle:
-        'I create beautiful and functional digital experiences with React and TypeScript, focusing on usability and modern design.',
+        'Artificial Intelligence • User Experience • E-commerce • WordPress • Chatbots • Blogs • Interface Design • Mobile App Design • Automations',
       viewProjects: 'View Projects',
-      contactMe: 'Contact me',
+      contactMe: 'Contact Me',
 
       // Sidebar chats
       'sidebar.chats.today': 'TODAY',
@@ -32,7 +32,7 @@ const resources = {
       // Navigation
       home: 'Home',
       projects: 'Projects',
-      experience: 'Experience',
+      experience: 'Projects',
       skills: 'Skills',
       contact: 'Contact',
       // Projects section
@@ -118,6 +118,8 @@ const resources = {
           tools: 'Tools',
         },
       },
+      // Testimonials Section Title
+      testimonialsTitle: 'Testimonials',
     },
   },
   es: {
@@ -129,7 +131,7 @@ const resources = {
       // Hero
       heroTitle: 'Diseñador UX/UI y Desarrollador Frontend',
       heroSubtitle:
-        'Creo experiencias digitales hermosas y funcionales con React y TypeScript, enfocándome en la usabilidad y el diseño moderno.',
+        'Inteligencia Artificial • Experiencia de usuario • E-commerce • Wordpress • Chatbots • Blogs • Diseño de interfaces • Diseño de aplicaciones móviles • Automatizaciones',
       viewProjects: 'Ver Proyectos',
       contactMe: 'Contáctame',
 
@@ -149,7 +151,7 @@ const resources = {
       // Navigation
       home: 'Inicio',
       projects: 'Proyectos',
-      experience: 'Experiencia',
+      experience: 'Proyectos',
       skills: 'Habilidades',
       contact: 'Contacto',
       // Projects section
@@ -236,6 +238,8 @@ const resources = {
           tools: 'Herramientas',
         },
       },
+      // Título Sección Testimonios
+      testimonialsTitle: 'Testimonios',
     },
   },
 };
