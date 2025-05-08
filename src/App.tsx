@@ -26,6 +26,8 @@ import { initializeN8NServer } from '@services/n8nService';
 import Home from './pages/Home';
 // Using dynamic imports for code splitting
 const ProjectPage = React.lazy(() => import('./pages/ProjectPage'));
+// Importar el componente XConsExperiencePage de forma diferida
+const XConsExperiencePage = React.lazy(() => import('./xcons/XConsExperiencePage'));
 // const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
 
 // Aseguramos que i18n se inicialice
@@ -214,6 +216,7 @@ const AppContent = () => {
                 <Home onAnimationComplete={handleAnimationComplete} fontsLoaded={fontsLoaded} />
               }
             />
+            <Route path="/xcons" element={<XConsExperiencePage />} />
             <Route path="/:projectId" element={<ProjectPage />} />
           </Routes>
         </React.Suspense>

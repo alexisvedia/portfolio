@@ -1,0 +1,313 @@
+.masonry {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.masonry>div {
+  position: absolute;
+  will-change: transform, width, height, opacity;
+  padding: 10px;
+}
+
+.masonry>div>div {
+  position: relative;
+  background-size: cover;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  text-transform: uppercase;
+  font-size: 10px;
+  line-height: 10px;
+  border-radius: 10px;
+  box-shadow: 0px 10px 50px -10px rgba(0, 0, 0, 0.2);
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+
+.masonry>div>div:hover {
+  transform: scale(1.1);
+  transition: 0.3s ease;
+}
+
+/* Estilos para el Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-content-wrapper {
+  position: relative;
+  background-color: #fff;
+  border-radius: 10px;
+  max-width: 1200px;
+  width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-media-area {
+  flex: 2;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.modal-media-area img {
+  max-width: 100%;
+  max-height: calc(90vh - 40px);
+  display: block;
+  border-radius: 6px;
+}
+
+.spline-modal-container {
+  width: 100%;
+  height: 100%;
+  min-height: 450px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.modal-info-area {
+  flex: 1;
+  padding: 25px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  border-left: 1px solid #eee;
+  max-width: 380px;
+  min-width: 300px;
+}
+
+.modal-info-area h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.6em;
+  color: #333;
+}
+
+.modal-info-area p {
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #555;
+  white-space: pre-wrap;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  font-size: 22px;
+  line-height: 35px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  z-index: 1020;
+}
+
+.modal-close-button:hover {
+  background: rgba(0,0,0,0.8);
+  transform: scale(1.1);
+}
+
+/* Estilos para Botones de Navegación del Modal */
+.modal-nav-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: rgba(40, 40, 40, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1010;
+  transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+  user-select: none;
+  opacity: 0.85;
+}
+
+.modal-nav-button svg {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.modal-nav-button:hover:not(:disabled) {
+  background-color: rgba(50, 50, 50, 0.5);
+  opacity: 1;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.modal-nav-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.modal-nav-button.prev {
+  left: 15px;
+}
+
+.modal-nav-button.next {
+  right: 15px;
+}
+
+/* Estilos para el Pasador de Miniaturas */
+.modal-thumbnail-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid #ddd;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  z-index: 1005;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-thumbnail-strip::-webkit-scrollbar {
+  height: 5px;
+}
+
+.modal-thumbnail-strip::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.thumbnail-item {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  margin-right: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.thumbnail-item:last-child {
+  margin-right: 0;
+}
+
+.thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbnail-item:hover {
+  border-color: #aaa;
+  transform: scale(1.05);
+}
+
+.thumbnail-item.active {
+  border-color: #007bff;
+  transform: scale(1.05);
+}
+
+@media (max-width: 992px) {
+  .modal-content-wrapper {
+    flex-direction: column;
+    max-height: 95vh;
+    width: 95vw;
+  }
+
+  .modal-media-area {
+    max-height: 60vh;
+    min-height: 300px;
+  }
+
+  .modal-media-area img {
+    max-height: calc(60vh - 40px);
+  }
+
+  .spline-modal-container {
+    height: 100%;
+    min-height: 280px;
+  }
+
+  .modal-info-area {
+    flex: none;
+    border-left: none;
+    border-top: 1px solid #eee;
+    max-width: 100%;
+    max-height: 35vh;
+    min-width: auto;
+  }
+
+  .modal-content-wrapper {
+    padding-bottom: 70px;
+  }
+
+  .modal-nav-button {
+    width: 35px;
+    height: 35px;
+    font-size: 20px;
+    line-height: 35px;
+  }
+  .modal-nav-button.prev {
+    left: 5px;
+  }
+  .modal-nav-button.next {
+    right: 5px;
+  }
+
+  .modal-thumbnail-strip {
+    height: 60px;
+    padding: 5px;
+  }
+  .thumbnail-item {
+    width: 45px;
+    height: 45px;
+    margin-right: 5px;
+  }
+}
+
+@media (max-width: 767px) {
+  .modal-info-area {
+  }
+  .modal-nav-button.prev {
+  }
+  .modal-nav-button.next {
+  }
+} 

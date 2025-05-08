@@ -42,7 +42,7 @@ const ProjectsSection: React.FC = () => {
     {
       link: '/condamind',
       text: 'Condamind',
-      image: '/images/projects/Condamind.svg',
+      image: '/images/projects/Condamind.svg',  
       color: '#262626',
       description: t(
         'companyDescriptions.condamind',
