@@ -23,6 +23,7 @@
     "@react-spring/web": "^9.7.5",
     "@reduxjs/toolkit": "^2.2.1",
     "@splinetool/react-spline": "^4.0.0",
+    "canvas-confetti": "^1.9.3",
     "clsx": "^2.1.1",
     "framer-motion": "^11.0.8",
     "gsap": "^3.13.0",
@@ -46,6 +47,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
     "@testing-library/react": "^14.2.1",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/jest": "^29.5.12",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",

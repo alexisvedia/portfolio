@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { store, setLoaded } from '@store/index';
@@ -79,6 +79,7 @@ const ContactButtonStyled = styled(ContactButton)<{ $hideOnScroll: boolean }>`
 `;
 
 const AppContent = () => {
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [hideControls, setHideControls] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
@@ -138,6 +139,20 @@ const AppContent = () => {
     }, isMobile ? 3000 : 2000);
     return () => clearTimeout(timer);
   }, [isMobile]);
+
+  // Efecto para hacer scroll a la sección de contacto
+  useEffect(() => {
+    if (location.state?.scrollToContact && location.pathname === '/') {
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        setTimeout(() => { // setTimeout para dar tiempo al DOM a actualizarse si es necesario
+          contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100); // Un pequeño delay puede ayudar
+      }
+      // Opcional: limpiar el estado para que no se repita el scroll en recargas o re-renders
+      // window.history.replaceState({}, ''); 
+    }
+  }, [location.state, location.pathname]);
 
   const handleAnimationComplete = () => {
     store.dispatch(setLoaded(true));

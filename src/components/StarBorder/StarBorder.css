@@ -8,6 +8,16 @@
   background: none; /* Quitar cualquier fondo por defecto del botón */
   border: none; /* Quitar cualquier borde por defecto del botón */
   cursor: pointer; /* Cambiado a pointer para indicar que es clickeable */
+  filter: none !important; /* Asegurar que no haya filtro base */
+}
+
+.star-border-container.light-mode:hover {
+  filter: none !important; /* Resetear filtro en hover para light mode */
+}
+
+.star-border-container.dark-mode:hover {
+  /* Aquí podrías añadir un filtro específico para dark mode si lo deseas en el futuro */
+  /* filter: brightness(0.9) !important; */ 
 }
 
 .border-gradient-bottom {

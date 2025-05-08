@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled, { css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -421,8 +421,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     position: { x: 0, y: 0 } 
   });
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
-  const [activeLink, setActiveLink] = useState<string>('#home');
-  
+  const [activeLink, setActiveLink] = useState<string>("#home");
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  // Efecto para controlar el scroll del body cuando el sidebar está abierto en móvil
+  useEffect(() => {
+    const body = document.body;
+    if (isMobile && isOpen) {
+      body.style.overflow = 'hidden';
+    } else {
+      body.style.overflow = 'auto';
+    }
+
+    // Cleanup: restaurar el scroll del body si el componente se desmonta
+    return () => {
+      body.style.overflow = 'auto';
+    };
+  }, [isOpen, isMobile]);
+
   const navLinks: NavLinkItem[] = [
     { href: '#home', labelKey: 'home', defaultLabel: 'Inicio', IconComponent: HomeIcon },
     { href: '#about', labelKey: 'navbar.about', defaultLabel: 'Sobre mí', IconComponent: AboutIcon },
@@ -472,9 +489,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       ]
     }
   ];
-
-  const touchStartX = React.useRef<number | null>(null);
-  const touchEndX = React.useRef<number | null>(null);
 
   const swipeThreshold = 50; 
 
