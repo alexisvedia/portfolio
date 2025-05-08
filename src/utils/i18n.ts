@@ -51,7 +51,7 @@ const resources = {
       namePlaceholder: 'E.g: Steve Jobs',
       emailPlaceholder: 'example@example.com',
       messagePlaceholder: 'Write a message...',
-      subjectPlaceholder: 'E.g: Project Inquiry',
+      subjectPlaceholder: 'E.g: I need help improving Siri',
       // Footer
       yourName: 'Your Name',
       allRightsReserved: 'All Rights Reserved',
@@ -169,7 +169,7 @@ const resources = {
       namePlaceholder: 'Ej: Steve Jobs',
       emailPlaceholder: 'ejemplo@ejemplo.com',
       messagePlaceholder: 'Escribe un mensaje...',
-      subjectPlaceholder: 'Ej: Consulta sobre proyecto',
+      subjectPlaceholder: 'Ej: Necesito ayuda para mejorar Siri',
       // Footer
       yourName: 'Tu Nombre',
       allRightsReserved: 'Todos los Derechos Reservados',

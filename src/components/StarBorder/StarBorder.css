@@ -7,7 +7,7 @@
   pointer-events: auto; /* Permitir hover/click en el contenedor */
   background: none; /* Quitar cualquier fondo por defecto del botón */
   border: none; /* Quitar cualquier borde por defecto del botón */
-  cursor: default; /* Cambiado de pointer a default para evitar cambio al hacer hover */
+  cursor: pointer; /* Cambiado a pointer para indicar que es clickeable */
 }
 
 .border-gradient-bottom {
@@ -53,6 +53,20 @@
   pointer-events: none; /* El contenedor maneja el hover/click */
   cursor: default; /* Cambiado de pointer a default para mantener consistencia */
   /* transition: filter 0.2s ease; // Eliminado */
+}
+
+/* Ajustes específicos para modo light */
+.star-border-container.light-mode .inner-content {
+  background: linear-gradient(to bottom, #f8f8f8, #eee); /* Fondo claro */
+  border: 1px solid #ccc; /* Borde claro */
+  color: #333; /* Color de texto oscuro */
+}
+
+/* Ajustes específicos para modo dark */
+.star-border-container.dark-mode .inner-content {
+  background: linear-gradient(to bottom, #060606, #111);
+  border: 1px solid #222;
+  color: white;
 }
 
 @keyframes star-movement-bottom {

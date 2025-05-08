@@ -22,12 +22,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({ className, initialDelay =
   }, [initialDelay]);
 
   const handleClick = () => {
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      navigate('/', { state: { scrollToContact: true } });
-    }
+    navigate('/', { state: { scrollToContact: true } });
   };
 
   return (

@@ -133,29 +133,31 @@ const Textarea = styled.textarea<{ $isDark: boolean }>`
 `;
 
 const SubmitButton = styled.button<{ $isDark: boolean }>`
-  padding: ${({ theme }) => `${theme.space.md} ${theme.space.xl}`};
-  color: white;
+  padding: ${({ theme }) => `${theme.space.sm} ${theme.space.lg}`};
+  color: ${({ $isDark }) => ($isDark ? 'black !important' : 'white !important')};
   border: none;
   border-radius: 8px;
-  font-size: ${({ theme }) => theme.fontSizes.lg};
+  font-size: ${({ theme }) => theme.fontSizes.md};
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  align-self: flex-end;
+  width: auto;
 
-  ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ theme, $isDark }) =>
-    $isDark
-      ? `linear-gradient(rgba(40, 40, 45, 0.7), rgba(40, 40, 45, 0.7)), ${theme.colors.primary}`
-      : `linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.3)), ${theme.colors.primary}`};
+  /* Glass style no se aplica si queremos fondos sólidos blanco/negro */
+  /* ${({ $isDark }) => glassStyle($isDark)} */
+  
+  background: ${({ $isDark }) => ($isDark ? 'white !important' : 'black !important')};
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    filter: brightness(${({ $isDark }) => ($isDark ? 0.95 : 1.15)});
   }
 
   &:disabled {
-    background: ${({ $isDark }) =>
-      $isDark ? 'rgba(60, 60, 65, 0.5)' : 'rgba(200, 200, 205, 0.5)'};
+    background: ${({ $isDark }) => ($isDark ? 'rgba(200, 200, 205, 0.5) !important' : 'rgba(60, 60, 65, 0.5) !important')};
+    color: ${({ $isDark }) => ($isDark ? 'rgba(0,0,0,0.4) !important' : 'rgba(255,255,255,0.4) !important')};
     cursor: not-allowed;
     transform: none;
   }

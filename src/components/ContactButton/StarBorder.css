@@ -98,11 +98,11 @@
 
 /* Ajustes específicos para modo light */
 .light-mode .inner-content {
-  background: rgba(6, 6, 6, 0.25);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: white;
+  background: rgba(245, 245, 245, 0.8);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #333;
 }
 
 /* Ajustes específicos para modo dark */
