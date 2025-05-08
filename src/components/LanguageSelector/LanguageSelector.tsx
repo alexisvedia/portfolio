@@ -9,7 +9,6 @@ const LANGUAGE_CHANGE_COOLDOWN = 3000;
 interface LanguageSelectorProps {
   className?: string;
   initialDelay?: number; // Retraso inicial para la aparición en ms
-  $hideOnScroll?: boolean; // Añadimos esta propiedad para controlar la ocultación
 }
 
 // Animación de carga
@@ -18,28 +17,35 @@ const loadingAnimation = keyframes`
   to { width: 100%; }
 `;
 
+// Estilos ajustados para que funcione dentro del ControlsContainer de la Sidebar
 const LanguageSelectorContainer = styled.div<{ $visible: boolean }>`
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  opacity: ${props => (props.$visible ? 1 : 0)};
-  transform: translateY(${props => (props.$visible ? 0 : -10)}px);
+  /* position: fixed; // Comentado */
+  /* top: 20px; // Comentado */
+  /* right: 20px; // Comentado */
+  /* z-index: 1000; // Comentado */
+  display: flex; // Mantenemos flex para alinear el botón interno si es necesario
+  align-items: center; // Añadido para centrar el botón si el contenedor es más alto
+  opacity: ${props => (props.$visible ? 1 : 0)}; // Se mantiene por ahora, podría simplificarse
+  transform: translateY(${props => (props.$visible ? 0 : -10)}px); // Se mantiene por ahora
   transition:
     opacity 0.6s ease-in-out,
-    transform 0.6s ease-in-out;
+    transform 0.6s ease-in-out; // Se mantiene por ahora
 `;
 
 const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
+  display: flex; 
+  align-items: center; 
+  justify-content: center; // Centrar contenido si el padding lo permite
+  height: 40px; // Altura fija
+  min-width: 40px; // Ancho mínimo si solo es icono (aunque aquí siempre hay texto)
+  padding: 0 12px; // Ajustar padding horizontal, vertical controlado por height/align-items
   background: ${props =>
     props.$changing ? 'rgba(150, 150, 150, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
   color: ${({ theme, $changing }) => ($changing ? 'rgba(255, 255, 255, 0.5)' : theme.colors.text)};
   border: 1px solid ${({ theme }) => theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'};
-  border-radius: 50px;
-  padding: 10px 15px;
+  border-radius: 20px; // Hacerlo más redondeado para que coincida con los circulares
   cursor: ${props => (props.$changing ? 'not-allowed' : 'pointer')};
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
   backdrop-filter: blur(10px);
   transition: all 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
@@ -47,7 +53,6 @@ const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
   position: relative;
   overflow: hidden;
 
-  /* Ajustamos el color de fondo basado en el tema */
   background: ${({ theme }) => 
     theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
 
@@ -58,11 +63,11 @@ const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
       : theme.isDark 
         ? 'rgba(255, 255, 255, 0.2)' 
         : 'rgba(0, 0, 0, 0.1)'};
-    transform: ${props => (props.$changing ? 'none' : 'scale(1.05) translateY(-2px)')};
+    transform: ${props => (props.$changing ? 'none' : 'scale(1.03)')};
   }
 
   &:active {
-    transform: ${props => (props.$changing ? 'none' : 'scale(0.98) translateY(0)')};
+    transform: ${props => (props.$changing ? 'none' : 'scale(0.97)')};
   }
 
   /* Indicador de carga */
@@ -83,8 +88,8 @@ const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
 `;
 
 const LanguageIcon = styled(MdOutlineLanguage)<{ $changing?: boolean }>`
-  margin-right: 6px;
-  font-size: 1.2rem;
+  margin-right: 5px;
+  font-size: 1.1rem;
   opacity: ${props => (props.$changing ? 0.5 : 1)};
   transition: opacity 0.3s ease;
   color: ${({ theme }) => theme.colors.text};
@@ -94,8 +99,7 @@ const LanguageIcon = styled(MdOutlineLanguage)<{ $changing?: boolean }>`
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   className,
-  initialDelay = 500,
-  $hideOnScroll = false,
+  initialDelay = 0, // Quitar retraso por defecto si está dentro de la sidebar
 }) => {
   const { i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language?.startsWith('es') ? 'es' : 'en');
@@ -157,11 +161,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     <LanguageSelectorContainer 
       className={className} 
       $visible={isVisible}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: `translateY(${isVisible ? 0 : -10}px)${$hideOnScroll ? ' translateY(-100px)' : ''}`,
-        transition: 'opacity 0.6s ease-in-out, transform 0.3s ease'
-      }}
+      // style prop ya no es necesario para la lógica de $hideOnScroll que estaba aquí
     >
       <LanguageButton onClick={toggleLanguage} $changing={isDisabled}>
         <LanguageIcon $changing={isDisabled} />

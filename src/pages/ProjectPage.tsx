@@ -6,6 +6,17 @@ import ferreyraImage from '../assets/ferreyra2.webp';
 // @ts-ignore
 import { SplineScene } from '../xcons';
 
+// Nuevas importaciones de imágenes
+import condamindLogo from '../assets/images/projects/Condamind.svg';
+import fusionadsLogo from '../assets/images/projects/Fusionads.svg';
+import banditLogo from '../assets/images/projects/Bandit.svg';
+import xconsLogoProject from '../assets/images/projects/XCONS.svg';
+import webXconxImage from '../assets/images/web-xconx.png';
+import fallbackImage from '../assets/images/projects/fallback-image.jpg';
+
+// Importar el nuevo botón
+import BackButton from '../components/BackButton/BackButton';
+
 const ProjectContainer = styled.div`
   padding: 0 20px 40px;
   max-width: 1200px;
@@ -94,21 +105,6 @@ const BannerDescription = styled.p`
 
 const ProjectContent = styled.div`
   margin-top: ${({ theme }) => theme.space.xl};
-`;
-
-const BackButton = styled.button`
-  padding: 10px 20px;
-  background: ${({ theme }) => theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-top: 40px;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.secondary};
-  }
 `;
 
 // Nuevos componentes para la experiencia XCONS
@@ -202,7 +198,7 @@ const ProjectPage: React.FC = () => {
         'companyDescriptions.condamind',
         'Empresa líder en tecnologías cognitivas y soluciones de IA avanzadas.'
       ),
-      image: '/images/projects/Condamind.svg',
+      image: condamindLogo,
       color: '#262626',
     },
     fusionads: {
@@ -212,7 +208,7 @@ const ProjectPage: React.FC = () => {
         'companyDescriptions.fusionads',
         'Plataforma innovadora de publicidad digital que integra tecnologías emergentes.'
       ),
-      image: '/images/projects/Fusionads.svg',
+      image: fusionadsLogo,
       color: '#F7480B',
     },
     bandit: {
@@ -222,7 +218,7 @@ const ProjectPage: React.FC = () => {
         'companyDescriptions.bandit',
         'Soluciones disruptivas en seguridad informática y protección de datos.'
       ),
-      image: '/images/projects/Bandit.svg',
+      image: banditLogo,
       color: '#F70F43',
     },
     xcons: {
@@ -232,7 +228,7 @@ const ProjectPage: React.FC = () => {
         'companyDescriptions.xcons',
         'Plataforma de e-commerce especializada en la venta omnicanal de materiales de construcción.'
       ),
-      image: '/images/projects/XCONS.svg',
+      image: xconsLogoProject,
       color: '#15814B',
     },
   };
@@ -247,7 +243,7 @@ const ProjectPage: React.FC = () => {
         navigate('/');
       }
     }
-  }, [projectId, navigate]);
+  }, [projectId, navigate, projectsData]);
 
   if (!project) {
     return <div>Cargando...</div>;
@@ -421,6 +417,7 @@ const ProjectPage: React.FC = () => {
 
   return (
     <>
+      <BackButton />
       <ProjectBanner $bgColor={project.color}>
         <BannerContent>
           <BannerLeftContent>
@@ -435,8 +432,8 @@ const ProjectPage: React.FC = () => {
           <BannerWebImage
             src={
               project.id === 'xcons'
-                ? '/images/web-xconx.png'
-                : '/images/projects/fallback-image.jpg'
+                ? webXconxImage
+                : fallbackImage
             }
             alt={`${project.title} Website`}
           />
@@ -445,8 +442,6 @@ const ProjectPage: React.FC = () => {
 
       <ProjectContainer style={{ paddingTop: 0 }}>
         <ProjectContent>{renderProjectContent()}</ProjectContent>
-
-        <BackButton onClick={() => navigate('/')}>{t('backToHome', 'Volver al inicio')}</BackButton>
       </ProjectContainer>
     </>
   );

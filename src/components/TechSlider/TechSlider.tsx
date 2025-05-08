@@ -2,6 +2,16 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTheme } from '../../context/ThemeContext';
 
+// Importaciones de logos
+import figmaIcon from '../../assets/images/Logos/figma-icon-one-color.svg';
+import mongoDbIcon from '../../assets/images/Logos/mongodb-svgrepo-com.svg';
+import n8nIcon from '../../assets/images/Logos/n8n.io.svg';
+import postmanIcon from '../../assets/images/Logos/postman-svgrepo-com.svg';
+import reactIcon from '../../assets/images/Logos/react-svgrepo-com.svg';
+import photoshopIcon from '../../assets/images/Logos/adobe-photoshop-2 1.svg';
+import huggingFaceIcon from '../../assets/images/Logos/huggingface-1 1.svg';
+import replicateAiIcon from '../../assets/images/Logos/Replicate Ai.svg';
+
 interface TechSliderProps {
   className?: string;
 }
@@ -128,14 +138,14 @@ const TechSlider: React.FC<TechSliderProps> = ({ className }) => {
 
   // Lista de tecnologías con sus iconos actualizados
   const technologies = [
-    { name: 'Figma', src: '/images/Logos/figma-icon-one-color.svg' },
-    { name: 'MongoDB', src: '/images/Logos/mongodb-svgrepo-com.svg' },
-    { name: 'n8n', src: '/images/Logos/n8n.io.svg' },
-    { name: 'Postman', src: '/images/Logos/postman-svgrepo-com.svg' },
-    { name: 'React', src: '/images/Logos/react-svgrepo-com.svg' },
-    { name: 'Adobe Photoshop', src: '/images/Logos/adobe-photoshop-2 1.svg' },
-    { name: 'HuggingFace', src: '/images/Logos/huggingface-1 1.svg' },
-    { name: 'Replicate', src: '/images/Logos/Replicate Ai.svg' },
+    { name: 'Figma', src: figmaIcon },
+    { name: 'MongoDB', src: mongoDbIcon },
+    { name: 'n8n', src: n8nIcon },
+    { name: 'Postman', src: postmanIcon },
+    { name: 'React', src: reactIcon },
+    { name: 'Adobe Photoshop', src: photoshopIcon },
+    { name: 'HuggingFace', src: huggingFaceIcon },
+    { name: 'Replicate', src: replicateAiIcon },
   ];
 
   useEffect(() => {

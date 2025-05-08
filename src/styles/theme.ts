@@ -19,6 +19,12 @@ const baseTheme = {
     '7xl': '5rem',
     '8xl': '6rem',
   },
+  radii: {
+    sm: '2px',
+    md: '4px',
+    lg: '8px',
+    full: '9999px',
+  },
   space: {
     xs: '0.25rem',
     sm: '0.5rem',
@@ -42,7 +48,8 @@ export const darkTheme = {
   colors: {
     primary: '#0070f3',
     secondary: '#1c1c1e',
-    background: '#1D1F23',
+    background: '#212121',
+    sidebarBackground: '#171717',
     text: '#ffffff',
     accent: '#7928ca',
     cardBackground: '#252830',
@@ -59,7 +66,8 @@ export const lightTheme = {
   colors: {
     primary: '#0070f3',
     secondary: '#f5f5f7',
-    background: '#F6F6F6',
+    background: '#FFFFFF',
+    sidebarBackground: '#F9F9F9',
     text: '#1D1F23',
     accent: '#7928ca',
     cardBackground: '#f8f9fa',
@@ -71,7 +79,6 @@ export const lightTheme = {
   isDark: false,
 };
 
-// Por compatibilidad con código existente, exportamos el tema oscuro como predeterminado
 export const theme = darkTheme;
 
 export type Theme = typeof darkTheme;

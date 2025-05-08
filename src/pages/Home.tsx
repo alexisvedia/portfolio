@@ -5,7 +5,6 @@ import HeroSection from '@components/HeroSection/HeroSection';
 import BioSection from '@components/BioSection';
 import ProjectsSection from '@components/ProjectsSection/ProjectsSection';
 import ContactSection from '@components/ContactSection/ContactSection';
-import Footer from '@components/Footer/Footer';
 
 const HomeContainer = styled.div`
   position: relative;
@@ -35,7 +34,6 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded }) => {
         <ContentWrapper>
           <ContactSection />
         </ContentWrapper>
-        <Footer />
       </HomeContainer>
     </PageTransition>
   );

@@ -5,11 +5,22 @@
   border-radius: 100px;
   overflow: hidden;
   --animation-enabled: running;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.star-border-container:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.star-border-container:active {
+  transform: translateY(1px);
 }
 
 .star-border-container:disabled {
   cursor: not-allowed;
   opacity: 0.7;
+  transform: none;
 }
 
 /* Estilo para el botón deshabilitado en modo light */
@@ -27,8 +38,8 @@
 .border-gradient-bottom {
   position: absolute;
   width: 300%;
-  height: 50%;
-  opacity: 0.7;
+  height: 55%;
+  opacity: 0.85;
   bottom: -11px;
   right: -250%;
   border-radius: 50%;
@@ -39,9 +50,9 @@
 
 .border-gradient-top {
   position: absolute;
-  opacity: 0.7;
+  opacity: 0.85;
   width: 300%;
-  height: 50%;
+  height: 55%;
   top: -10px;
   left: -250%;
   border-radius: 50%;
@@ -52,8 +63,9 @@
 
 .inner-content {
   position: relative;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.05);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
   font-size: 16px;
@@ -61,18 +73,44 @@
   padding: 10px 20px;
   border-radius: 100px;
   z-index: 1;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.star-border-container:hover .inner-content {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Fallback para navegadores que no soportan backdrop-filter */
+@supports not (backdrop-filter: blur(10px)) {
+  .inner-content {
+    background: rgba(50, 50, 50, 0.8);
+  }
+  
+  .light-mode .inner-content {
+    background: rgba(20, 20, 20, 0.8);
+  }
+  
+  .dark-mode .inner-content {
+    background: rgba(30, 30, 30, 0.8);
+  }
 }
 
 /* Ajustes específicos para modo light */
 .light-mode .inner-content {
-  background: rgba(6, 6, 6, 0.6);
+  background: rgba(6, 6, 6, 0.25);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: white;
 }
 
 /* Ajustes específicos para modo dark */
 .dark-mode .inner-content {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 @keyframes star-movement-bottom {

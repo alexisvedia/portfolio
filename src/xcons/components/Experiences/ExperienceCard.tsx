@@ -20,14 +20,14 @@ const CardContainer = styled.div`
 const CardTitle = styled.h3`
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: ${props => (props.theme.mode === 'dark' ? '#FFFFFF' : '#333333')};
+  color: ${props => (props.theme.isDark ? '#FFFFFF' : '#333333')};
   font-family: 'Inter', sans-serif;
   font-weight: 600;
 `;
 
 const Period = styled.p`
   font-size: 0.9rem;
-  color: ${props => (props.theme.mode === 'dark' ? '#B8B8B8' : '#666666')};
+  color: ${props => (props.theme.isDark ? '#FFFFFF' : '#666666')};
   margin-bottom: 1rem;
   font-family: 'Inter', sans-serif;
 `;
@@ -35,7 +35,7 @@ const Period = styled.p`
 const Role = styled.h4`
   font-size: 1.1rem;
   margin-bottom: 1rem;
-  color: ${props => (props.theme.mode === 'dark' ? '#E0E0E0' : '#444444')};
+  color: ${props => (props.theme.isDark ? '#FFFFFF' : '#444444')};
   font-family: 'Inter', sans-serif;
   font-weight: 500;
 `;
@@ -43,7 +43,7 @@ const Role = styled.h4`
 const SectionTitle = styled.h5`
   font-size: 1rem;
   margin: 1rem 0 0.5rem 0;
-  color: ${props => (props.theme.mode === 'dark' ? '#CCCCCC' : '#555555')};
+  color: ${props => (props.theme.isDark ? '#FFFFFF' : '#555555')};
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   text-transform: none;
@@ -57,7 +57,7 @@ const List = styled.ul`
 
 const ListItem = styled.li`
   margin-bottom: 0.5rem;
-  color: ${props => (props.theme.mode === 'dark' ? '#AAAAAA' : '#666666')};
+  color: ${props => (props.theme.isDark ? '#FFFFFF' : '#666666')};
   font-size: 0.95rem;
   line-height: 1.6;
 `;
@@ -70,8 +70,8 @@ const ToolsContainer = styled.div`
 `;
 
 const Tool = styled.span`
-  background-color: ${props => (props.theme.mode === 'dark' ? '#2D2F33' : '#EEEEEE')};
-  color: ${props => (props.theme.mode === 'dark' ? '#CCCCCC' : '#555555')};
+  background-color: ${props => (props.theme.isDark ? '#2D2F33' : '#EEEEEE')};
+  color: ${props => (props.theme.isDark ? '#FFFFFF' : '#555555')};
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-size: 0.85rem;
