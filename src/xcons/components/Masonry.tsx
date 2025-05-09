@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react";
 import ReactDOM from 'react-dom'; // Importar ReactDOM para createPortal
 import { useTransition, a } from "@react-spring/web";
 import styled from 'styled-components'; // Importar styled
-import SplineScene from '../SplineScene'; // Importar SplineScene
+
+const SplineScene = lazy(() => import('../SplineScene')); // Importar SplineScene dinámicamente
 
 import "./Masonry.css";
 
@@ -216,7 +217,9 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           )}
           {selectedContent?.type === 'spline' && (
             <div className="spline-modal-container">
-              <SplineScene /> 
+              <Suspense fallback={<div>Loading 3D...</div>}>
+                <SplineScene /> 
+              </Suspense>
             </div>
           )}
         </div>
