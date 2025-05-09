@@ -30,6 +30,7 @@ import Home from './pages/Home';
 const ProjectPage = React.lazy(() => import('./pages/ProjectPage'));
 // Importar el componente XConsExperiencePage de forma diferida
 const XConsExperiencePage = React.lazy(() => import('./xcons/XConsExperiencePage'));
+const MaintenancePage = React.lazy(() => import('./pages/MaintenancePage'));
 // const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
 
 // Aseguramos que i18n se inicialice
@@ -197,6 +198,9 @@ const AppContent = () => {
                 }
               />
               <Route path="/xcons" element={<XConsExperiencePage />} />
+              <Route path="/fusionads" element={<MaintenancePage />} />
+              <Route path="/bandit" element={<MaintenancePage />} />
+              <Route path="/condamind" element={<MaintenancePage />} />
               <Route path="/:projectId" element={<ProjectPage />} />
             </Routes>
           </React.Suspense>
