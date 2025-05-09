@@ -13,7 +13,7 @@ import RediseñoXCONSProjectImage from '../assets/Proyectos XCONS/rediseñoXCONS
 import CamionProjectImage from '../assets/Proyectos XCONS/camion.png';
 import OsvaldoProjectImage from '../assets/Proyectos XCONS/osvaldo.png';
 import ComercialXCONSProjectImage from '../assets/Proyectos XCONS/comercial.png';
-import FerreyraProjectImage from '../assets/Proyectos XCONS/ferreyra.png';
+import FerreyraProjectImage from '../assets/Proyectos XCONS/Ferreyra.png';
 import SplineThumbnailImage from '../assets/Proyectos XCONS/spline.png';
 import RrssProjectImage from '../assets/Proyectos XCONS/rrss.png';
 import StandardSectionTitle from '../components/shared/StandardSectionTitle';
