@@ -450,9 +450,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       IconComponent: ExperienceIcon,
       subLinks: [
         { href: '/xcons', labelKey: 'navbar.xcons', defaultLabel: 'XCONS', IconComponent: ChevronRight }, 
-        { href: '#fusionads', labelKey: 'navbar.fusionads', defaultLabel: 'FusionAds', IconComponent: ChevronRight },
-        { href: '#bandit', labelKey: 'navbar.bandit', defaultLabel: 'Bandit', IconComponent: ChevronRight },
-        { href: '#condamind', labelKey: 'navbar.condamind', defaultLabel: 'Condamind', IconComponent: ChevronRight },
+        { href: '/fusionads', labelKey: 'navbar.fusionads', defaultLabel: 'FusionAds', IconComponent: ChevronRight },
+        { href: '/bandit', labelKey: 'navbar.bandit', defaultLabel: 'Bandit', IconComponent: ChevronRight },
+        { href: '/condamind', labelKey: 'navbar.condamind', defaultLabel: 'Condamind', IconComponent: ChevronRight },
       ],
     },
     { href: '#contact', labelKey: 'contact', defaultLabel: 'Contacto', IconComponent: ContactIcon },
