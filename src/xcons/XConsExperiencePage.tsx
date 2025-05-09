@@ -7,13 +7,15 @@ import { useTranslation } from 'react-i18next';
 import xFondo from '../assets/x-fondo.png';
 import xconLogoVerde from '../assets/xcon-logo-verde.png';
 import xconsComercial from '../assets/xcons-comercial.png';
-import Masonry from './components/Masonry';
-import OGImage from '../assets/OG.png';
-import RediseñoImage from '../assets/Rediseño.png';
-import FerreyraImage from '../assets/ferreyra2.webp';
-import XFondoImage from '../assets/x-fondo.png';
-import XConsComercialImage from '../assets/xcons-comercial.png';
-import XConLogoVerdeImage from '../assets/xcon-logo-verde.png';
+import Masonry, { MasonryItem } from './components/Masonry';
+
+import RediseñoXCONSProjectImage from '../assets/Proyectos XCONS/rediseñoXCONS.png';
+import CamionProjectImage from '../assets/Proyectos XCONS/camion.png';
+import OsvaldoProjectImage from '../assets/Proyectos XCONS/osvaldo.png';
+import ComercialXCONSProjectImage from '../assets/Proyectos XCONS/comercial.png';
+import FerreyraProjectImage from '../assets/Proyectos XCONS/ferreyra.png';
+import SplineThumbnailImage from '../assets/Proyectos XCONS/spline.png';
+import RrssProjectImage from '../assets/Proyectos XCONS/rrss.png';
 import StandardSectionTitle from '../components/shared/StandardSectionTitle';
 import PageTransition from '@components/PageTransition/PageTransition';
 
@@ -195,21 +197,154 @@ const MasonryWrapper = styled.div< { $isDark?: boolean } >`
   }
 `;
 
+// Textos para los elementos de la galería (Español e Inglés)
+const masonryItemText = {
+  splineScene: {
+    title: { es: "Escena Interactiva 3D", en: "Interactive 3D Scene" },
+    description: {
+      es: "Escena hecha con Spline para la web comercial, puede reaccionar al scroll o hover del mouse si se desea.",
+      en: "Scene made with Spline for the commercial website, it can react to scroll or mouse hover if desired."
+    }
+  },
+  rediseñoXCONS: {
+    title: { es: "Rediseño XCONS", en: "XCONS Redesign" },
+    description: { 
+      es: "Propuesta de rediseño de la plataforma principal, basada en buenas prácticas de diseño UX/UI, considerando principios fundamentales como familiaridad, ley de Prägnanz, etc.", 
+      en: "Redesign proposal for the main platform, based on UX/UI design best practices, considering fundamental principles such as familiarity, Prägnanz law, etc." 
+    }
+  },
+  camion: {
+    title: { es: "Diseño de banner OG", en: "OG Banner Design" },
+    description: { 
+      es: "Antes de la existencia de la AI de edición de imagen, haciendo uso de Photoshop realizaba los diseños de cada banner que usaban las webs utilizando los recursos originales (algunas veces en mala calidad) que enviaban los clientes que digitalizabamos.", 
+      en: "Before the existence of image editing AI, using Photoshop, I designed each banner used by the websites using the original resources (sometimes of poor quality) sent by the clients we digitized." 
+    }
+  },
+  osvaldo: {
+    title: { es: "Dashboard Osvaldo", en: "Osvaldo Dashboard" },
+    description: { 
+      es: "Creación de un dashboard analítico para la visualización de datos clave del proyecto Osvaldo.", 
+      en: "Creation of an analytical dashboard for visualizing key data for the Osvaldo project." 
+    }
+  },
+  comercialXCONS: {
+    title: { es: "Spot Publicitario XCONS", en: "XCONS Commercial Spot" },
+    description: { 
+      es: "Concepto y diseño visual para un spot publicitario de XCONS destacando sus nuevas funcionalidades.", 
+      en: "Concept and visual design for an XCONS commercial spot highlighting its new features." 
+    }
+  },
+  ferreyra: {
+    title: { es: "Proyecto Ferreyra", en: "Ferreyra Project" },
+    description: {
+      es: "Detalles del proyecto Ferreyra.",
+      en: "Details of the Ferreyra project."
+    }
+  },
+  rrss: {
+    title: { es: "RRSS XCONS", en: "XCONS Social Media" },
+    description: {
+      es: "Diseño de plantillas y contenido para redes sociales de XCONS.",
+      en: "Design of templates and content for XCONS social media."
+    }
+  }
+} as const;
+
+// Definir un tipo para las claves de masonryItemText
+type MasonryItemKey = keyof typeof masonryItemText;
+
+// Definición de datos base para los elementos de la galería
+// Aseguramos que los elementos base cumplan con parte de MasonryItem y añadan la key.
+const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'> & { id: string | number; key: MasonryItemKey }> = [
+  {
+    id: 'spline-scene',
+    key: 'splineScene',
+    height: 300,
+    type: 'spline' as const,
+    thumbnail: SplineThumbnailImage,
+    splineSrc: 'https://prod.spline.design/kFgAlvghlLyIp78Q/scene.splinecode',
+  },
+  {
+    id: 7,
+    key: 'rediseñoXCONS',
+    image: RediseñoXCONSProjectImage,
+    height: 320,
+    type: 'image' as const,
+    documentLinks: [
+      { 
+        name: "Diseño general.pdf", 
+        url: "/src/assets/Proyectos XCONS/Diseño general.pdf" 
+      },
+      { 
+        name: "Corralones.pdf", 
+        url: "/src/assets/Proyectos XCONS/Corralones.pdf" 
+      },
+      { 
+        name: "Calculadores.pdf", 
+        url: "/src/assets/Proyectos XCONS/Calculadores.pdf" 
+      },
+      { 
+        name: "Calificación.pdf", 
+        url: "/src/assets/Proyectos XCONS/Calificación.pdf" 
+      },
+      { 
+        name: "Otras consideraciones.pdf", 
+        url: "/src/assets/Proyectos XCONS/Otras consideraciones.pdf" 
+      }
+    ]
+  },
+  {
+    id: 8,
+    key: 'camion',
+    image: CamionProjectImage,
+    height: 380,
+    type: 'image' as const,
+  },
+  {
+    id: 9,
+    key: 'osvaldo',
+    image: OsvaldoProjectImage,
+    height: 420,
+    type: 'image' as const,
+  },
+  {
+    id: 10,
+    key: 'comercialXCONS',
+    image: ComercialXCONSProjectImage,
+    height: 330,
+    type: 'image' as const,
+  },
+  {
+    id: 11,
+    key: 'ferreyra',
+    image: FerreyraProjectImage,
+    height: 350,
+    type: 'image' as const,
+  },
+  {
+    id: 12,
+    key: 'rrss',
+    image: RrssProjectImage,
+    height: 300,
+    type: 'image' as const,
+  },
+];
+
 const XConsExperiencePage: React.FC = () => {
   const { themeMode } = useTheme();
   const { i18n } = useTranslation();
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
   const isDark = themeMode === 'dark';
 
-  const masonryData = [
-    { id: 1, image: OGImage, height: 400, type: 'image' as const, title: 'Imagen OG Portafolio', description: '...' },
-    { id: 2, image: RediseñoImage, height: 300, type: 'image' as const, title: 'Propuesta de Rediseño', description: '...' },
-    { id: 3, image: FerreyraImage, height: 350, type: 'image' as const, title: 'Proyecto Ferreyra', description: '...' },
-    { id: 'spline-scene', height: 300, type: 'spline' as const, thumbnail: XConsComercialImage, splineSrc: 'https://prod.spline.design/kFgAlvghlLyIp78Q/scene.splinecode', title: 'Escena Interactiva 3D', description: '...' },
-    { id: 4, image: XFondoImage, height: 250, type: 'image' as const, title: 'Fondo XCONS', description: '...' },
-    { id: 5, image: XConsComercialImage, height: 300, type: 'image' as const, title: 'Vista Comercial XCONS', description: '...' },
-    { id: 6, image: XConLogoVerdeImage, height: 200, type: 'image' as const, title: 'Logo XCONS (Versión Verde)', description: '...' },
-  ]; // Descripciones acortadas para brevedad
+  // Generar masonryData con los textos traducidos
+  const masonryData: MasonryItem[] = masonryItemDetails.map(item => {
+    const texts = masonryItemText[item.key]; 
+    return {
+      ...item,
+      title: texts.title[language],
+      description: texts.description[language],
+    } as MasonryItem; // Asegurar que el objeto resultante sea del tipo MasonryItem
+  });
 
   const translations = {
     mainTitle: { es: 'Un Vistazo a XCONS', en: 'A Glimpse into XCONS' },

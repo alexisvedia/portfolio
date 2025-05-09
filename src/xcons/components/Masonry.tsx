@@ -1,12 +1,15 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react";
 import ReactDOM from 'react-dom'; // Importar ReactDOM para createPortal
 import { useTransition, a } from "@react-spring/web";
 import styled from 'styled-components'; // Importar styled
-import SplineScene from '../SplineScene'; // Importar SplineScene
+import { useTranslation } from 'react-i18next'; // Importar useTranslation
+import Tooltip from '../../components/Tooltip/Tooltip'; // Importar el componente Tooltip
+
+const SplineScene = lazy(() => import('../SplineScene')); // Importar SplineScene dinámicamente
 
 import "./Masonry.css";
 
-interface MasonryItem {
+export interface MasonryItem {
   id: string | number;
   height: number;
   image?: string; // Hacer opcional si es Spline
@@ -15,6 +18,7 @@ interface MasonryItem {
   thumbnail?: string; // Imagen para mostrar en la cuadrícula para Spline
   title?: string; // Nuevo campo para el título
   description?: string; // Nuevo campo para la descripción
+  documentLinks?: Array<{name: string, url: string}>; // Nuevo campo para enlaces a documentos
 }
 
 interface GridItem extends MasonryItem {
@@ -39,15 +43,52 @@ const ModalInfoTitle = styled.h2`
   line-height: 1.3;
 `;
 
-const TARGET_ZOOM_LEVEL = 2.5;
+// Nuevo componente para los enlaces a documentos
+const DocumentLinksContainer = styled.div`
+  margin-top: 1.5rem;
+`;
+
+const DocumentLinksTitle = styled.h3`
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  color: ${({ theme }) => (theme.isDark || theme.themeMode === 'dark' ? '#E0E0E0' : '#333333')};
+  margin-bottom: 0.75rem;
+`;
+
+const DocumentLinksList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+const DocumentLinkItem = styled.li`
+  margin-bottom: 0.5rem;
+
+  a {
+    color: ${({ theme }) => (theme.isDark || theme.themeMode === 'dark' ? '#4DABF7' : '#0072CE')};
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+
+    svg {
+      margin-right: 0.5rem;
+    }
+  }
+`;
 
 const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
+  const { t } = useTranslation(); // Hook de traducción
   const [columns, setColumns] = useState<number>(2);
   const [selectedContent, setSelectedContent] = useState<MasonryItem | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
-  const [zoomLevel, setZoomLevel] = useState<number>(1);
-  const [transformOriginValue, setTransformOriginValue] = useState<string>('50% 50%');
   const imageRef = useRef<HTMLImageElement>(null);
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(0);
@@ -113,21 +154,14 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     trail: 25,
   });
 
-  const resetZoomState = () => {
-    setZoomLevel(1);
-    setTransformOriginValue('50% 50%');
-  }
-
   const handleItemClick = (item: MasonryItem, index: number) => {
     setSelectedContent(item);
     setCurrentIndex(index);
-    resetZoomState();
   };
 
   const closeModal = () => {
     setSelectedContent(null);
     setCurrentIndex(null);
-    resetZoomState();
   };
 
   const goToNext = () => {
@@ -135,7 +169,6 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     const nextIndex = currentIndex + 1;
     setSelectedContent(data[nextIndex]);
     setCurrentIndex(nextIndex);
-    resetZoomState();
   };
 
   const goToPrevious = () => {
@@ -143,36 +176,29 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     const prevIndex = currentIndex - 1;
     setSelectedContent(data[prevIndex]);
     setCurrentIndex(prevIndex);
-    resetZoomState();
   };
 
-  const handleImageClick = (event: React.MouseEvent<HTMLImageElement>) => {
-    event.stopPropagation();
-    if (!imageRef.current) return;
+  const handleShowTooltip = (e: React.MouseEvent) => {
+    setTooltipPosition({
+      x: e.clientX,
+      y: e.clientY
+    });
+    setTooltipVisible(true);
+  };
 
-    if (zoomLevel === 1) {
-      // Zoom In
-      const imageElement = event.currentTarget;
-      // const rect = imageElement.getBoundingClientRect(); // rect del elemento img
-      
-      // offsetX/Y son relativos al borde del elemento img.
-      // Esto es lo que queremos para transform-origin si el elemento img en sí no tiene padding.
-      const clickX = event.nativeEvent.offsetX;
-      const clickY = event.nativeEvent.offsetY;
-
-      const originXPercent = (clickX / imageElement.offsetWidth) * 100;
-      const originYPercent = (clickY / imageElement.offsetHeight) * 100;
-      
-      setTransformOriginValue(`${originXPercent}% ${originYPercent}%`);
-      setZoomLevel(TARGET_ZOOM_LEVEL);
-    } else {
-      // Zoom Out
-      resetZoomState();
-    }
+  const handleHideTooltip = () => {
+    setTooltipVisible(false);
   };
 
   const ModalContent = (
     <div className={`modal-overlay ${themeMode === 'dark' ? 'dark-mode' : ''}`} onClick={closeModal}>
+      {/* Tooltip global */}
+      <Tooltip 
+        text={t('tooltip.viewOriginal')} 
+        isVisible={tooltipVisible} 
+        position={tooltipPosition}
+      />
+      
       <div className="modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
         {data.length > 1 && (
           <>
@@ -197,26 +223,36 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
 
         <div className="modal-media-area">
           {selectedContent?.type === 'image' && selectedContent.image && (
-            <>
-              <img 
+            <div
+              className="image-scroll-container"
+              style={{ 
+                width: `clamp(300px, 90vw, 1200px)`,
+                height: `clamp(300px, 85vh, 1000px)`,
+                overflow: 'auto',
+                margin: '0 auto',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}
+            >
+              <img
                 ref={imageRef}
-                src={selectedContent.image} 
-                alt={selectedContent.title || 'Selected Image'} 
-                style={{ 
-                  transform: `scale(${zoomLevel})`,
-                  transformOrigin: transformOriginValue,
-                  transition: 'transform 0.3s ease-out, transform-origin 0s linear',
-                  cursor: zoomLevel > 1 ? 'zoom-out' : 'zoom-in',
-                  willChange: 'transform'
+                src={selectedContent.image}
+                alt={selectedContent.title || 'Selected Image'}
+                style={{
+                  display: 'block',
+                  width: '100%',
+                  height: 'auto',
                 }}
-                onClick={handleImageClick}
                 draggable="false"
               />
-            </>
+            </div>
           )}
           {selectedContent?.type === 'spline' && (
             <div className="spline-modal-container">
-              <SplineScene /> 
+              <Suspense fallback={<div>Loading 3D...</div>}>
+                <SplineScene /> 
+              </Suspense>
             </div>
           )}
         </div>
@@ -225,10 +261,42 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           <div className="modal-info-area">
             {selectedContent.title && <ModalInfoTitle>{selectedContent.title}</ModalInfoTitle>}
             {selectedContent.description && <p>{selectedContent.description}</p>}
+            
+            {selectedContent?.documentLinks && selectedContent.documentLinks.length > 0 && (
+              <DocumentLinksContainer>
+                <DocumentLinksTitle>{t('documentLinksTitle', 'Defensa de la propuesta')}</DocumentLinksTitle>
+                <DocumentLinksList>
+                  {selectedContent.documentLinks.map((link, index) => (
+                    <DocumentLinkItem key={`doc-link-${index}`}>
+                      <a href={link.url} target="_blank" rel="noopener noreferrer">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                          <polyline points="14 2 14 8 20 8"></polyline>
+                          <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        {link.name}
+                      </a>
+                    </DocumentLinkItem>
+                  ))}
+                </DocumentLinksList>
+              </DocumentLinksContainer>
+            )}
           </div>
         )}
 
         <button className="modal-close-button" onClick={closeModal} aria-label="Close modal">&times;</button>
+
+        {/* Botón para abrir imagen en nueva pestaña */}
+        {selectedContent?.type === 'image' && selectedContent.image && (
+          <button 
+            className="modal-open-original-button"
+            onClick={() => window.open(selectedContent.image, '_blank', 'noopener,noreferrer')}
+            onMouseEnter={handleShowTooltip}
+            onMouseLeave={handleHideTooltip}
+          >
+            {t('viewOriginalButton', 'Ver Original')}
+          </button>
+        )}
 
         {data.length > 1 && (
           <div className="modal-thumbnail-strip">

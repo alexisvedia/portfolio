@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import PageTransition from '@components/PageTransition/PageTransition';
 import { useTheme } from '../context/ThemeContext'; // Ruta corregida
+import maintenanceImage from '@/assets/images/matenimiento.png'; // Importar la imagen
 
 const MaintenanceContainer = styled.div< { $isDark: boolean } >`
   display: flex;
@@ -14,6 +15,13 @@ const MaintenanceContainer = styled.div< { $isDark: boolean } >`
   text-align: center;
   background-color: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.text};
+`;
+
+const StyledImage = styled.img< { $isDark?: boolean } >`
+  width: 150px; // Ajusta el tamaño según necesites
+  height: auto;
+  margin-bottom: 2rem; // Espacio entre la imagen y el título
+  ${({ $isDark }) => !$isDark && `filter: invert(1);`} // Aplicar filtro en modo claro
 `;
 
 const Title = styled.h1< { $isDark: boolean } >`
@@ -52,6 +60,7 @@ const MaintenancePage: React.FC = () => {
   return (
     <PageTransition>
       <MaintenanceContainer $isDark={isDark}>
+        <StyledImage src={maintenanceImage} alt="En mantenimiento" $isDark={isDark} />
         <Title $isDark={isDark}>{translations.title[currentLanguage]}</Title>
         <Message>{translations.message[currentLanguage]}</Message>
       </MaintenanceContainer>
