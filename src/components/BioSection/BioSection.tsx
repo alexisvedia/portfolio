@@ -72,7 +72,6 @@ const SectionTitleStyles = styled.div`
     color: ${({ theme }) => theme.colors.text};
     margin-bottom: 1.5rem;
     line-height: 1.2;
-    letter-spacing: 0.1em;
     
     @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
       font-size: 2rem;
@@ -88,7 +87,8 @@ const StyledScrollReveal = styled(ScrollReveal)`
 
 const BioTextContainer = styled.div`
   margin-bottom: 1rem;
-  line-height: 1.1;
+  line-height: 1.6;
+  white-space: pre-line;
   
   &:last-child {
     margin-bottom: 0;

@@ -28,7 +28,7 @@ const WatermarkCover = styled.div`
   right: 0;
   width: 170px;
   height: 80px;
-  background-color:#FFF;
+  background-color: ${({ $isDark }) => $isDark ? '#282c34' : '#FFF'};
   z-index: 10;
   
   &::after {

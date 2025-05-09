@@ -68,13 +68,18 @@
   justify-content: center;
   overflow: hidden;
   position: relative;
+  height: 85vh;
+  min-height: 450px;
 }
 
 .modal-media-area img {
   max-width: 100%;
-  max-height: calc(90vh - 40px);
+  max-height: 100%;
   display: block;
   border-radius: 6px;
+  object-fit: contain;
+  width: auto;
+  height: auto;
 }
 
 .spline-modal-container {
@@ -250,15 +255,16 @@
     flex-direction: column;
     max-height: 95vh;
     width: 95vw;
+    padding-bottom: 70px;
   }
 
   .modal-media-area {
-    max-height: 60vh;
-    min-height: 300px;
+    max-height: none;
+    height: 45vh;
+    min-height: 280px;
   }
 
   .modal-media-area img {
-    max-height: calc(60vh - 40px);
   }
 
   .spline-modal-container {
@@ -273,10 +279,6 @@
     max-width: 100%;
     max-height: 35vh;
     min-width: auto;
-  }
-
-  .modal-content-wrapper {
-    padding-bottom: 70px;
   }
 
   .modal-nav-button {
@@ -310,4 +312,85 @@
   }
   .modal-nav-button.next {
   }
-} 
+}
+
+/* Dark Mode Styles for Modal */
+.modal-overlay.dark-mode {
+  background-color: rgba(0, 0, 0, 0.92);
+}
+
+.modal-overlay.dark-mode .modal-content-wrapper {
+  background-color: #282c34;
+  border: 1px solid #3a3f4b;
+}
+
+.modal-overlay.dark-mode .modal-media-area img {
+}
+
+.modal-overlay.dark-mode .spline-modal-container {
+  background-color: #282c34;
+}
+
+.modal-overlay.dark-mode .modal-info-area {
+  background-color: #21252b;
+  border-left-color: #3a3f4b;
+  color: #abb2bf;
+}
+
+.modal-overlay.dark-mode .modal-info-area h2 {
+  color: #e0e6f1;
+}
+
+.modal-overlay.dark-mode .modal-info-area p {
+  color: #abb2bf;
+}
+
+.modal-overlay.dark-mode .modal-close-button {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e0e6f1;
+}
+
+.modal-overlay.dark-mode .modal-close-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.modal-overlay.dark-mode .modal-nav-button {
+  background-color: rgba(70, 70, 70, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e0e6f1;
+}
+
+.modal-overlay.dark-mode .modal-nav-button:hover:not(:disabled) {
+  background-color: rgba(90, 90, 90, 0.6);
+}
+
+.modal-overlay.dark-mode .modal-nav-button:disabled {
+  opacity: 0.4;
+}
+
+.modal-overlay.dark-mode .modal-thumbnail-strip {
+  background-color: #21252b;
+  border-top-color: #3a3f4b;
+}
+
+.modal-overlay.dark-mode .modal-thumbnail-strip::-webkit-scrollbar-thumb {
+  background: #4b5260;
+}
+
+.modal-overlay.dark-mode .thumbnail-item:hover {
+  border-color: #61afef;
+}
+
+.modal-overlay.dark-mode .thumbnail-item.active {
+  border-color: #61afef;
+}
+
+@media (max-width: 992px) {
+  .modal-overlay.dark-mode .modal-info-area {
+    border-top-color: #3a3f4b;
+  }
+}
+
+/* Los estilos de .zoom-controls y .zoom-button se eliminan */
+
+/* ... (final del archivo) ... */ 
