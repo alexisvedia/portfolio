@@ -97,11 +97,15 @@
 .modal-info-area {
   flex: 1;
   padding: 25px;
+  padding-right: 70px;
   overflow-y: auto;
   background-color: #f9f9f9;
   border-left: 1px solid #eee;
   max-width: 380px;
   min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .modal-info-area h2 {
@@ -139,6 +143,42 @@
 .modal-close-button:hover {
   background: rgba(0,0,0,0.8);
   transform: scale(1.1);
+}
+
+/* Estilo para el botón de abrir original */
+.modal-open-original-button {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: rgba(60, 60, 60, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 100px;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 1020;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.modal-open-original-button:hover {
+  background-color: rgba(70, 70, 70, 0.7);
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Ajustes para modo oscuro si fuera necesario (opcional, si .dark-mode afecta al modal) */
+.modal-overlay.dark-mode .modal-open-original-button {
+  background-color: rgba(40, 40, 40, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.modal-overlay.dark-mode .modal-open-original-button:hover {
+  background-color: rgba(50, 50, 50, 0.8);
 }
 
 /* Estilos para Botones de Navegación del Modal */
@@ -250,6 +290,25 @@
   transform: scale(1.05);
 }
 
+/* Estilos para el scrollbar del contenedor de la imagen en el modal */
+.image-scroll-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.image-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.image-scroll-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.modal-overlay.dark-mode .image-scroll-container::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
 @media (max-width: 992px) {
   .modal-content-wrapper {
     flex-direction: column;
@@ -279,6 +338,8 @@
     max-width: 100%;
     max-height: 35vh;
     min-width: auto;
+    justify-content: flex-start;
+    padding-right: 25px;
   }
 
   .modal-nav-button {

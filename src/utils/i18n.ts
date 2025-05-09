@@ -68,7 +68,10 @@ const resources = {
         linkedin: 'Visit LinkedIn Profile',
         toggleTheme: 'Toggle Theme',
         selectLanguage: 'Select Language',
+        viewOriginal: 'View original image in new tab',
       },
+      // Document links
+      documentLinksTitle: 'Proposal Defense',
       // About page
       about: {
         professionalProfile: 'Professional Profile',
@@ -130,6 +133,8 @@ const resources = {
         kodi:
           '"I met Alexis through Mile. He made an initial redesign proposal for my app without me asking. That\'s when I realized I had to work with him. We worked together for hours, and he never hesitated to tell me if something wasn\'t on the right track. He also introduced me to many tools, a genius!"',
       },
+      viewOriginalButton: 'View Original',
+      openOriginalTitle: 'Open original image in new tab',
     },
   },
   es: {
@@ -198,7 +203,10 @@ const resources = {
         linkedin: 'Visitar Perfil de LinkedIn',
         toggleTheme: 'Cambiar Tema',
         selectLanguage: 'Seleccionar Idioma',
+        viewOriginal: 'Ver imagen original en nueva pestaña',
       },
+      // Enlaces a documentos
+      documentLinksTitle: 'Defensa de la propuesta',
       // Página Sobre Mí
       about: {
         professionalProfile: 'Perfil Profesional',
@@ -260,6 +268,8 @@ const resources = {
         kodi:
           '"A Alexis lo conocí por contacto con Mile. Realizó una primer propuesta de rediseño de mi app sin habérselo pedido. Ahí me di cuenta que debía trabajar con él. Trabajamos en conjunto durante horas, y no dudaba nunca en decirme que algo no iba por buen camino. Además me hizo conocer muchas herramientas, ¡un genio!"',
       },
+      viewOriginalButton: 'Ver Original',
+      openOriginalTitle: 'Abrir imagen original en nueva pestaña',
     },
   },
 };
