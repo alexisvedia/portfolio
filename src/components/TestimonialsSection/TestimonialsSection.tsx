@@ -10,9 +10,19 @@ import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-// Placeholder images (replace with actual paths or logic)
-const placeholderPerson = 'https://via.placeholder.com/80/cccccc/808080?text=Person';
-const placeholderLogo = 'https://via.placeholder.com/100x40/eeeeee/909090?text=Logo';
+// Importar imágenes de personas (asumiendo .png, ajustar si es necesario)
+import jorgeImage from '../../assets/images/testimonials/Jorge.jpeg';
+import mauroImage from '../../assets/images/testimonials/Mauro.jpeg';
+import milenaImage from '../../assets/images/testimonials/Milena.jpeg';
+import kodiImage from '../../assets/images/testimonials/Kodi.png';
+
+// Importar logos de empresa desde la carpeta de proyectos
+import xconsLogo from '../../assets/images/projects/XCONS.svg';
+import fusionadsLogo from '../../assets/images/projects/Fusionads.svg';
+import banditLogo from '../../assets/images/projects/Bandit.svg';
+
+// Placeholder para logo (si es necesario)
+// const placeholderLogo = 'https://via.placeholder.com/100x40/eeeeee/909090?text=Logo'; // Ya no se necesita por ahora
 
 // Actualizar estructura de datos
 interface Testimonial {
@@ -20,34 +30,43 @@ interface Testimonial {
   quote: string;
   name: string;
   role: string;
-  personImage?: string; // opcional
-  companyLogo?: string; // opcional
+  personImage: string; // Ahora requerido
+  companyLogo: string; // Ahora requerido (usaremos placeholder si no hay)
 }
 
+// Actualizar datos con las nuevas personas, imágenes y logos
 const testimonialsData: Testimonial[] = [
   {
     id: 1,
-    quote: "Trabajar con Alexis fue una experiencia transformadora. Su visión para el diseño y la funcionalidad es excepcional.",
-    name: "Ana García",
-    role: "CEO, Startup Creativa",
-    personImage: placeholderPerson,
-    companyLogo: placeholderLogo
+    quote: "testimonials.jorge", // Clave para i18next
+    name: "Jorge Venzon",
+    role: "CTO at XCONS",
+    personImage: jorgeImage,
+    companyLogo: xconsLogo
   },
   {
     id: 2,
-    quote: "La atención al detalle y la capacidad de Alexis para entender las necesidades del usuario son impresionantes. Altamente recomendado.",
-    name: "Carlos Rodríguez",
-    role: "Product Manager, Tech Solutions",
-    personImage: placeholderPerson,
-    companyLogo: placeholderLogo
+    quote: "testimonials.mauro", // Clave para i18next
+    name: "Mauro Schuzman",
+    role: "Chief Technology Officer at Fusion AI",
+    personImage: mauroImage,
+    companyLogo: fusionadsLogo
   },
   {
     id: 3,
-    quote: "Un profesional dedicado y proactivo. Siempre aporta soluciones innovadoras y eficientes. Un placer colaborar con él.",
-    name: "Laura Fernández",
-    role: "Lead Developer, Innovatech",
-    personImage: placeholderPerson,
-    companyLogo: placeholderLogo
+    quote: "testimonials.milena", // Clave para i18next
+    name: "Milena Pasetti",
+    role: "Digital Specialist",
+    personImage: milenaImage,
+    companyLogo: xconsLogo // Milena también usa el logo de XCONS
+  },
+  {
+    id: 4,
+    quote: "testimonials.kodi", // Clave para i18next
+    name: "Kodi Martinez",
+    role: "CEO at Bandit",
+    personImage: kodiImage,
+    companyLogo: banditLogo
   }
 ];
 
@@ -66,14 +85,13 @@ const SectionTitle = styled.h2`
   text-align: center;
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: ${({ theme }) => theme.space.xl};
-  letter-spacing: 0.1em;
 `;
 
 const StyledSwiper = styled(Swiper)`
   width: 100%;
   max-width: 800px; 
   margin: 0 auto;
-  padding-bottom: 50px; // Aumentar espacio para paginación
+  padding-bottom: 50px;
 
   .swiper-slide {
     display: flex;
@@ -90,7 +108,7 @@ const StyledSwiper = styled(Swiper)`
   }
 
   .swiper-pagination-bullet-active {
-    background-color: ${({ theme }) => theme.colors.text}; // Blanco en dark, Negro en light
+    background-color: ${({ theme }) => theme.colors.text};
     opacity: 1;
   }
 
@@ -113,15 +131,15 @@ const glassEffect = css<{ $isDark: boolean }>`
 `;
 
 const TestimonialCard = styled.div<{ $isDark: boolean }>`
-  padding: ${({ theme }) => theme.space.xl}; // Más padding
-  border-radius: 20px; // Más redondeado
+  padding: ${({ theme }) => theme.space.xl};
+  border-radius: 20px;
   max-width: 90%; 
-  min-height: 280px; // Altura mínima para consistencia
+  min-height: 280px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; // Para espaciar contenido y logo
-  text-align: left; // Alinear texto a la izquierda
-  ${glassEffect} // Aplicar efecto glass
+  justify-content: space-between;
+  text-align: left;
+  ${glassEffect}
 `;
 
 const CardHeader = styled.div`
@@ -131,7 +149,7 @@ const CardHeader = styled.div`
 `;
 
 const PersonImage = styled.img`
-  width: 60px; // Tamaño reducido
+  width: 60px;
   height: 60px;
   border-radius: 50%;
   margin-right: ${({ theme }) => theme.space.md};
@@ -144,30 +162,30 @@ const AuthorInfo = styled.div`
 `;
 
 const Quote = styled.blockquote`
-  font-size: ${({ theme }) => theme.fontSizes.md}; // Ligeramente más pequeño
+  font-size: ${({ theme }) => theme.fontSizes.md};
   font-style: italic;
   margin-bottom: ${({ theme }) => theme.space.lg};
-  color: ${({ theme }) => theme.colors.text}dd; // Más opaco
+  color: ${({ theme }) => theme.colors.text}dd;
   line-height: 1.6;
   quotes: "\201C" "\201D" "\2018" "\2019";
-  flex-grow: 1; // Para que ocupe espacio disponible
+  flex-grow: 1;
   position: relative;
-  padding-left: 2.5rem; // Espacio para la comilla grande
+  padding-left: 2.5rem;
 
   &::before {
     content: open-quote;
-    font-size: 4em; // Comilla más grande
+    font-size: 4em;
     position: absolute;
     left: 0;
     top: -0.1em;
     line-height: 1;
-    color: ${({ theme }) => theme.colors.primary}aa; // Usar color primario con transparencia
+    color: ${({ theme }) => theme.colors.primary}aa;
   }
 `;
 
 const Author = styled.p`
   font-weight: bold;
-  margin: 0; // Quitar margen superior
+  margin: 0;
   color: ${({ theme }) => theme.colors.text};
 `;
 
@@ -179,20 +197,20 @@ const Role = styled.p`
 
 const CardFooter = styled.div`
   display: flex;
-  justify-content: flex-end; // Alinear logo a la derecha
+  justify-content: flex-end;
   margin-top: ${({ theme }) => theme.space.md};
   opacity: 0.7;
 `;
 
 const CompanyLogo = styled.img`
-  max-height: 30px; // Altura máxima del logo
+  max-height: 30px;
   max-width: 100px;
   object-fit: contain;
 `;
 
 const TestimonialsSection: React.FC = () => {
   const { t } = useTranslation();
-  const { themeMode } = useTheme(); // Obtener el modo del tema
+  const { themeMode } = useTheme();
   const isDark = themeMode === 'dark';
 
   return (
@@ -215,18 +233,18 @@ const TestimonialsSection: React.FC = () => {
         {testimonialsData.map((testimonial) => (
           <SwiperSlide key={testimonial.id}>
             <TestimonialCard $isDark={isDark}>
-              <div> {/* Wrapper para contenido superior */} 
+              <div> 
                 <CardHeader>
-                  <PersonImage src={testimonial.personImage || placeholderPerson} alt={testimonial.name} />
+                  <PersonImage src={testimonial.personImage} alt={testimonial.name} />
                   <AuthorInfo>
                     <Author>{testimonial.name}</Author>
                     <Role>{testimonial.role}</Role>
                   </AuthorInfo>
                 </CardHeader>
-                <Quote>{testimonial.quote}</Quote>
+                <Quote>{t(testimonial.quote)}</Quote>
               </div>
               <CardFooter>
-                <CompanyLogo src={testimonial.companyLogo || placeholderLogo} alt={`${testimonial.name}'s company logo`} />
+                <CompanyLogo src={testimonial.companyLogo} alt={`${testimonial.name}'s company logo`} />
               </CardFooter>
             </TestimonialCard>
           </SwiperSlide>

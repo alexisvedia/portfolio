@@ -10,9 +10,9 @@ interface StandardSectionTitleProps {
 }
 
 const Title = styled.h2` // Por defecto es h2, pero se puede cambiar con la prop 'as'
-  font-family: 'Morganite', sans-serif;
+  font-family: 'NHaasGroteskTXPro-55Rg', 'Inter', sans-serif;
   font-weight: 900;
-  font-size: 5rem; /* Considerar clamp o media queries para responsiveness */
+  font-size:1.6rem; /* Reducido desde 3rem */
   text-transform: uppercase;
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: 1.5rem;
@@ -20,11 +20,11 @@ const Title = styled.h2` // Por defecto es h2, pero se puede cambiar con la prop
   text-align: center;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 4rem; /* Ejemplo de ajuste para pantallas medianas */
+    font-size: 2rem; /* Reducido desde 2.5rem */
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
-    font-size: 3rem; /* Ejemplo de ajuste para pantallas pequeñas */
+    font-size: 1.8rem; /* Reducido desde 2rem */
   }
 `;
 

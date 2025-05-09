@@ -80,9 +80,9 @@ const resources = {
         english: 'English: Intermediate Level',
         bio: {
           part1:
-            'Passionate Full Stack Developer, specialized in React and TypeScript, with extensive experience in UX/UI design and great interest in integrating artificial intelligence solutions. I stand out for my adaptability, teamwork ability, humility, and constant commitment to excellence.',
+            'Full Stack Developer with strong specialization in React and TypeScript and extensive background in UX/UI design.',
           part2:
-            'Experience in automations with n8n. I am always looking for challenges that drive my professional and personal growth.',
+            'I have collaborated with multidisciplinary teams on international projects, quickly adapting to intercultural environments and agile methodologies. I stand out for my teamwork ability, professional humility, and permanent commitment to excellence and delivering high-impact results.',
         },
         jobs: {
           fullStackEngineer: 'Full Stack Engineer',
@@ -120,6 +120,16 @@ const resources = {
       },
       // Testimonials Section Title
       testimonialsTitle: 'Testimonials',
+      testimonials: {
+        jorge:
+          '"During the 2 years he provided services for XCONS, Alexis was a very proactive person, always doing more than what was asked, with an ambition to learn and improve."',
+        mauro:
+          '"Alexis started as one person and ended as another in his process at Fusion. Undoubtedly, in a short time he adapted, learned, and surpassed himself. He was of great help to us in very accelerated implementation times, and his knowledge in design saved us hours of understanding with the design team."',
+        milena:
+          '"Whenever I have to work with a new client, I think of Alexis, and how his help could serve me. He is a person who is at the forefront. Highly recommended!"',
+        kodi:
+          '"I met Alexis through Mile. He made an initial redesign proposal for my app without me asking. That\'s when I realized I had to work with him. We worked together for hours, and he never hesitated to tell me if something wasn\'t on the right track. He also introduced me to many tools, a genius!"',
+      },
     },
   },
   es: {
@@ -200,9 +210,9 @@ const resources = {
         english: 'Inglés: Nivel Intermedio',
         bio: {
           part1:
-            'Desarrollador Full Stack apasionado, especializado en React y TypeScript, con vasta experiencia en diseño UX/UI y gran interés en la integración de soluciones de inteligencia artificial. Me destaco por mi adaptabilidad, capacidad de trabajar en equipo, humildad y compromiso constante con la excelencia.',
+            'Desarrollador Full Stack con sólida especialización en React y TypeScript y amplia trayectoria en diseño UX/UI.',
           part2:
-            'Experiencia en automatizaciones con n8n. Siempre estoy en busca de desafíos que impulsen mi crecimiento profesional y personal.',
+            'He colaborado con equipos multidisciplinarios en proyectos internacionales, adaptándome rápidamente a entornos interculturales y metodologías ágiles. Destaco por mi capacidad de trabajo en equipo, humildad profesional y compromiso permanente con la excelencia y la entrega de resultados de alto impacto.',
         },
         jobs: {
           fullStackEngineer: 'Ingeniero Full Stack',
@@ -240,6 +250,16 @@ const resources = {
       },
       // Título Sección Testimonios
       testimonialsTitle: 'Testimonios',
+      testimonials: {
+        jorge:
+          '"Durante los 2 años que prestó servicios para XCONS, Alexis fue una persona muy proactiva, siempre haciendo más de lo que se pedía, con ambición de aprender y superarse."',
+        mauro:
+          '"Alexis empezó como una persona y terminó como otra en su proceso en Fusion. Sin duda en poco tiempo se adaptó, aprendió y se superó a sí mismo. Nos fue de gran ayuda en tiempos muy acelerados de implementación, y su conocimiento en diseño nos ahorró horas de entendimiento con el equipo de diseñadores."',
+        milena:
+          '"Siempre que debo trabajar con algún cliente nuevo pienso en Alexis, y en cómo podría servirme su ayuda. Es una persona que está a la vanguardia. ¡Recomendadísimo!"',
+        kodi:
+          '"A Alexis lo conocí por contacto con Mile. Realizó una primer propuesta de rediseño de mi app sin habérselo pedido. Ahí me di cuenta que debía trabajar con él. Trabajamos en conjunto durante horas, y no dudaba nunca en decirme que algo no iba por buen camino. Además me hizo conocer muchas herramientas, ¡un genio!"',
+      },
     },
   },
 };

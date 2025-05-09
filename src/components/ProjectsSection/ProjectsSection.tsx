@@ -30,7 +30,6 @@ const SectionTitle = styled.h2`
   color: ${({ theme }) => theme.colors.text};
   position: relative;
   font-family: ${({ theme }) => theme.fonts.body};
-  letter-spacing: 0.1em;
 `;
 
 const MenuContainer = styled.div`

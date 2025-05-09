@@ -42,17 +42,27 @@ const Role = styled.h4`
 
 const SectionTitle = styled.h5`
   font-size: 1rem;
-  margin: 1rem 0 0.5rem 0;
+  margin: 1rem 0 0.25rem 0;
   color: ${props => (props.theme.isDark ? '#FFFFFF' : '#555555')};
   font-family: 'Inter', sans-serif;
-  font-weight: 500;
+  font-weight: 700;
   text-transform: none;
+`;
+
+const DividerLine = styled.hr`
+  width: 100%;
+  border: none;
+  height: 1px;
+  background-color: ${({ theme }) => theme.isDark ? theme.colors.border + '55' : theme.colors.border + '88'};
+  margin-top: 0.25rem;
+  margin-bottom: 1rem;
 `;
 
 const List = styled.ul`
   padding-left: 1.5rem;
   margin-bottom: 1rem;
   font-family: 'Inter', sans-serif;
+  list-style: disc;
 `;
 
 const ListItem = styled.li`
@@ -66,7 +76,7 @@ const ToolsContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin: 1rem 0;
+  margin-bottom: 1rem;
 `;
 
 const Tool = styled.span`
@@ -111,25 +121,28 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
       <Role>{role}</Role>
 
       <SectionTitle>{translations.tasks[language]}</SectionTitle>
+      <DividerLine />
       <List>
         {tasks.map((task, index) => (
-          <ListItem key={index}>{task}</ListItem>
+          <ListItem key={`task-${index}`}>{task}</ListItem>
         ))}
       </List>
 
       <SectionTitle>{translations.tools[language]}</SectionTitle>
+      <DividerLine />
       <ToolsContainer>
         {tools.map((tool, index) => (
-          <Tool key={index}>{tool}</Tool>
+          <Tool key={`tool-${index}`}>{tool}</Tool>
         ))}
       </ToolsContainer>
 
       {results && results.length > 0 && (
         <>
           <SectionTitle>{translations.results[language]}</SectionTitle>
+          <DividerLine />
           <List>
             {results.map((result, index) => (
-              <ListItem key={index}>{result}</ListItem>
+              <ListItem key={`result-${index}`}>{result}</ListItem>
             ))}
           </List>
         </>

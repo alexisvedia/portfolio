@@ -13,8 +13,9 @@ const PageContainer = styled(motion.div)`
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* align-items: center; */ /* Eliminado para permitir ancho completo */
   overflow-y: auto;
+  overflow-x: hidden;
+  background-color: ${({ theme }) => theme.colors.background};
 `;
 
 const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
