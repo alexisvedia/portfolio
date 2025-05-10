@@ -75,13 +75,29 @@ const Form = styled.form<{ $isDark: boolean }>`
     background-repeat: repeat;
     mix-blend-mode: ${({ $isDark }) => ($isDark ? 'overlay' : 'multiply')};
   }
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 0.5rem 1.5rem 0.5rem;
+    border-radius: 0;
+    background: none;
+    border: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    width: 100%;
+    box-shadow: none;
+    position: static;
+    &::before {
+      display: none;
+    }
+  }
 `;
 
 const FormDivider = styled.hr<{ $isDark: boolean }>`
   width: 100%;
   border: none;
   height: 1px;
-  background-color: ${({ $isDark, theme }) => $isDark ? theme.colors.border + '55' : theme.colors.border + '88'};
+  background-color: ${({ $isDark, theme }) =>
+    $isDark ? theme.colors.border + '55' : theme.colors.border + '88'};
   margin-top: 0;
   margin-bottom: 0;
 `;
@@ -114,14 +130,15 @@ const Input = styled.input<{ $isDark: boolean }>`
   transition: all 0.3s ease;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid ${({ $isDark }) => $isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
   ${glassEffect}
   background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
 
   &:focus {
     outline: none;
     border-color: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)')};
-    box-shadow: 0 0 0 2px ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)')};
+    box-shadow: 0 0 0 2px
+      ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)')};
   }
 `;
 
@@ -136,14 +153,15 @@ const Textarea = styled.textarea<{ $isDark: boolean }>`
   transition: all 0.3s ease;
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid ${({ $isDark }) => $isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
   ${glassEffect}
   background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
 
   &:focus {
     outline: none;
     border-color: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)')};
-    box-shadow: 0 0 0 2px ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)')};
+    box-shadow: 0 0 0 2px
+      ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)')};
   }
 `;
 
@@ -169,8 +187,10 @@ const SubmitButton = styled.button<{ $isDark: boolean }>`
   background: ${({ $isDark }) => ($isDark ? 'white !important' : 'black !important')};
 
   &:disabled {
-    background: ${({ $isDark }) => ($isDark ? 'rgba(200, 200, 205, 0.5) !important' : 'rgba(60, 60, 65, 0.5) !important')};
-    color: ${({ $isDark }) => ($isDark ? 'rgba(0,0,0,0.4) !important' : 'rgba(255,255,255,0.4) !important')};
+    background: ${({ $isDark }) =>
+      $isDark ? 'rgba(200, 200, 205, 0.5) !important' : 'rgba(60, 60, 65, 0.5) !important'};
+    color: ${({ $isDark }) =>
+      $isDark ? 'rgba(0,0,0,0.4) !important' : 'rgba(255,255,255,0.4) !important'};
     cursor: not-allowed;
     transform: none;
   }
@@ -243,11 +263,10 @@ const ContactSection: React.FC = () => {
       // ¡Lanzar confeti!
       confetti({
         particleCount: 150, // Más partículas
-        spread: 90,         // Mayor dispersión
-        origin: { y: 0.6 },  // Origen un poco más abajo de la mitad
-        colors: ['#bb0000', '#ffffff', '#00ff00'] // Colores (puedes personalizar)
+        spread: 90, // Mayor dispersión
+        origin: { y: 0.6 }, // Origen un poco más abajo de la mitad
+        colors: ['#bb0000', '#ffffff', '#00ff00'], // Colores (puedes personalizar)
       });
-
     } catch (error) {
       console.error('FAILED...', error);
       setIsLoading(false);
