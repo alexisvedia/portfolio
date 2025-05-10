@@ -141,6 +141,40 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
 
   const isDark = themeMode === 'dark';
 
+  // --- NUEVO: Detectar si es mobile ---
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 767);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // --- NUEVO: Swipe handlers para mobile ---
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.changedTouches[0].screenX;
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.changedTouches[0].screenX;
+  };
+  const handleTouchEnd = () => {
+    if (touchStartX.current !== null && touchEndX.current !== null) {
+      const diff = touchStartX.current - touchEndX.current;
+      if (Math.abs(diff) > 50) {
+        if (diff > 0 && currentIndex !== null && currentIndex < data.length - 1) {
+          goToNext();
+        } else if (diff < 0 && currentIndex !== null && currentIndex > 0) {
+          goToPrevious();
+        }
+      }
+    }
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
   useEffect(() => {
     const updateColumns = () => {
       if (window.matchMedia('(min-width: 1500px)').matches) {
@@ -273,7 +307,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
       />
 
       <div className="modal-content-wrapper" onClick={e => e.stopPropagation()}>
-        {data.length > 1 && (
+        {data.length > 1 && !isMobile && (
           <>
             <button
               className="modal-nav-button prev"
@@ -306,7 +340,12 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           </>
         )}
 
-        <div className="modal-media-area">
+        <div
+          className="modal-media-area"
+          onTouchStart={isMobile ? handleTouchStart : undefined}
+          onTouchMove={isMobile ? handleTouchMove : undefined}
+          onTouchEnd={isMobile ? handleTouchEnd : undefined}
+        >
           {selectedContent?.type === 'image' && selectedContent.image && (
             <div
               className="image-scroll-container"
@@ -414,7 +453,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           </button>
         )}
 
-        {data.length > 1 && (
+        {data.length > 1 && !isMobile && (
           <div className="modal-thumbnail-strip">
             {data.map((thumbItem, index) => (
               <div
@@ -442,9 +481,50 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
             ))}
           </div>
         )}
+        {/* Dots solo en mobile */}
+        {data.length > 1 && isMobile && (
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              margin: '12px 0 0 0',
+              gap: 8,
+            }}
+          >
+            {data.map((_, idx) => (
+              <span
+                key={`dot-${idx}`}
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: '50%',
+                  background: idx === currentIndex ? '#007bff' : '#bbb',
+                  display: 'inline-block',
+                  transition: 'background 0.2s',
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
+
+  // --- NUEVO: Manejar clase global para overlays y scroll del body ---
+  useEffect(() => {
+    if (selectedContent) {
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    };
+  }, [selectedContent]);
 
   return (
     <>
