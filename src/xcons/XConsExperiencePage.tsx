@@ -94,7 +94,7 @@ const BannerText = styled.p`
   line-height: 1.6;
 
   a {
-    color: #15814B;
+    color: #15814b;
     text-decoration: underline;
     &:hover {
       text-decoration: none;
@@ -136,40 +136,43 @@ const glassEffectForDescriptionBox = css`
 `;
 
 // Nuevo título estilizado para dentro del DescriptionBox
-const SectionTitleInsideBox = styled.h3< { $isDark: boolean } >`
+const SectionTitleInsideBox = styled.h3<{ $isDark: boolean }>`
   font-family: 'NHaasGroteskTXPro-55Rg', 'Inter', sans-serif; // Fuente principal para consistencia
   font-weight: 600;
   font-size: 1.6rem;
-  color: ${({ $isDark }) => $isDark ? '#FFFFFF' : '#1D1F23'}; // Colores de texto del tema
+  color: ${({ $isDark }) => ($isDark ? '#FFFFFF' : '#1D1F23')}; // Colores de texto del tema
   margin-bottom: 0.75rem;
   text-transform: uppercase;
 `;
 
 // Línea separadora (similar a la de Marketing/Operations Experiences)
-const DividerLine = styled.hr< { $isDark?: boolean } >`
+const DividerLine = styled.hr<{ $isDark?: boolean }>`
   width: 100%;
   border: none;
   height: 1px;
-  background-color: ${({ $isDark }) => $isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}; // Mismos colores de borde que DescriptionBox/Inputs
+  background-color: ${({ $isDark }) =>
+    $isDark
+      ? 'rgba(255,255,255,0.2)'
+      : 'rgba(0,0,0,0.15)'}; // Mismos colores de borde que DescriptionBox/Inputs
   margin-top: 0.75rem;
   margin-bottom: 1.5rem;
 `;
 
-const DescriptionBox = styled.div<{$isDark: boolean}>`
+const DescriptionBox = styled.div<{ $isDark: boolean }>`
   border-radius: 12px;
   padding: 2.5rem;
   margin-top: 1rem;
-  border: 1px solid ${({ $isDark }) => $isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
   background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
-  ${glassEffectForDescriptionBox}
-  // El color del texto de SummaryText se manejará directamente o se heredará.
+  ${glassEffectForDescriptionBox}// El color del texto de SummaryText se manejará directamente o se heredará.
 `;
 
-const SummaryText = styled.p<{ $isDark: boolean }>` // Pasar $isDark para consistencia si es necesario
+const SummaryText = styled.p<{ $isDark: boolean }>`
+  // Pasar $isDark para consistencia si es necesario
   font-size: 1rem;
   line-height: 1.8;
   margin-bottom: 0;
-  color: ${({ $isDark }) => $isDark ? '#DDDDDD' : '#444444'}; // Restaurar color explícito
+  color: ${({ $isDark }) => ($isDark ? '#DDDDDD' : '#444444')}; // Restaurar color explícito
 `;
 
 const ExperienceContainer = styled.div`
@@ -182,12 +185,12 @@ const ExperienceContainer = styled.div`
   }
 `;
 
-const MasonryWrapper = styled.div< { $isDark?: boolean } >`
+const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
   margin-top: 4rem;
   margin-bottom: 2rem;
   border-radius: 12px;
   padding: 2.5rem;
-  border: 1px solid ${({ $isDark }) => $isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+  border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
   background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
   ${glassEffectForDescriptionBox}
   color: ${({ theme }) => theme.colors.text};
@@ -200,54 +203,63 @@ const MasonryWrapper = styled.div< { $isDark?: boolean } >`
 // Textos para los elementos de la galería (Español e Inglés)
 const masonryItemText = {
   splineScene: {
-    title: { es: "Escena Interactiva 3D", en: "Interactive 3D Scene" },
+    title: { es: 'Escena Interactiva 3D', en: 'Interactive 3D Scene' },
     description: {
-      es: "Escena hecha con Spline para la web comercial, puede reaccionar al scroll o hover del mouse si se desea.",
-      en: "Scene made with Spline for the commercial website, it can react to scroll or mouse hover if desired."
-    }
+      es: 'Escena hecha con Spline para la web comercial, puede reaccionar al scroll o hover del mouse si se desea.',
+      en: 'Scene made with Spline for the commercial website, it can react to scroll or mouse hover if desired.',
+    },
   },
   rediseñoXCONS: {
-    title: { es: "Rediseño XCONS", en: "XCONS Redesign" },
-    description: { 
-      es: "Propuesta de rediseño de la plataforma principal, basada en buenas prácticas de diseño UX/UI, considerando principios fundamentales como familiaridad, ley de Prägnanz, etc.", 
-      en: "Redesign proposal for the main platform, based on UX/UI design best practices, considering fundamental principles such as familiarity, Prägnanz law, etc." 
-    }
+    title: { es: 'Rediseño XCONS', en: 'XCONS Redesign' },
+    description: {
+      es: 'Propuesta de rediseño de la plataforma principal, basada en buenas prácticas de diseño UX/UI, considerando principios fundamentales como familiaridad, ley de Prägnanz, etc.',
+      en: 'Redesign proposal for the main platform, based on UX/UI design best practices, considering fundamental principles such as familiarity, Prägnanz law, etc.',
+    },
   },
   camion: {
-    title: { es: "Diseño de banner OG", en: "OG Banner Design" },
-    description: { 
-      es: "Antes de la existencia de la AI de edición de imagen, haciendo uso de Photoshop realizaba los diseños de cada banner que usaban las webs utilizando los recursos originales (algunas veces en mala calidad) que enviaban los clientes que digitalizabamos.", 
-      en: "Before the existence of image editing AI, using Photoshop, I designed each banner used by the websites using the original resources (sometimes of poor quality) sent by the clients we digitized." 
-    }
+    title: { es: 'Diseño de banner OG', en: 'OG Banner Design' },
+    description: {
+      es: 'Antes de la existencia de la AI de edición de imagen, haciendo uso de Photoshop realizaba los diseños de cada banner que usaban las webs utilizando los recursos originales (algunas veces en mala calidad) que enviaban los clientes que digitalizabamos.',
+      en: 'Before the existence of image editing AI, using Photoshop, I designed each banner used by the websites using the original resources (sometimes of poor quality) sent by the clients we digitized.',
+    },
   },
   osvaldo: {
-    title: { es: "Dashboard Osvaldo", en: "Osvaldo Dashboard" },
-    description: { 
-      es: "Creación de un dashboard analítico para la visualización de datos clave del proyecto Osvaldo.", 
-      en: "Creation of an analytical dashboard for visualizing key data for the Osvaldo project." 
-    }
+    title: { es: 'E-commerce Osvaldo Gonzalez', en: 'Osvaldo Gonzalez E-commerce' },
+    description: {
+      es: 'Diseño para la digitalización de un distribuidor de materiales de construcción en Argentina usando el branding de la marca. Cada uno de los recursos visuales fue creado desde cero.',
+      en: "Design for the digitalization of a construction materials distributor in Argentina using the brand's branding. Each visual asset was created from scratch.",
+    },
   },
   comercialXCONS: {
-    title: { es: "Spot Publicitario XCONS", en: "XCONS Commercial Spot" },
-    description: { 
-      es: "Concepto y diseño visual para un spot publicitario de XCONS destacando sus nuevas funcionalidades.", 
-      en: "Concept and visual design for an XCONS commercial spot highlighting its new features." 
-    }
+    title: {
+      es: 'Migración y rediseño de sitio comercial',
+      en: 'Commercial Site Migration and Redesign',
+    },
+    description: {
+      es: 'Realicé la migración del sitio comercial alojado en hubspot a Wordpress, modficando el código de plantillas y módulos. Previamente se realizó una propuesta de diseño en Figma para ver como quedaría el sitio el producción.',
+      en: 'I migrated the commercial site hosted on HubSpot to WordPress, modifying template and module code. Previously, a design proposal was made in Figma to preview how the site would look in production.',
+    },
   },
   ferreyra: {
-    title: { es: "Proyecto Ferreyra", en: "Ferreyra Project" },
+    title: {
+      es: 'E-commerce Ferreyra materiales',
+      en: 'Ferreyra Materials E-commerce',
+    },
     description: {
-      es: "Detalles del proyecto Ferreyra.",
-      en: "Details of the Ferreyra project."
-    }
+      es: 'Una propuesta de diseño aprobada por el cliente para su e-commerce. En mi paso en XCONS he realizado más de 10 diseños de e-commerces para diversos clientes en toda LATAM.',
+      en: 'A design proposal approved by the client for their e-commerce. During my time at XCONS, I created more than 10 e-commerce designs for various clients across LATAM.',
+    },
   },
   rrss: {
-    title: { es: "RRSS XCONS", en: "XCONS Social Media" },
+    title: {
+      es: 'Recursos gráficos para RRSS',
+      en: 'Graphic Assets for Social Media',
+    },
     description: {
-      es: "Diseño de plantillas y contenido para redes sociales de XCONS.",
-      en: "Design of templates and content for XCONS social media."
-    }
-  }
+      es: 'En conjunto con el equipo de marketing, realicé varias piezas y recursos para redes sociales, incluyendo imágenes y videos con el fin de comunicar y dar a conocer la propuesta comercial de XCONS.',
+      en: "Together with the marketing team, I created several assets and resources for social media, including images and videos to communicate and promote XCONS's commercial offering.",
+    },
+  },
 } as const;
 
 // Definir un tipo para las claves de masonryItemText
@@ -255,7 +267,9 @@ type MasonryItemKey = keyof typeof masonryItemText;
 
 // Definición de datos base para los elementos de la galería
 // Aseguramos que los elementos base cumplan con parte de MasonryItem y añadan la key.
-const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'> & { id: string | number; key: MasonryItemKey }> = [
+const masonryItemDetails: Array<
+  Omit<MasonryItem, 'title' | 'description' | 'id'> & { id: string | number; key: MasonryItemKey }
+> = [
   {
     id: 'spline-scene',
     key: 'splineScene',
@@ -271,27 +285,27 @@ const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'
     height: 320,
     type: 'image' as const,
     documentLinks: [
-      { 
-        name: "Diseño general.pdf", 
-        url: "https://storage.googleapis.com/brandify-usercontent-dev/c4e43e71-4702-4e55-88be-4308c9fdce23?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=eayt9wA%2B98j7WjMDtdCzsujR3%2Bs%3D%0A" 
+      {
+        name: 'Diseño general.pdf',
+        url: 'https://storage.googleapis.com/brandify-usercontent-dev/c4e43e71-4702-4e55-88be-4308c9fdce23?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=eayt9wA%2B98j7WjMDtdCzsujR3%2Bs%3D%0A',
       },
-      { 
-        name: "Distribuidores.pdf", 
-        url: "https://storage.googleapis.com/brandify-usercontent-dev/f5ce9fd5-3397-40fc-b914-930f0c293986?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=kM7WtIcN0oXOEELf9%2FB2LBrhYyA%3D%0A" 
+      {
+        name: 'Distribuidores.pdf',
+        url: 'https://storage.googleapis.com/brandify-usercontent-dev/f5ce9fd5-3397-40fc-b914-930f0c293986?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=kM7WtIcN0oXOEELf9%2FB2LBrhYyA%3D%0A',
       },
-      { 
-        name: "Calculadores.pdf", 
-        url: "https://storage.googleapis.com/brandify-usercontent-dev/c4e43e71-4702-4e55-88be-4308c9fdce23?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=eayt9wA%2B98j7WjMDtdCzsujR3%2Bs%3D%0A" 
+      {
+        name: 'Calculadores.pdf',
+        url: 'https://storage.googleapis.com/brandify-usercontent-dev/c4e43e71-4702-4e55-88be-4308c9fdce23?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=eayt9wA%2B98j7WjMDtdCzsujR3%2Bs%3D%0A',
       },
-      { 
-        name: "Calificación.pdf", 
-        url: "https://storage.googleapis.com/brandify-usercontent-dev/7d81c133-7384-4782-af57-a27e8ab5a7e2?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=8p412QJ5P0mYrEqrKJy%2FmQ3WOrQ%3D%0A" 
+      {
+        name: 'Calificación.pdf',
+        url: 'https://storage.googleapis.com/brandify-usercontent-dev/7d81c133-7384-4782-af57-a27e8ab5a7e2?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=8p412QJ5P0mYrEqrKJy%2FmQ3WOrQ%3D%0A',
       },
-      { 
-        name: "Otras consideraciones.pdf", 
-        url: "https://storage.googleapis.com/brandify-usercontent-dev/22709981-98c0-4926-8f80-376a095fea2a?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=j0HPmAei9M1RfCrqigusBboXCb0%3D%0A" 
-      }
-    ]
+      {
+        name: 'Otras consideraciones.pdf',
+        url: 'https://storage.googleapis.com/brandify-usercontent-dev/22709981-98c0-4926-8f80-376a095fea2a?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=j0HPmAei9M1RfCrqigusBboXCb0%3D%0A',
+      },
+    ],
   },
   {
     id: 8,
@@ -299,6 +313,11 @@ const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'
     image: CamionProjectImage,
     height: 380,
     type: 'image' as const,
+    actionButton: {
+      url: 'https://www.corralongonzalez.com.ar/?srsltid=AfmBOopRBo-jVl1o-9v2jPjQp9pr_l4NM8xoFXyuf-x3HlhDZiCmBjnb',
+      labelES: 'Visitar sitio',
+      labelEN: 'Visit site',
+    },
   },
   {
     id: 9,
@@ -306,6 +325,11 @@ const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'
     image: OsvaldoProjectImage,
     height: 420,
     type: 'image' as const,
+    actionButton: {
+      url: 'https://www.corralongonzalez.com.ar/?srsltid=AfmBOopRBo-jVl1o-9v2jPjQp9pr_l4NM8xoFXyuf-x3HlhDZiCmBjnb',
+      labelES: 'Visitar sitio',
+      labelEN: 'Visit site',
+    },
   },
   {
     id: 10,
@@ -313,6 +337,11 @@ const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'
     image: ComercialXCONSProjectImage,
     height: 330,
     type: 'image' as const,
+    actionButton: {
+      url: 'https://comercial.xcons.com/',
+      labelES: 'Visitar sitio',
+      labelEN: 'Visit site',
+    },
   },
   {
     id: 11,
@@ -320,6 +349,11 @@ const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'
     image: FerreyraProjectImage,
     height: 350,
     type: 'image' as const,
+    actionButton: {
+      url: 'https://www.ferreyramateriales.com/',
+      labelES: 'Visitar sitio',
+      labelEN: 'Visit site',
+    },
   },
   {
     id: 12,
@@ -327,6 +361,11 @@ const masonryItemDetails: Array<Omit<MasonryItem, 'title' | 'description' | 'id'
     image: RrssProjectImage,
     height: 300,
     type: 'image' as const,
+    actionButton: {
+      url: 'https://www.instagram.com/xcons_ar/',
+      labelES: 'Ver en Instagram',
+      labelEN: 'View on Instagram',
+    },
   },
 ];
 
@@ -338,7 +377,7 @@ const XConsExperiencePage: React.FC = () => {
 
   // Generar masonryData con los textos traducidos
   const masonryData: MasonryItem[] = masonryItemDetails.map(item => {
-    const texts = masonryItemText[item.key]; 
+    const texts = masonryItemText[item.key];
     return {
       ...item,
       title: texts.title[language],
@@ -352,16 +391,28 @@ const XConsExperiencePage: React.FC = () => {
     operationsTitle: { es: 'Operaciones y Calidad', en: 'Operations & Quality' },
     projectsTitle: { es: 'Proyectos Destacados', en: 'Featured Projects' },
     roleSummaryTitle: { es: 'Resumen de Rol', en: 'Role Summary' },
-    summary: { 
+    summary: {
       es: 'Como Diseñador UI/UX y Gráfico, lideré la creación y mantenimiento de bibliotecas de componentes, definiendo experiencias coherentes en desktop y mobile, y produciendo piezas visuales para campañas en redes sociales. Colaboré con otros diseñadores en la optimización de los flujos críticos del e-commerce —checkout, compra, micrositios y gestión de proveedores—, mejorando la conversión y la usabilidad. Participé activamente en el rebranding de ViviendaVerde a XCONS, aplicando la nueva identidad visual en todos los puntos de contacto digitales. Trabajé codo a codo con el equipo front-end, ejecutando maquetación semántica y guiando a otros diseñadores para garantizar consistencia y calidad en el producto.',
-      en: 'As a UI/UX and Graphic Designer, I led the creation and maintenance of component libraries, defining coherent experiences on desktop and mobile, and producing visual pieces for social media campaigns. I collaborated with other designers in optimizing critical e-commerce flows—checkout, purchase, microsites, and supplier management—improving conversion and usability. I actively participated in the rebranding from ViviendaVerde to XCONS, applying the new visual identity across all digital touchpoints. I worked closely with the front-end team, executing semantic layout and guiding other designers to ensure consistency and quality in the product.' 
-    }, 
+      en: 'As a UI/UX and Graphic Designer, I led the creation and maintenance of component libraries, defining coherent experiences on desktop and mobile, and producing visual pieces for social media campaigns. I collaborated with other designers in optimizing critical e-commerce flows—checkout, purchase, microsites, and supplier management—improving conversion and usability. I actively participated in the rebranding from ViviendaVerde to XCONS, applying the new visual identity across all digital touchpoints. I worked closely with the front-end team, executing semantic layout and guiding other designers to ensure consistency and quality in the product.',
+    },
   };
 
   return (
     <PageTransition>
       <PageContainer>
-        <StandardSectionTitle as="h1" style={{ position: 'absolute', width: '1px', height: '1px', margin: '-1px', padding: 0, overflow: 'hidden', clip: 'rect(0,0,0,0)', border: 0 }}>
+        <StandardSectionTitle
+          as="h1"
+          style={{
+            position: 'absolute',
+            width: '1px',
+            height: '1px',
+            margin: '-1px',
+            padding: 0,
+            overflow: 'hidden',
+            clip: 'rect(0,0,0,0)',
+            border: 0,
+          }}
+        >
           {translations.mainTitle[language]}
         </StandardSectionTitle>
 
@@ -371,18 +422,28 @@ const XConsExperiencePage: React.FC = () => {
             <LeftContent>
               <LogoImage src={xconLogoVerde} alt="XCON Logo" />
               <BannerText>
-                {language === 'es'
-                  ? <>
-                      Plataforma de e-commerce especializada en la venta omnicanal de materiales de construcción.<br />
-                      <a href="https://www.xcons.com.ar" target="_blank" rel="noopener noreferrer">www.xcons.com.ar</a><br />
-                      <LocationText>Argentina</LocationText>
-                    </>
-                  : <>
-                      E-commerce platform specialized in omnichannel sales of construction materials.<br />
-                      <a href="https://www.xcons.com.ar" target="_blank" rel="noopener noreferrer">www.xcons.com.ar</a><br />
-                      <LocationText>Argentina</LocationText>
-                    </> 
-                }
+                {language === 'es' ? (
+                  <>
+                    Plataforma de e-commerce especializada en la venta omnicanal de materiales de
+                    construcción.
+                    <br />
+                    <a href="https://www.xcons.com.ar" target="_blank" rel="noopener noreferrer">
+                      www.xcons.com.ar
+                    </a>
+                    <br />
+                    <LocationText>Argentina</LocationText>
+                  </>
+                ) : (
+                  <>
+                    E-commerce platform specialized in omnichannel sales of construction materials.
+                    <br />
+                    <a href="https://www.xcons.com.ar" target="_blank" rel="noopener noreferrer">
+                      www.xcons.com.ar
+                    </a>
+                    <br />
+                    <LocationText>Argentina</LocationText>
+                  </>
+                )}
               </BannerText>
             </LeftContent>
             <RightContent>
@@ -393,7 +454,9 @@ const XConsExperiencePage: React.FC = () => {
 
         <Summary $themeMode={themeMode}>
           <DescriptionBox $isDark={isDark}>
-            <SectionTitleInsideBox $isDark={isDark}>{translations.roleSummaryTitle[language]}</SectionTitleInsideBox>
+            <SectionTitleInsideBox $isDark={isDark}>
+              {translations.roleSummaryTitle[language]}
+            </SectionTitleInsideBox>
             <DividerLine $isDark={isDark} />
             <SummaryText $isDark={isDark}>{translations.summary[language]}</SummaryText>
           </DescriptionBox>
@@ -401,18 +464,24 @@ const XConsExperiencePage: React.FC = () => {
 
         <ExperienceContainer>
           <div>
-            <MarketingExperiences 
-              title={<StandardSectionTitle>{translations.marketingTitle[language]}</StandardSectionTitle>} 
-              experiences={marketingExperiences[language]} 
+            <MarketingExperiences
+              title={
+                <StandardSectionTitle>{translations.marketingTitle[language]}</StandardSectionTitle>
+              }
+              experiences={marketingExperiences[language]}
               language={language}
               isDark={isDark}
             />
           </div>
           <div>
-            <OperationsExperiences 
-              title={<StandardSectionTitle>{translations.operationsTitle[language]}</StandardSectionTitle>} 
-              experiences={operationsExperiences[language]} 
-              language={language} 
+            <OperationsExperiences
+              title={
+                <StandardSectionTitle>
+                  {translations.operationsTitle[language]}
+                </StandardSectionTitle>
+              }
+              experiences={operationsExperiences[language]}
+              language={language}
               isDark={isDark}
             />
           </div>

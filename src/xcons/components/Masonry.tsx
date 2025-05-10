@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from "react";
+import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from 'react';
 import ReactDOM from 'react-dom'; // Importar ReactDOM para createPortal
-import { useTransition, a } from "@react-spring/web";
-import styled from 'styled-components'; // Importar styled
+import { useTransition, a } from '@react-spring/web';
+import styled from 'styled-components'; // Importar solo styled
 import { useTranslation } from 'react-i18next'; // Importar useTranslation
 import Tooltip from '../../components/Tooltip/Tooltip'; // Importar el componente Tooltip
 
 const SplineScene = lazy(() => import('../SplineScene')); // Importar SplineScene dinámicamente
 
-import "./Masonry.css";
+import './Masonry.css';
 
 export interface MasonryItem {
   id: string | number;
@@ -18,7 +18,12 @@ export interface MasonryItem {
   thumbnail?: string; // Imagen para mostrar en la cuadrícula para Spline
   title?: string; // Nuevo campo para el título
   description?: string; // Nuevo campo para la descripción
-  documentLinks?: Array<{name: string, url: string}>; // Nuevo campo para enlaces a documentos
+  documentLinks?: Array<{ name: string; url: string }>; // Nuevo campo para enlaces a documentos
+  actionButton?: {
+    url: string;
+    labelES: string;
+    labelEN: string;
+  };
 }
 
 interface GridItem extends MasonryItem {
@@ -38,7 +43,8 @@ const ModalInfoTitle = styled.h2`
   font-family: 'Inter', sans-serif;
   font-weight: 500; // Coincide con el font-weight de Role
   font-size: 1.2rem; // Ligeramente más grande para un título de modal, ajustable
-  color: ${({ theme }) => (theme.isDark || theme.themeMode === 'dark' ? '#E0E0E0' : '#333333')}; // Ajustar color según tema
+  color: ${({ theme }) =>
+    theme.isDark || theme.themeMode === 'dark' ? '#E0E0E0' : '#333333'}; // Ajustar color según tema
   margin-bottom: 0.75rem; // Espaciado inferior
   line-height: 1.3;
 `;
@@ -70,7 +76,7 @@ const DocumentLinkItem = styled.li`
     text-decoration: none;
     display: flex;
     align-items: center;
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -81,8 +87,48 @@ const DocumentLinkItem = styled.li`
   }
 `;
 
+const AcrylicButton = styled.a<{ $isDark: boolean }>`
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 7px 14px;
+  border-radius: 100px;
+  font-size: 0.92em;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  color: white;
+  background-color: ${({ $isDark }) =>
+    $isDark ? 'rgba(40, 40, 40, 0.6)' : 'rgba(60, 60, 60, 0.5)'};
+  border: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.18)')};
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+  z-index: 1020;
+  box-shadow: none;
+  border-width: 1px;
+  border-style: solid;
+  position: relative;
+  overflow: hidden;
+  outline: none;
+  width: auto;
+  max-width: 150px;
+  min-width: 0;
+  &:hover {
+    background-color: ${({ $isDark }) =>
+      $isDark ? 'rgba(50, 50, 50, 0.8)' : 'rgba(70, 70, 70, 0.7)'};
+    transform: scale(1.03);
+    box-shadow: none;
+    text-decoration: none;
+  }
+`;
+
 const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
-  const { t } = useTranslation(); // Hook de traducción
+  const { t, i18n } = useTranslation(); // Hook de traducción
   const [columns, setColumns] = useState<number>(2);
   const [selectedContent, setSelectedContent] = useState<MasonryItem | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
@@ -93,13 +139,15 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(0);
 
+  const isDark = themeMode === 'dark';
+
   useEffect(() => {
     const updateColumns = () => {
-      if (window.matchMedia("(min-width: 1500px)").matches) {
+      if (window.matchMedia('(min-width: 1500px)').matches) {
         setColumns(5);
-      } else if (window.matchMedia("(min-width: 1000px)").matches) {
+      } else if (window.matchMedia('(min-width: 1000px)').matches) {
         setColumns(4);
-      } else if (window.matchMedia("(min-width: 600px)").matches) {
+      } else if (window.matchMedia('(min-width: 600px)').matches) {
         setColumns(3);
       } else {
         setColumns(1); // Breakpoint for mobile devices
@@ -107,8 +155,8 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     };
 
     updateColumns();
-    window.addEventListener("resize", updateColumns);
-    return () => window.removeEventListener("resize", updateColumns);
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
   }, []);
 
   useEffect(() => {
@@ -119,13 +167,13 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     };
 
     handleResize(); // Set initial width
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const [heights, gridItems] = useMemo<[number[], GridItem[]]>(() => {
     let newHeights = new Array(columns).fill(0);
-    const newGridItems = data.map((child) => {
+    const newGridItems = data.map(child => {
       const column = newHeights.indexOf(Math.min(...newHeights));
       const itemHeight = child.height / 2; // Usar la altura original para el cálculo de posición
       const x = (width / columns) * column;
@@ -145,7 +193,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     GridItem,
     { x: number; y: number; width: number; height: number; opacity: number }
   >(gridItems, {
-    keys: (item) => item.id,
+    keys: item => item.id,
     from: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 0 }),
     enter: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 1 }),
     update: ({ x, y, width, height }) => ({ x, y, width, height }),
@@ -178,10 +226,35 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     setCurrentIndex(prevIndex);
   };
 
+  // --- NUEVO: Navegación con teclado en el modal ---
+  useEffect(() => {
+    if (selectedContent === null || currentIndex === null) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        if (currentIndex > 0) {
+          goToPrevious();
+        }
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        if (currentIndex < data.length - 1) {
+          goToNext();
+        }
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedContent, currentIndex, data.length]);
+
   const handleShowTooltip = (e: React.MouseEvent) => {
     setTooltipPosition({
       x: e.clientX,
-      y: e.clientY
+      y: e.clientY,
     });
     setTooltipVisible(true);
   };
@@ -191,15 +264,15 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
   };
 
   const ModalContent = (
-    <div className={`modal-overlay ${themeMode === 'dark' ? 'dark-mode' : ''}`} onClick={closeModal}>
+    <div className={`modal-overlay ${isDark ? 'dark-mode' : ''}`} onClick={closeModal}>
       {/* Tooltip global */}
-      <Tooltip 
-        text={t('tooltip.viewOriginal')} 
-        isVisible={tooltipVisible} 
+      <Tooltip
+        text={t('tooltip.viewOriginal')}
+        isVisible={tooltipVisible}
         position={tooltipPosition}
       />
-      
-      <div className="modal-content-wrapper" onClick={(e) => e.stopPropagation()}>
+
+      <div className="modal-content-wrapper" onClick={e => e.stopPropagation()}>
         {data.length > 1 && (
           <>
             <button
@@ -208,7 +281,13 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
               disabled={currentIndex === 0}
               aria-label="Previous item"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '28px', height: '28px' }}><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ width: '28px', height: '28px' }}
+              >
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              </svg>
             </button>
             <button
               className="modal-nav-button next"
@@ -216,7 +295,13 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
               disabled={currentIndex === data.length - 1}
               aria-label="Next item"
             >
-              <svg viewBox="0 0 24 24" fill="currentColor" style={{ width: '28px', height: '28px' }}><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                style={{ width: '28px', height: '28px' }}
+              >
+                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+              </svg>
             </button>
           </>
         )}
@@ -225,14 +310,14 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           {selectedContent?.type === 'image' && selectedContent.image && (
             <div
               className="image-scroll-container"
-              style={{ 
+              style={{
                 width: `clamp(300px, 90vw, 1200px)`,
                 height: `clamp(300px, 85vh, 1000px)`,
                 overflow: 'auto',
                 margin: '0 auto',
                 display: 'flex',
                 justifyContent: 'center',
-                alignItems: 'center'
+                alignItems: 'center',
               }}
             >
               <img
@@ -251,7 +336,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           {selectedContent?.type === 'spline' && (
             <div className="spline-modal-container">
               <Suspense fallback={<div>Loading 3D...</div>}>
-                <SplineScene /> 
+                <SplineScene />
               </Suspense>
             </div>
           )}
@@ -261,15 +346,44 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           <div className="modal-info-area">
             {selectedContent.title && <ModalInfoTitle>{selectedContent.title}</ModalInfoTitle>}
             {selectedContent.description && <p>{selectedContent.description}</p>}
-            
+
+            {/* Botón acrílico opcional */}
+            {selectedContent.actionButton && (
+              <AcrylicButton
+                href={selectedContent.actionButton.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                $isDark={isDark}
+                onMouseEnter={undefined}
+                onMouseLeave={undefined}
+                style={{ textDecoration: 'none' }}
+              >
+                {i18n.language.startsWith('es')
+                  ? selectedContent.actionButton.labelES
+                  : selectedContent.actionButton.labelEN}
+              </AcrylicButton>
+            )}
+
             {selectedContent?.documentLinks && selectedContent.documentLinks.length > 0 && (
               <DocumentLinksContainer>
-                <DocumentLinksTitle>{t('documentLinksTitle', 'Defensa de la propuesta')}</DocumentLinksTitle>
+                <DocumentLinksTitle>
+                  {t('documentLinksTitle', 'Defensa de la propuesta')}
+                </DocumentLinksTitle>
                 <DocumentLinksList>
                   {selectedContent.documentLinks.map((link, index) => (
                     <DocumentLinkItem key={`doc-link-${index}`}>
                       <a href={link.url} target="_blank" rel="noopener noreferrer">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
                           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                           <polyline points="14 2 14 8 20 8"></polyline>
                           <line x1="9" y1="15" x2="15" y2="15"></line>
@@ -284,11 +398,13 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
           </div>
         )}
 
-        <button className="modal-close-button" onClick={closeModal} aria-label="Close modal">&times;</button>
+        <button className="modal-close-button" onClick={closeModal} aria-label="Close modal">
+          &times;
+        </button>
 
         {/* Botón para abrir imagen en nueva pestaña */}
         {selectedContent?.type === 'image' && selectedContent.image && (
-          <button 
+          <button
             className="modal-open-original-button"
             onClick={() => window.open(selectedContent.image, '_blank', 'noopener,noreferrer')}
             onMouseEnter={handleShowTooltip}
@@ -308,14 +424,18 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
                 role="button"
                 tabIndex={0}
                 aria-label={`View item ${index + 1}${thumbItem.title ? ': ' + thumbItem.title : ''}`}
-                onKeyDown={(e) => {
+                onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     handleItemClick(thumbItem, index);
                   }
                 }}
               >
                 <img
-                  src={thumbItem.type === 'image' && thumbItem.image ? thumbItem.image : (thumbItem.thumbnail || 'https://via.placeholder.com/50?text=N/A')}
+                  src={
+                    thumbItem.type === 'image' && thumbItem.image
+                      ? thumbItem.image
+                      : thumbItem.thumbnail || 'https://via.placeholder.com/50?text=N/A'
+                  }
                   alt={thumbItem.title || `Thumbnail ${index + 1}`}
                 />
               </div>
@@ -343,25 +463,24 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
             >
               <div
                 style={{
-                  backgroundColor: "#ffffff",
-                  width: "100%",
-                  height: "100%",
+                  backgroundColor: '#ffffff',
+                  width: '100%',
+                  height: '100%',
                   backgroundImage: `url(${item.type === 'image' ? item.image : item.thumbnail})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  cursor: "pointer",
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  cursor: 'pointer',
                 }}
               />
             </a.div>
           );
         })}
       </div>
-      {selectedContent && currentIndex !== null && ReactDOM.createPortal(
-        ModalContent, 
-        document.body
-      )}
+      {selectedContent &&
+        currentIndex !== null &&
+        ReactDOM.createPortal(ModalContent, document.body)}
     </>
   );
 };
 
-export default Masonry; 
+export default Masonry;
