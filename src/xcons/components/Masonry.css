@@ -377,11 +377,71 @@
 }
 
 @media (max-width: 767px) {
-  .modal-info-area {}
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100vh;
+    z-index: 11000;
+    padding: 0;
+  }
 
-  .modal-nav-button.prev {}
+  .modal-content-wrapper {
+    min-height: 100dvh;
+    height: 100dvh;
+    width: 100vw;
+    max-width: 100vw;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    flex-direction: column;
+  }
 
-  .modal-nav-button.next {}
+  .modal-media-area {
+    height: 55dvh;
+    min-height: 35vh;
+    max-height: 60dvh;
+    padding: 32px 0 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-media-area img {
+    max-width: 90vw;
+    max-height: 100%;
+    padding: 0 16px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .modal-info-area {
+    height: 45dvh;
+    min-height: 30vh;
+    max-height: 55dvh;
+    padding: 18px 10px 24px 10px;
+    background: none;
+    border: none;
+    max-width: 100vw;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+  }
+
+  .modal-info-area h2,
+  .modal-info-area p,
+  .modal-info-area a,
+  .modal-info-area .AcrylicButton,
+  .modal-info-area .document-links-container {
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
 /* Dark Mode Styles for Modal */
@@ -461,5 +521,14 @@
 }
 
 /* Los estilos de .zoom-controls y .zoom-button se eliminan */
+
+/* Ocultar overlays globales cuando el modal está abierto */
+body.modal-open .chatbot-assistant,
+body.modal-open .navbar,
+body.modal-open .theme-toggle,
+body.modal-open .language-selector,
+body.modal-open .back-button {
+  display: none !important;
+}
 
 /* ... (final del archivo) ... */

@@ -164,7 +164,15 @@ const DescriptionBox = styled.div<{ $isDark: boolean }>`
   margin-top: 1rem;
   border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
   background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
-  ${glassEffectForDescriptionBox}// El color del texto de SummaryText se manejará directamente o se heredará.
+  ${glassEffectForDescriptionBox} // El color del texto de SummaryText se manejará directamente o se heredará.
+
+  @media (max-width: 767px) {
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: 0;
+    margin-top: 0.5rem;
+  }
 `;
 
 const SummaryText = styled.p<{ $isDark: boolean }>`
@@ -183,6 +191,13 @@ const ExperienceContainer = styled.div`
   @media (min-width: 992px) {
     grid-template-columns: 1fr 1fr;
   }
+  @media (max-width: 767px) {
+    gap: 1.5rem;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+  }
 `;
 
 const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
@@ -197,6 +212,14 @@ const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
 
   & > *:first-child {
     margin-bottom: 0.75rem;
+  }
+
+  @media (max-width: 767px) {
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: 0;
+    margin-top: 2rem;
   }
 `;
 
