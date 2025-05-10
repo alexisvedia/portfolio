@@ -116,39 +116,45 @@ const ChatWindow = styled.div<{ $isDark: boolean }>`
   }
 `;
 
+// Cambios en el header para mobile
 const ChatHeader = styled.div<{ $isDark: boolean }>`
   padding: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid
-    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)')};
+  border-bottom: 1.5px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)')};
   color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
-
   ${({ $isDark }) => glassStyle($isDark)}
   background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
-
   @media (max-width: 768px) {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    /* Hacer header más visible y con botones más grandes */
-    padding: 18px 16px;
-    /* Ajustar a la barra del navegador */
+    padding: 25px 8px 20px 8px;
+    min-height: unset;
+    height: unset;
+    max-height: unset;
     margin-top: env(safe-area-inset-top, 0);
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.04);
+    border-bottom: none;
+    background: ${({ $isDark }) =>
+      $isDark
+        ? 'linear-gradient(to bottom, rgba(32,32,34,0.95) 0%, rgba(32,32,34,0.7) 60%, rgba(32,32,34,0.0) 100%)'
+        : 'linear-gradient(to bottom, rgba(240,240,245,0.95) 0%, rgba(240,240,245,0.7) 60%, rgba(240,240,245,0.0) 100%)'};
   }
 `;
 
 const ChatHeaderActions = styled.div`
   display: flex;
-  gap: 10px;
+  gap: 6px;
   align-items: center;
   position: relative;
 
   @media (max-width: 768px) {
-    gap: 15px; /* Más espacio entre botones en móvil para mejor usabilidad */
+    gap: 6px;
   }
 `;
 
@@ -159,8 +165,8 @@ const IconButton = styled.button<{ $isDark?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   transition: background 0.2s ease;
   position: relative;
@@ -171,13 +177,11 @@ const IconButton = styled.button<{ $isDark?: boolean }>`
   }
 
   @media (max-width: 768px) {
-    width: 44px;
-    height: 44px;
-
-    /* Hacer los iconos internos un poco más grandes en móvil */
+    width: 32px;
+    height: 32px;
     svg,
     i {
-      transform: scale(1.25);
+      transform: scale(1.05);
     }
   }
 `;
@@ -189,7 +193,8 @@ const Tooltip = styled.div<{ $isDark?: boolean; $isVisible: boolean }>`
   border-radius: 100px;
   font-size: 12px;
   white-space: nowrap;
-  background: ${({ $isDark }) => ($isDark ? 'rgba(20, 20, 25, 0.65)' : 'rgba(240, 240, 245, 0.65)')};
+  background: ${({ $isDark }) =>
+    $isDark ? 'rgba(20, 20, 25, 0.65)' : 'rgba(240, 240, 245, 0.65)'};
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -199,168 +204,62 @@ const Tooltip = styled.div<{ $isDark?: boolean; $isVisible: boolean }>`
   z-index: 10000;
 `;
 
-// Área de mensajes con fondo transparente para mantener efecto acrylic
-const ChatMessages = styled.div`
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
+// Mejorar el wrapper para efecto burbuja y sombra
+const InputWrapper = styled.div`
+  position: relative;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overscroll-behavior: contain;
-  background: transparent;
-
-  /* Scrollbar mejorada */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(155, 155, 155, 0.5);
-    border-radius: 20px;
-  }
-
-  @media (max-width: 768px) {
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
-    /* Ajustes para mostrar correctamente con header y footer fijos */
-    padding-top: calc(70px + env(safe-area-inset-top, 0));
-    padding-bottom: 76px;
-    height: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-  }
-`;
-
-const MessageBubble = styled.div<{ $isUser: boolean; $isDark: boolean }>`
-  max-width: 85%;
-  padding: 12px 16px;
-  border-radius: 16px;
-  align-self: ${props => (props.$isUser ? 'flex-end' : 'flex-start')};
-
-  background: ${({ $isUser, $isDark }) =>
-    $isUser
-      ? $isDark
-        ? 'rgba(50, 50, 60, 0.7)'
-        : 'rgba(50, 50, 60, 0.2)'
-      : $isDark
-        ? 'rgba(40, 40, 45, 0.7)'
-        : 'rgba(230, 230, 240, 0.7)'};
-
-  border: 1px solid
-    ${({ $isUser, $isDark }) =>
-      $isUser
-        ? $isDark
-          ? 'rgba(255, 255, 255, 0.1)'
-          : 'rgba(0, 0, 0, 0.05)'
-        : $isDark
-          ? 'rgba(255, 255, 255, 0.05)'
-          : 'rgba(0, 0, 0, 0.03)'};
-
-  /* Aplicamos backdrop-filter solo a las burbujas */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transform: translateZ(0);
-
-  /* Estilos de markdown */
-  p,
-  ul,
-  ol,
-  li {
-    margin: 0.5em 0;
-    &:first-child {
-      margin-top: 0;
-    }
-    &:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  code {
-    background: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.07)')};
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 0.9em;
-  }
-`;
-
-const ChatInputArea = styled.div<{ $isDark: boolean }>`
-  padding: 16px;
-  display: flex;
-  gap: 10px;
-  border-top: 1px solid
-    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)')};
-
-  ${({ $isDark }) => glassStyle($isDark)}
-  background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
-
-  @media (max-width: 768px) {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-  }
+  align-items: center;
+  background: ${({ theme }) => (theme.mode === 'dark' ? '#202022B' : 'rgba(240,240,245,0)')};
+  border-radius: 24px;
+  box-shadow: none;
+  border: 1.5px solid
+    ${({ theme }) => (theme.mode === 'dark' ? 'rgba(80,80,90,0)' : 'rgba(180,180,200,0)')};
+  padding: 0;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
 `;
 
 const ChatInput = styled.input<{ $isDark: boolean }>`
-  flex: 1;
-  padding: 12px 16px;
+  width: 100%;
+  padding: 18px 52px 18px 20px;
   border-radius: 24px;
   border: none;
   outline: none;
-  font-size: 14px;
-
-  background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(250, 250, 255, 0.7)')};
+  font-size: 18px;
+  background: transparent;
   color: ${({ theme }) => theme.colors.text};
-  border: 1px solid
-    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
-
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
-  &:focus {
-    box-shadow: 0 0 0 2px
-      ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
+  box-shadow: none;
+  &::placeholder {
+    color: ${({ $isDark }) => ($isDark ? 'rgba(200,200,210,0.7)' : 'rgba(80,80,90,0.5)')};
+    opacity: 1;
   }
-
-  @media (max-width: 768px) {
-    font-size: 16px;
+  &:focus {
+    box-shadow: none;
+    outline: none;
   }
 `;
 
 const SendButton = styled.button<{ $isDark: boolean }>`
-  width: 40px;
-  height: 40px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
-
-  background: ${({ $isDark }) => ($isDark ? 'rgba(50, 50, 55, 0.8)' : 'rgba(50, 50, 60, 0.2)')};
-  border: 1px solid
-    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
-
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
-  &:hover {
-    background: ${({ $isDark }) => ($isDark ? 'rgba(60, 60, 65, 0.9)' : 'rgba(60, 60, 70, 0.3)')};
+  color: ${({ $isDark }) => ($isDark ? 'white' : '#222')};
+  background: transparent;
+  transition: background 0.15s;
+  z-index: 2;
+  &:hover,
+  &:focus {
+    background: ${({ $isDark }) => ($isDark ? 'rgba(60, 60, 65, 0.18)' : 'rgba(60, 60, 70, 0.12)')};
   }
 `;
 
@@ -373,6 +272,111 @@ const LoadingDot = styled.div<{ $delay: number }>`
   opacity: 0.6;
   animation: ${pulse} 1s infinite;
   animation-delay: ${props => props.$delay}s;
+`;
+
+// Restaurar styled-component para ChatMessages
+const ChatMessages = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overscroll-behavior: contain;
+  background: transparent;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(155, 155, 155, 0.5);
+    border-radius: 20px;
+  }
+  @media (max-width: 768px) {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    padding-top: 90px;
+    padding-bottom: 80px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+  }
+`;
+
+// Restaurar styled-component para MessageBubble
+const MessageBubble = styled.div<{ $isUser: boolean; $isDark: boolean }>`
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  align-self: ${props => (props.$isUser ? 'flex-end' : 'flex-start')};
+  background: ${({ $isUser, $isDark }) =>
+    $isUser
+      ? $isDark
+        ? 'rgba(50, 50, 60, 0.7)'
+        : 'rgba(50, 50, 60, 0.2)'
+      : $isDark
+        ? 'rgba(40, 40, 45, 0.7)'
+        : 'rgba(230, 230, 240, 0.7)'};
+  border: 1px solid
+    ${({ $isUser, $isDark }) =>
+      $isUser
+        ? $isDark
+          ? 'rgba(255, 255, 255, 0.1)'
+          : 'rgba(0, 0, 0, 0.05)'
+        : $isDark
+          ? 'rgba(255, 255, 255, 0.05)'
+          : 'rgba(0, 0, 0, 0.03)'};
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transform: translateZ(0);
+  p,
+  ul,
+  ol,
+  li {
+    margin: 0.5em 0;
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  code {
+    background: ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.07)')};
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+  }
+`;
+
+// Restaurar styled-component para ChatInputArea
+const ChatInputArea = styled.div<{ $isDark: boolean }>`
+  padding: 16px;
+  border-top: 1px solid
+    ${({ $isDark }) => ($isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)')};
+  ${({ $isDark }) => glassStyle($isDark)}
+  background: ${({ $isDark }) => ($isDark ? 'rgba(32, 32, 34, 0.7)' : 'rgba(240, 240, 245, 0.7)')};
+  @media (max-width: 768px) {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    padding: 12px 8px 12px 8px;
+    min-height: 64px;
+    height: 64px;
+    box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.04);
+  }
 `;
 
 // Componente principal
@@ -641,30 +645,36 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
           </ChatMessages>
 
           <ChatInputArea $isDark={isDark}>
-            <ChatInput
-              type="text"
-              placeholder={t('Escribe un mensaje...')}
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
-              ref={inputRef}
-              $isDark={isDark}
-            />
-            <SendButton $isDark={isDark} onClick={handleSendMessage}>
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            <InputWrapper>
+              <ChatInput
+                type="text"
+                placeholder={t('Escribe un mensaje...')}
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onKeyPress={e => e.key === 'Enter' && handleSendMessage()}
+                ref={inputRef}
+                $isDark={isDark}
+              />
+              <SendButton
+                $isDark={isDark}
+                onClick={handleSendMessage}
+                aria-label={t('Enviar mensaje')}
               >
-                <path d="M22 2L11 13"></path>
-                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
-              </svg>
-            </SendButton>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M22 2L11 13"></path>
+                  <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                </svg>
+              </SendButton>
+            </InputWrapper>
           </ChatInputArea>
         </ChatWindow>
       )}
