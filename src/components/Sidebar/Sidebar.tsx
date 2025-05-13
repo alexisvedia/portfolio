@@ -412,7 +412,6 @@ const MobileMenuButton = styled.button<{ $isMobile: boolean; $isOpen: boolean }>
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) => {
   const { t, i18n } = useTranslation();
-  const currentLanguage = i18n.language.startsWith('es') ? 'es' : 'en';
   const navigate = useNavigate();
   const location = useLocation();
   const [tooltip, setTooltip] = useState<TooltipState>({ 
@@ -460,34 +459,85 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
 
   const chatGroups: ChatGroup[] = [
     {
+      titleKey: 'sidebar.experiences.title',
+      defaultTitle: 'EXPERIENCES',
+      chats: [
+        {
+          id: 'xcons',
+          title: 'XCONS',
+          titleKey: 'sidebar.experiences.xcons',
+          displayText: {
+            es: 'XCONS',
+            en: 'XCONS',
+          },
+        },
+        {
+          id: 'fusionads',
+          title: 'FusionAds',
+          titleKey: 'sidebar.experiences.fusionads',
+          displayText: {
+            es: 'FusionAds',
+            en: 'FusionAds',
+          },
+        },
+        {
+          id: 'bandit',
+          title: 'Bandit',
+          titleKey: 'sidebar.experiences.bandit',
+          displayText: {
+            es: 'Bandit',
+            en: 'Bandit',
+          },
+        },
+        {
+          id: 'condamind',
+          title: 'Condamind',
+          titleKey: 'sidebar.experiences.condamind',
+          displayText: {
+            es: 'Condamind',
+            en: 'Condamind',
+          },
+        },
+      ],
+    },
+    {
       titleKey: 'sidebar.chats.today',
       defaultTitle: 'Hoy',
       chats: [
-        { id: 'chat1', title: '¿Por qué Alexis es necesario en tu proyecto?', displayText: { es: '¿Por qué Alexis es necesario en tu proyecto?', en: 'Why is Alexis needed in your project?' } },
-        { id: 'chat2', title: 'Planes de dominación mundial (con Alexis)', displayText: { es: 'Planes de dominación mundial (con Alexis)', en: 'World domination plans (with Alexis)' } },
-        { id: 'chat3', title: 'Contratar a Alexis: la mejor decisión', displayText: { es: 'Contratar a Alexis: la mejor decisión', en: 'Hiring Alexis: the best decision' } },
-        { id: 'chat_new1', title: 'El secreto del café perfecto según Alexis', displayText: { es: 'El secreto del café perfecto según Alexis', en: 'Alexis\'s secret to the perfect coffee' } },
+        {
+          id: 'chat1',
+          title: '¿Por qué Alexis es necesario en tu proyecto?',
+          displayText: {
+            es: '¿Por qué Alexis es necesario en tu proyecto?',
+            en: 'Why is Alexis needed in your project?',
+          },
+        },
+        {
+          id: 'chat2',
+          title: 'Planes de dominación mundial (con Alexis)',
+          displayText: {
+            es: 'Planes de dominación mundial (con Alexis)',
+            en: 'World domination plans (with Alexis)',
+          },
+        },
+        {
+          id: 'chat3',
+          title: 'Contratar a Alexis: la mejor decisión',
+          displayText: {
+            es: 'Contratar a Alexis: la mejor decisión',
+            en: 'Hiring Alexis: the best decision',
+          },
+        },
+        {
+          id: 'chat_new1',
+          title: 'El secreto del café perfecto según Alexis',
+          displayText: {
+            es: 'El secreto del café perfecto según Alexis',
+            en: "Alexis's secret to the perfect coffee",
+          },
+        },
       ],
     },
-    {
-      titleKey: 'sidebar.chats.yesterday',
-      defaultTitle: 'Ayer',
-      chats: [
-        { id: 'chat4', title: 'Ideas de proyectos innovadores con Alexis', displayText: { es: 'Ideas de proyectos innovadores con Alexis', en: 'Innovative project ideas with Alexis?' } },
-        { id: 'chat5', title: '¿Cómo contactar a este genio?', displayText: { es: '¿Cómo contactar a este genio?', en: 'How to contact this genius?' } },
-        { id: 'chat6', title: 'El impacto de Alexis en la industria tech', displayText: { es: 'El impacto de Alexis en la industria tech', en: 'Alexis\'s impact on the tech industry' } },
-        { id: 'chat_new2', title: 'Debate: ¿Piña en la pizza? La opinión de Alexis', displayText: { es: 'Debate: ¿Piña en la pizza? La opinión de Alexis', en: 'Debate: Pineapple on pizza? Alexis\'s take' } },
-      ],
-    },
-    {
-      titleKey: 'sidebar.chats.previous',
-      defaultTitle: 'Anteriores',
-      chats: [
-        { id: 'chat_prev1', title: 'Desbloqueando el potencial de React con Alexis', displayText: { es: 'Desbloqueando el potencial de React con Alexis', en: 'Unlocking React\'s potential with Alexis' } },
-        { id: 'chat_prev2', title: 'Consejos de Alexis para un código limpio', displayText: { es: 'Consejos de Alexis para un código limpio', en: 'Alexis\'s tips for clean code' } },
-        { id: 'chat_prev3', title: 'La filosofía de diseño de Alexis Vedia', displayText: { es: 'La filosofía de diseño de Alexis Vedia', en: 'Alexis Vedia\'s design philosophy' } },
-      ]
-    }
   ];
 
   const swipeThreshold = 50; 
@@ -627,6 +677,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     }
   };
 
+  const handleChatClick = (chatItem: ChatItem) => {
+    console.log('Chat item clicked:', chatItem.id);
+    if (isMobile && isOpen) {
+      toggleSidebar();
+    }
+  };
+
   const showTooltip = (textKey: string, e: React.MouseEvent<HTMLElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltip({
@@ -726,16 +783,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
                 {group.chats.map((chat) => (
                   <ChatItemStyled key={chat.id}>
                     <ChatLink
-                      href="#"
+                      href={`#chat-${chat.id}`}
                       onClick={(e) => {
                         e.preventDefault();
-                        console.log(`Clicked chat: ${chat.displayText[currentLanguage]}`);
-                        if (isMobile) toggleSidebar(); 
+                        handleChatClick(chat);
                       }}
-                      onMouseEnter={(e) => showTooltip(chat.displayText[currentLanguage], e)}
+                      onMouseEnter={(e) => showTooltip(chat.titleKey || chat.title, e)}
                       onMouseLeave={hideTooltip}
                     >
-                      {chat.displayText[currentLanguage]}
+                      {i18n.language === 'es' ? chat.displayText.es : chat.displayText.en}
                     </ChatLink>
                   </ChatItemStyled>
                 ))}

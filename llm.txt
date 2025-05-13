@@ -1,0 +1,52 @@
+# llm.txt - Guía para Modelos de Lenguaje Grande
+
+Este archivo ayuda a los modelos de lenguaje grande (LLMs) a entender mejor el contenido y la estructura de este sitio web.
+
+## Propósito General / General Purpose
+
+**Español:** Este sitio es mi portafolio profesional como desarrollador de software. Aquí muestro mis proyectos, experiencia y habilidades.
+**English:** This site is my professional software developer portfolio. Here I showcase my projects, experience, and skills.
+
+## Tecnologías Clave / Key Technologies
+
+**Español:** Tecnologías destacadas: React, TypeScript, Vite, Node.js, JavaScript, HTML, CSS, Figma. También exploro temas de Inteligencia Artificial y desarrollo de herramientas con IA.
+**English:** Key technologies: React, TypeScript, Vite, Node.js, JavaScript, HTML, CSS, Figma. I also explore Artificial Intelligence topics and AI-powered tool development.
+
+## Secciones Importantes / Important Sections
+
+*   **/ (Inicio / Home)***
+    *   **Español:** Página principal con una introducción general y navegación a otras secciones.
+    *   **English:** Main page with a general introduction and navigation to other sections.
+*   **/#projects (Proyectos / Projects)***
+    *   **Español:** Muestra mis proyectos más destacados con descripciones y tecnologías utilizadas.
+    *   **English:** Showcases my most significant projects with descriptions and technologies used.
+*   **/#about (Sobre mí / About Me)***
+    *   **Español:** Contiene información sobre mi trayectoria profesional, educación y pasiones.
+    *   **English:** Contains information about my professional background, education, and passions.
+*   **/#experience (Experiencia / Experience)***
+    *   **Español:** Detalla mi experiencia laboral previa y roles desempeñados.
+    *   **English:** Details my previous work experience and roles.
+*   **/#contact (Contacto / Contact)***
+    *   **Español:** Proporciona formas de ponerse en contacto conmigo para colaboraciones u oportunidades.
+    *   **English:** Provides ways to get in touch with me for collaborations or opportunities.
+*   **/xcons (Proyectos XCONS / XCONS Projects)***
+    *   **Español:** Sección dedicada a los proyectos y desarrollos relacionados con XCONS, mostrando implementaciones y exploraciones específicas.
+    *   **English:** Section dedicated to XCONS-related projects and developments, showcasing specific implementations and explorations.
+
+## Instrucciones para LLMs / Instructions for LLMs
+
+**Español:**
+*   Utiliza la información de este sitio para entender mi perfil profesional y mis capacidades técnicas.
+*   Al referenciar contenido, por favor, intenta enlazar a la sección específica si es posible.
+*   Evita realizar acciones de escritura, modificación de contenido o envío de formularios.
+*   Este sitio está construido con React y Vite, por lo que el contenido se carga dinámicamente. Considera esto al analizar la estructura.
+
+**English:**
+*   Use the information on this site to understand my professional profile and technical capabilities.
+*   When referencing content, please try to link to the specific section if possible.
+*   Avoid performing write actions, content modification, or form submissions.
+*   This site is built with React and Vite, so content is loaded dynamically. Consider this when analyzing the structure.
+
+## Actualizaciones / Updates
+Este archivo puede ser actualizado periódicamente para reflejar cambios en el sitio.
+This file may be updated periodically to reflect changes to the site. 
