@@ -30,6 +30,8 @@ import Home from './pages/Home';
 const ProjectPage = React.lazy(() => import('./pages/ProjectPage'));
 // Importar el componente XConsExperiencePage de forma diferida
 const XConsExperiencePage = React.lazy(() => import('./xcons/XConsExperiencePage'));
+// Importar FusionAdsPage de forma diferida
+const FusionAdsPage = React.lazy(() => import('./fusionads/FusionAdsPage'));
 const MaintenancePage = React.lazy(() => import('./pages/MaintenancePage'));
 // const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
 
@@ -198,7 +200,7 @@ const AppContent = () => {
                 }
               />
               <Route path="/xcons" element={<XConsExperiencePage />} />
-              <Route path="/fusionads" element={<MaintenancePage />} />
+              <Route path="/fusionads" element={<FusionAdsPage />} />
               <Route path="/bandit" element={<MaintenancePage />} />
               <Route path="/condamind" element={<MaintenancePage />} />
               <Route path="/:projectId" element={<ProjectPage />} />
