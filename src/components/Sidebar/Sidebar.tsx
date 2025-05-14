@@ -459,83 +459,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
 
   const chatGroups: ChatGroup[] = [
     {
-      titleKey: 'sidebar.experiences.title',
-      defaultTitle: 'EXPERIENCES',
-      chats: [
-        {
-          id: 'xcons',
-          title: 'XCONS',
-          titleKey: 'sidebar.experiences.xcons',
-          displayText: {
-            es: 'XCONS',
-            en: 'XCONS',
-          },
-        },
-        {
-          id: 'fusionads',
-          title: 'FusionAds',
-          titleKey: 'sidebar.experiences.fusionads',
-          displayText: {
-            es: 'FusionAds',
-            en: 'FusionAds',
-          },
-        },
-        {
-          id: 'bandit',
-          title: 'Bandit',
-          titleKey: 'sidebar.experiences.bandit',
-          displayText: {
-            es: 'Bandit',
-            en: 'Bandit',
-          },
-        },
-        {
-          id: 'condamind',
-          title: 'Condamind',
-          titleKey: 'sidebar.experiences.condamind',
-          displayText: {
-            es: 'Condamind',
-            en: 'Condamind',
-          },
-        },
-      ],
-    },
-    {
       titleKey: 'sidebar.chats.today',
       defaultTitle: 'Hoy',
       chats: [
-        {
-          id: 'chat1',
-          title: '¿Por qué Alexis es necesario en tu proyecto?',
-          displayText: {
-            es: '¿Por qué Alexis es necesario en tu proyecto?',
-            en: 'Why is Alexis needed in your project?',
-          },
-        },
-        {
-          id: 'chat2',
-          title: 'Planes de dominación mundial (con Alexis)',
-          displayText: {
-            es: 'Planes de dominación mundial (con Alexis)',
-            en: 'World domination plans (with Alexis)',
-          },
-        },
-        {
-          id: 'chat3',
-          title: 'Contratar a Alexis: la mejor decisión',
-          displayText: {
-            es: 'Contratar a Alexis: la mejor decisión',
-            en: 'Hiring Alexis: the best decision',
-          },
-        },
-        {
-          id: 'chat_new1',
-          title: 'El secreto del café perfecto según Alexis',
-          displayText: {
-            es: 'El secreto del café perfecto según Alexis',
-            en: "Alexis's secret to the perfect coffee",
-          },
-        },
+        { id: 'chat1', title: '¿Por qué Alexis es necesario en tu proyecto?', displayText: { es: '¿Por qué Alexis es necesario en tu proyecto?', en: 'Why is Alexis needed in your project?' } },
+        { id: 'chat2', title: 'Planes de dominación mundial (con Alexis)', displayText: { es: 'Planes de dominación mundial (con Alexis)', en: 'World domination plans (with Alexis)' } },
+        { id: 'chat3', title: 'Contratar a Alexis: la mejor decisión', displayText: { es: 'Contratar a Alexis: la mejor decisión', en: 'Hiring Alexis: the best decision' } },
+        { id: 'chat_new1', title: 'El secreto del café perfecto según Alexis', displayText: { es: 'El secreto del café perfecto según Alexis', en: 'Alexis\'s secret to the perfect coffee' } },
+      ],
+    },
+    {
+      titleKey: 'sidebar.chats.yesterday',
+      defaultTitle: 'Ayer',
+      chats: [
+        { id: 'chat4', title: 'Ideas de proyectos innovadores con Alexis', displayText: { es: 'Ideas de proyectos innovadores con Alexis', en: 'Innovative project ideas with Alexis?' } },
+        { id: 'chat5', title: '¿Cómo contactar a este genio?', displayText: { es: '¿Cómo contactar a este genio?', en: 'How to contact this genius?' } },
+        { id: 'chat6', title: 'El impacto de Alexis en la industria tech', displayText: { es: 'El impacto de Alexis en la industria tech', en: 'Alexis\'s impact on the tech industry' } },
+        { id: 'chat_new2', title: 'Debate: ¿Piña en la pizza? La opinión de Alexis', displayText: { es: 'Debate: ¿Piña en la pizza? La opinión de Alexis', en: 'Debate: Pineapple on pizza? Alexis\'s take' } },
       ],
     },
   ];
@@ -684,11 +624,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     }
   };
 
-  const showTooltip = (textKey: string, e: React.MouseEvent<HTMLElement>) => {
+  const showTooltip = (textKey: string, e: React.MouseEvent<HTMLElement>, displayText?: { es: string; en: string }) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltip({
       visible: true,
-      text: t(textKey),
+      text: displayText ? (i18n.language === 'es' ? displayText.es : displayText.en) : t(textKey),
       position: {
         x: rect.left + rect.width / 2,
         y: rect.top,
@@ -788,7 +728,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
                         e.preventDefault();
                         handleChatClick(chat);
                       }}
-                      onMouseEnter={(e) => showTooltip(chat.titleKey || chat.title, e)}
+                      onMouseEnter={(e) => showTooltip(chat.titleKey || chat.title, e, chat.displayText)}
                       onMouseLeave={hideTooltip}
                     >
                       {i18n.language === 'es' ? chat.displayText.es : chat.displayText.en}

@@ -1,12 +1,16 @@
 import React from 'react';
-import styled from 'styled-components';
-import { useTheme } from '../context/ThemeContext'; // TS6133 ThemeMode eliminado
+import styled, { css } from 'styled-components';
+import { useTheme, ThemeMode } from '../context/ThemeContext'; // Importar ThemeMode
 import { useTranslation } from 'react-i18next';
 import PageTransition from '@components/PageTransition/PageTransition'; // Asumiendo alias correcto
 import fusionAdsFondo from '../assets/Proyectos Fusion/Fusion-fondo.png'; // Importación imagen de fondo
 import fusionAdsLogo from '../assets/Proyectos Fusion/Logo-color-fusion.png'; // Ruta actualizada del logo
 import fusionAdsAppImage from '../assets/Proyectos Fusion/fusion-app.png'; // Importación para la imagen derecha
 // import fusionAdsIlustracion from '../assets/images/projects/fusionads-ilustracion.png'; // Placeholder para ilustración
+import { FrontendDevelopmentExperience } from './components/FrontendDevelopmentExperience';
+import type { FrontendExperienceData } from './components/FrontendDevelopmentExperience';
+import { frontendDevelopmentExperienceData } from './data/experiencesData';
+import StandardSectionTitle from '../components/shared/StandardSectionTitle'; // Ajustar ruta si es necesario
 
 const PageContainer = styled.div`
   max-width: 1000px;
@@ -85,7 +89,7 @@ const BannerText = styled.p`
   color: #333; /* Considerar tema */
   max-width: 500px; /* Ajustado */
   line-height: 1.6;
-  margin-bottom: 10px; /* Añadido margen */
+  margin-bottom: 10px; /* Mantenemos este margen inferior */
 
   a {
     color: #007bff; /* Color de enlace estándar, ajustar según diseño */
@@ -100,6 +104,25 @@ const LocationText = styled.span`
   color: #666; /* Considerar tema */
   font-size: 0.9rem;
   font-weight: 500; /* Añadido peso */
+  margin-bottom: 8px; /* Añadido margen inferior para separar del botón */
+`;
+
+const StyledSiteButton = styled.a`
+  display: inline-block;
+  background-color: #F7480B; /* Color naranja FusionAds */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #D9400A; /* Naranja FusionAds más oscuro para hover */
+    text-decoration: none; /* Asegurar que no haya subrayado en hover */
+  }
 `;
 
 const RightContent = styled.div`
@@ -119,28 +142,109 @@ const RightContent = styled.div`
   }
 `;
 
+// Definiciones copiadas de XConsExperiencePage.tsx (o adaptadas)
+const Summary = styled.div<{ $themeMode: ThemeMode }>`
+  margin: 3rem auto;
+  max-width: 100%;
+`;
+
+const glassEffectForDescriptionBox = css`
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  will-change: backdrop-filter;
+`;
+
+const SectionTitleInsideBox = styled.h3<{ $isDark: boolean }>`
+  font-family: 'NHaasGroteskTXPro-55Rg', 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 1.6rem;
+  color: ${({ $isDark }) => ($isDark ? '#FFFFFF' : '#1D1F23')};
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+`;
+
+const DividerLine = styled.hr<{ $isDark?: boolean }>`
+  width: 100%;
+  border: none;
+  height: 1px;
+  background-color: ${({ $isDark }) =>
+    $isDark
+      ? 'rgba(255,255,255,0.2)'
+      : 'rgba(0,0,0,0.15)'};
+  margin-top: 0.75rem;
+  margin-bottom: 1.5rem;
+`;
+
+const DescriptionBox = styled.div<{ $isDark: boolean }>`
+  border-radius: 12px;
+  padding: 2.5rem;
+  margin-top: 1rem;
+  border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
+  ${glassEffectForDescriptionBox}
+
+  @media (max-width: 767px) {
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: 0;
+    margin-top: 0.5rem;
+  }
+`;
+
+const SummaryText = styled.p<{ $isDark: boolean }>`
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 0;
+  color: ${({ $isDark }) => ($isDark ? '#DDDDDD' : '#444444')};
+`;
+
+// Contenedor para las secciones de experiencia (similar al de XCONS)
+const ExperienceContainer = styled.div`
+  display: flex; // Cambiado a flex para una sola columna, podrías usar grid si planeas más secciones lado a lado.
+  flex-direction: column;
+  gap: 3rem; // Espacio entre diferentes secciones de experiencia (si hubiera más)
+  margin-top: 3rem; // Espacio después de la sección de Resumen
+`;
+
 const FusionAdsPage: React.FC = () => {
-  // const { themeMode } = useTheme(); // TS6133 Eliminado
-  useTheme(); // Llamada para mantener el hook si tiene efectos secundarios y evitar otro error de no uso.
-  // const { t, i18n } = useTranslation('fusionads'); // TS6133 i18n eliminado
-  const { t } = useTranslation('fusionads'); // TS6133 i18n eliminado
+  const { themeMode } = useTheme(); // Desestructurar themeMode
+  const { i18n } = useTranslation('fusionads');
+  const language = i18n.language.startsWith('en') ? 'en' : 'es';
+  const isDark = themeMode === 'dark'; // Determinar isDark
 
-  // Textos para internacionalización con traducciones explícitas donde sea necesario
-  const bannerDescription = t('banner.description', 'FusionAds.ai es una plataforma de publicidad generativa impulsada por inteligencia artificial que genera anuncios profesionales omni-canal.');
-  const bannerUrl = "https://backoffice.fusionos.ai"; // URL actualizada sin /login
-  const bannerLocation = t('banner.location', 'Estados Unidos');
+  const bannerUrl = "https://backoffice.fusionos.ai";
 
-  // Para asegurar que tenemos las traducciones correctas en el contexto de i18n, aunque usemos fallbacks:
-  // Esto es más para la configuración de i18n, pero lo ponemos aquí como referencia
-  /* // TS6133 Eliminado
-  const translations = {
-    en: {
-      banner: {
-// ... existing code ...
-      }
+  const bannerSectionTexts = {
+    description: {
+      es: 'FusionAds.ai es una plataforma de publicidad generativa impulsada por inteligencia artificial que genera anuncios profesionales omni-canal.',
+      en: 'FusionAds.ai is an AI-powered generative advertising platform that creates professional omni-channel ads.'
+    },
+    location: {
+      es: 'Estados Unidos',
+      en: 'United States'
+    },
+    visitSiteButton: {
+      es: 'Visitar sitio',
+      en: 'Visit site'
     }
   };
-  */
+
+  // Textos para la nueva sección "Resumen de Rol"
+  const roleSummaryTexts = {
+    title: {
+      es: "Resumen de Rol",
+      en: "Role Summary"
+    },
+    description: {
+      es: `Como Desarrollador Front-End en React y TypeScript, trabajé en la creación y mejora de componentes reutilizables, colaborando con el equipo para optimizar flujos críticos y garantizar la coherencia entre desktop y mobile. Mantuve e implementé soluciones en código legacy, adaptando componentes antiguos a nuevas necesidades sin afectar el rendimiento.\n\nIntegré servicios del backend con la interfaz, implementando validaciones con Zod y gestionando communications con APIs externas. Además, mejoré la experiencia del usuario en formularios dinámicos y modales, optimizando la visibilidad de elementos según el estado de la campaña.\n\nFui responsable de la gestión del estado global a través de Context API y trabajé en la migración de flujos de campaña, asegurando la coexistencia de componentes viejos y nuevos, siempre priorizando la escalabilidad y mantenibilidad del proyecto.`,
+      en: `As a Front-End Developer in React and TypeScript, I worked on creating and improving reusable components, collaborating with the team to optimize critical flows and ensure consistency between desktop and mobile. I maintained and implemented solutions in legacy code, adapting old components to new needs without affecting performance.\n\nI integrated backend services with the interface, implementing validations with Zod and managing communications with external APIs. Additionally, I improved the user experience in dynamic forms and modals, optimizing the visibility of elements according to the campaign status.\n\nI was responsible for global state management through the Context API and worked on migrating campaign flows, ensuring the coexistence of old and new components, always prioritizing the scalability and maintainability of the project.`
+    }
+  };
+
+  // Obtener los datos de la experiencia para el idioma actual
+  const currentExperienceData = frontendDevelopmentExperienceData[language] as FrontendExperienceData;
+  const experienceSectionTitle = frontendDevelopmentExperienceData[language].sectionTitle;
 
   return (
     <PageTransition>
@@ -151,19 +255,44 @@ const FusionAdsPage: React.FC = () => {
             <LeftContent>
               <LogoImage src={fusionAdsLogo} alt="FusionAds Logo" />
               <BannerText>
-                {bannerDescription}
-                <br />
-                <a href={bannerUrl} target="_blank" rel="noopener noreferrer">
-                  {bannerUrl} {/* Mostrar la URL directamente */}
-                </a>
+                {bannerSectionTexts.description[language]}
               </BannerText>
-              <LocationText>{bannerLocation}</LocationText>
+              <LocationText>{bannerSectionTexts.location[language]}</LocationText>
+              <StyledSiteButton href={bannerUrl} target="_blank" rel="noopener noreferrer">
+                {bannerSectionTexts.visitSiteButton[language]}
+              </StyledSiteButton>
             </LeftContent>
             <RightContent>
               <img src={fusionAdsAppImage} alt="FusionAds App Illustration" />
             </RightContent>
           </BannerContent>
         </FusionAdsBanner>
+
+        {/* Nueva sección de Resumen de Rol */}
+        <Summary $themeMode={themeMode}>
+          <DescriptionBox $isDark={isDark}>
+            <SectionTitleInsideBox $isDark={isDark}>
+              {roleSummaryTexts.title[language]}
+            </SectionTitleInsideBox>
+            <DividerLine $isDark={isDark} />
+            <SummaryText $isDark={isDark}>
+              {roleSummaryTexts.description[language]}
+            </SummaryText>
+          </DescriptionBox>
+        </Summary>
+
+        {/* Nueva sección de Experiencia Front-End */}
+        <ExperienceContainer>
+          <div> {/* Envuelto en div para mantener la estructura si se añaden más experiencias lado a lado con grid más adelante */} 
+            <StandardSectionTitle>
+              {experienceSectionTitle}
+            </StandardSectionTitle>
+            <FrontendDevelopmentExperience 
+              experience={currentExperienceData}
+              isDark={isDark} 
+            />
+          </div>
+        </ExperienceContainer>
 
         {/* Aquí irán las demás secciones replicadas de XCONS */}
         {/* Por ejemplo: Resumen, Experiencias, Galería, etc. */}
