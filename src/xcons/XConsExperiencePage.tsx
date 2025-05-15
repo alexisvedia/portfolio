@@ -24,7 +24,6 @@ const PageContainer = styled.div`
   margin: 0 auto;
   padding: 2rem;
   padding-top: 4rem;
-  font-family: 'Inter', sans-serif;
 `;
 
 const XconsBanner = styled.div`
@@ -158,7 +157,6 @@ const glassEffectForDescriptionBox = css`
 
 // Nuevo título estilizado para dentro del DescriptionBox
 const SectionTitleInsideBox = styled.h3<{ $isDark: boolean }>`
-  font-family: 'NHaasGroteskTXPro-55Rg', 'Inter', sans-serif; // Fuente principal para consistencia
   font-weight: 600;
   font-size: 1.6rem;
   color: ${({ $isDark }) => ($isDark ? '#FFFFFF' : '#1D1F23')}; // Colores de texto del tema

@@ -55,7 +55,6 @@ const PageContainer = styled.div`
   margin: 0 auto;
   padding: 2rem;
   padding-top: 4rem;
-  font-family: 'Inter', sans-serif;
 `;
 
 const ProjectBanner = styled.div` // Renombrado
@@ -178,7 +177,6 @@ const DescriptionBox = styled(StyledBox)`
 `;
 
 const SectionTitleInsideBox = styled.h3<{ $isDark: boolean }>`
-  font-family: 'NHaasGroteskTXPro-55Rg', 'Inter', sans-serif;
   font-weight: 600;
   font-size: 1.6rem;
   color: ${({ $isDark }) => $isDark ? '#FFFFFF' : '#1D1F23'};

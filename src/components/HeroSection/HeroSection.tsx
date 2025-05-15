@@ -8,7 +8,7 @@ const HeroContainer = styled.section`
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-height: 80vh;
+  min-height: 100vh;
   padding: 0 ${({ theme }) => theme.space.xl};
   text-align: center;
   position: relative;
@@ -25,7 +25,6 @@ const CenteringWrapper = styled.div`
 `;
 
 const Title = styled.h1`
-  font-family: 'Morganite', sans-serif;
   font-weight: 900;
   color: ${({ theme }) => theme.colors.text};
   line-height: 0.9;
@@ -34,15 +33,15 @@ const Title = styled.h1`
   user-select: none;
   
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 180px;
+    font-size: 75px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    line-height: 0.8;
+    line-height: 1;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 350px;
+    font-size: 130px;
     margin-bottom: ${({ theme }) => theme.space.sm};
   }
 `;
@@ -100,7 +99,6 @@ const ParallaxSubtitle = styled.div`
 
 // Subtítulo con animación de aparición original
 const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   font-size: 1.3rem;
   font-weight: 400;
   margin-bottom: 0;

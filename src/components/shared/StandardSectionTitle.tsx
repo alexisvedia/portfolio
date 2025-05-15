@@ -10,7 +10,6 @@ interface StandardSectionTitleProps {
 }
 
 const Title = styled.h2` // Por defecto es h2, pero se puede cambiar con la prop 'as'
-  font-family: 'NHaasGroteskTXPro-55Rg', 'Inter', sans-serif;
   font-weight: 900;
   font-size:1.6rem; /* Reducido desde 3rem */
   text-transform: uppercase;
