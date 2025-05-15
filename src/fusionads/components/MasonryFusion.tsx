@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 
 import './MasonryFusion.css';
+import '../../xcons/components/Masonry.css';
 
 export interface MasonryItem {
   id: string | number;
@@ -358,6 +359,67 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
                 />
               )}
             </div>
+
+            {/* INICIO: Nueva sección de miniaturas */}
+            {data.length > 1 && !isMobile && (
+              <div className="modal-thumbnail-strip">
+                {data.map((thumbItem, index) => (
+                  <div
+                    key={`thumb-${thumbItem.id}`}
+                    className={`thumbnail-item ${index === currentIndex ? 'active' : ''}`}
+                    onClick={() => handleItemClick(thumbItem, index)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`View item ${index + 1}${thumbItem.title ? ': ' + thumbItem.title[language] : ''}`}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleItemClick(thumbItem, index);
+                      }
+                    }}
+                  >
+                    <img
+                      src={thumbItem.image} // Usar la imagen principal del item como miniatura
+                      alt={thumbItem.title ? thumbItem.title[language] : `Thumbnail ${index + 1}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* FIN: Nueva sección de miniaturas */}
+
+            {/* Dots solo en mobile */}
+            {data.length > 1 && isMobile && (
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  padding: '12px 0 0 0', // Ajustado para dar espacio a los dots
+                  gap: 8,
+                  position: 'absolute', // Posicionar absolutamente
+                  bottom: '10px',      // En la parte inferior
+                  left: '50%',         // Centrado horizontalmente
+                  transform: 'translateX(-50%)', // Ajuste fino para centrar
+                  zIndex: 1010,       // Asegurar que esté sobre el contenido pero debajo de botones de cierre si los hubiera fuera del strip
+                }}
+              >
+                {data.map((_, idx) => (
+                  <span
+                    key={`dot-${idx}`}
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      background: idx === currentIndex ? (isDark ? theme.colors.primary : theme.colors.primary) : (isDark ? '#555' : '#bbb'),
+                      display: 'inline-block',
+                      transition: 'background 0.3s ease',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => handleItemClick(data[idx], idx)} // Permitir clic en dots
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="modal-info-area">
               {selectedContent.title && (

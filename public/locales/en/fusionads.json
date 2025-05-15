@@ -8,5 +8,23 @@
   },
   "masonry": {
     "noProjects": "Projects will be added here soon."
+  },
+  "fusionProjectsData": {
+    "designDirections": {
+      "title": "Design Directions",
+      "description": "Exploration of various design directions and the rationale behind visual choices to optimize ad presentation."
+    },
+    "firstStep": {
+      "title": "First Step in Creation",
+      "description": "Visualization of the initial flow a user follows to start generating their first advertising campaign on the platform."
+    },
+    "publishFlow": {
+      "title": "Publishing Flow",
+      "description": "Demonstration of the complete process to publish a campaign, from final configuration to launch."
+    },
+    "campaignTemplateGallery": {
+      "title": "Campaign Template Gallery",
+      "description": "Showcase of the campaign-specific template gallery, facilitating quick selection and customization."
+    }
   }
 } 
