@@ -5,31 +5,32 @@
 
 .masonry-grid {
   position: relative;
-}
-
-.masonry-grid > .masonry-item {
-  position: absolute;
-  will-change: transform, width, height, opacity;
-  padding: 10px; 
-  box-sizing: border-box;
-}
-
-.masonry-grid > .masonry-item > * { 
-  position: relative;
-  display: block; /* Asegurar que la imagen/video sea un bloque */
   width: 100%;
   height: 100%;
-  object-fit: cover; 
-  border-radius: 8px; /* Reducido de 10px para consistencia con otros redondeos */
-  box-shadow: 0px 8px 20px -8px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-  overflow: hidden; 
 }
 
-.masonry-grid > .masonry-item:hover > * {
-  transform: scale(1.03);
-  box-shadow: 0px 12px 30px -10px rgba(0, 0, 0, 0.25);
+.masonry-grid>div {
+  position: absolute;
+  will-change: transform, width, height, opacity;
+  padding: 10px;
+}
+
+.masonry-grid>div>div {
+  position: relative;
+  background-size: cover;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0px 10px 50px -10px rgba(0, 0, 0, 0.2);
+  transition: 0.3s ease;
+  cursor: pointer;
+}
+
+.masonry-grid>div>div:hover {
+  transform: scale(1.1);
+  transition: 0.3s ease;
 }
 
 /* --- Estilos del Modal (Revisión detallada basada en XCons) --- */
@@ -43,18 +44,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10000; 
+  z-index: 1000;
   padding: 20px;
   overflow-y: auto;
 }
 
 .modal-content-wrapper {
   position: relative;
-  background-color: #fff; 
+  background-color: #fff;
   border-radius: 10px;
-  max-width: 1200px; 
-  width: 90vw; 
-  max-height: 90vh; 
+  max-width: 1200px;
+  width: 90vw;
+  max-height: 90vh;
   display: flex;
   flex-direction: row;
   overflow: hidden;
@@ -69,122 +70,121 @@
   justify-content: center;
   overflow: hidden;
   position: relative;
-  height: 85vh; /* De XCons */
-  min-height: 450px; /* De XCons */
-  /* background-color: #f0f0f0; */ /* XCons no lo tiene en modo claro, se elimina */
+  height: 85vh;
+  min-height: 450px;
 }
 
-.modal-media-area img,
+.modal-media-area img, 
 .modal-media-area video {
   max-width: 100%;
-  max-height: 100%; 
+  max-height: 100%;
   display: block;
   border-radius: 6px;
   object-fit: contain;
+  width: auto;
+  height: auto;
 }
 
 .modal-info-area {
   flex: 1;
   padding: 25px;
-  padding-right: 30px; /* Reducido de 70px de XCons, ajustable */
+  padding-right: 70px;
   overflow-y: auto;
-  background-color: #f9f9f9; 
-  border-left: 1px solid #eee; 
-  max-width: 380px; 
-  min-width: 300px; 
+  background-color: #f9f9f9;
+  border-left: 1px solid #eee;
+  max-width: 380px;
+  min-width: 300px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-/* Estilos para h2 y p dentro de modal-info-area (referencia XCons) */
-/* ModalInfoTitle (h2) es styled-component, sus props deben coincidir:
-   font-family: 'Inter', sans-serif;
-   font-weight: 500;
-   font-size: 1.6em; (ModalInfoTitle usa 1.2rem, se podría ajustar si es necesario)
-   color: #333; (light) / #ddd (dark) (ModalInfoTitle lo maneja)
-   margin-bottom: 15px; (ModalInfoTitle usa 0.75rem = 12px)
-*/
+.modal-info-area h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.6em;
+  color: #333;
+}
 
-.modal-description { /* p */
-  font-family: 'Inter', sans-serif; /* Asegurar consistencia de fuente */
-  font-size: 0.95em; /* De XCons */
-  line-height: 1.6; /* De XCons */
-  color: #555; /* De XCons, para modo claro */
+.modal-description {
+  font-size: 0.95em;
+  line-height: 1.6;
+  color: #555;
   white-space: pre-wrap;
-  margin-bottom: 1rem; /* Ajustado de 0.5rem de XCons a 1rem */
+  margin-bottom: 0.5rem;
 }
 
 .modal-close-button {
   position: absolute;
-  top: 15px; 
-  right: 15px; 
-  background: rgba(0, 0, 0, 0.6); 
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.6);
   color: white;
   border: none;
   border-radius: 50%;
-  width: 35px; 
-  height: 35px; 
-  font-size: 22px; 
-  line-height: 35px; 
+  width: 35px;
+  height: 35px;
+  font-size: 22px;
+  line-height: 35px;
   text-align: center;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
-  z-index: 1020; 
+  z-index: 1020;
 }
 
 .modal-close-button:hover {
-  background: rgba(0, 0, 0, 0.8); 
-  transform: scale(1.1); 
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
 }
 
+/* Estilos para Botones de Navegación del Modal */
 .modal-nav-button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 44px; 
-  height: 44px; 
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background-color: rgba(40, 40, 40, 0.3); 
-  backdrop-filter: blur(10px); 
+  background-color: rgba(40, 40, 40, 0.3);
+  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1); 
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: white;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 1010; 
+  z-index: 1010;
   transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
-  opacity: 0.85; 
+  opacity: 0.85;
 }
 
-.modal-nav-button svg { 
+.modal-nav-button svg {
   display: block;
   width: 24px;
   height: 24px;
 }
 
 .modal-nav-button:hover:not(:disabled) {
-  background-color: rgba(50, 50, 50, 0.5); 
+  background-color: rgba(50, 50, 50, 0.5);
   opacity: 1;
-  transform: translateY(-50%) scale(1.05); 
+  transform: translateY(-50%) scale(1.05);
 }
 
 .modal-nav-button:disabled {
-  opacity: 0.3; 
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
 .modal-nav-button.prev {
-  left: 15px; 
+  left: 15px;
 }
 
 .modal-nav-button.next {
-  right: 15px; 
+  right: 15px;
 }
 
 /* --- Dark Mode para el Modal (Revisión detallada basada en XCons) --- */
@@ -339,4 +339,171 @@ Pero es más simple aplicar el padding/gap directamente en cómo se calculan las
 o usar un gap en CSS Grid/Flex si la librería lo permite internamente, o no usar padding en el item
 y dejar que el contenido (imagen) llene el item completamente con su propio border-radius.
 Elegí la opción de que la imagen llene el .masonry-item y tenga su propio estilo.
-*/ 
+*/
+
+/* Dark Mode Styles for Modal */
+.modal-overlay.dark-mode {
+  background-color: rgba(0, 0, 0, 0.92);
+}
+
+.modal-overlay.dark-mode .modal-content-wrapper {
+  background-color: #282c34;
+  border: 1px solid #3a3f4b;
+}
+
+.modal-overlay.dark-mode .modal-info-area {
+  background-color: #21252b;
+  border-left-color: #3a3f4b;
+  color: #abb2bf;
+}
+
+.modal-overlay.dark-mode .modal-info-area h2 {
+  color: #e0e6f1;
+}
+
+.modal-overlay.dark-mode .modal-description {
+  color: #abb2bf;
+}
+
+.modal-overlay.dark-mode .modal-close-button {
+  background: rgba(255, 255, 255, 0.15);
+  color: #e0e6f1;
+}
+
+.modal-overlay.dark-mode .modal-close-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.modal-overlay.dark-mode .modal-nav-button {
+  background-color: rgba(70, 70, 70, 0.4);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e0e6f1;
+}
+
+.modal-overlay.dark-mode .modal-nav-button:hover:not(:disabled) {
+  background-color: rgba(90, 90, 90, 0.6);
+}
+
+.modal-overlay.dark-mode .modal-nav-button:disabled {
+  opacity: 0.4;
+}
+
+@media (max-width: 992px) {
+  .modal-content-wrapper {
+    flex-direction: column;
+    max-height: 95vh;
+    width: 95vw;
+    padding-bottom: 0;
+  }
+
+  .modal-media-area {
+    max-height: none;
+    height: 45vh;
+    min-height: 280px;
+  }
+
+  .modal-info-area {
+    flex: none;
+    border-left: none;
+    border-top: 1px solid #eee;
+    max-width: 100%;
+    max-height: 35vh;
+    min-width: auto;
+    justify-content: flex-start;
+    padding-right: 25px;
+  }
+
+  .modal-nav-button {
+    width: 35px;
+    height: 35px;
+    font-size: 20px;
+    line-height: 35px;
+  }
+
+  .modal-nav-button.prev {
+    left: 5px;
+  }
+
+  .modal-nav-button.next {
+    right: 5px;
+  }
+}
+
+@media (max-width: 767px) {
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    min-height: 100vh;
+    z-index: 11000;
+    padding: 0;
+  }
+
+  .modal-content-wrapper {
+    min-height: 100dvh;
+    height: 100dvh;
+    width: 100vw;
+    max-width: 100vw;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    flex-direction: column;
+  }
+
+  .modal-media-area {
+    height: 55dvh;
+    min-height: 35vh;
+    max-height: 60dvh;
+    padding: 32px 0 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-media-area img,
+  .modal-media-area video {
+    max-width: 90vw;
+    max-height: 100%;
+    padding: 0 16px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .modal-info-area {
+    height: 45dvh;
+    min-height: 30vh;
+    max-height: 55dvh;
+    padding: 18px 10px 24px 10px;
+    background: none;
+    border: none;
+    max-width: 100vw;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+  }
+
+  .modal-info-area h2,
+  .modal-info-area p,
+  .modal-info-area a {
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .modal-overlay.dark-mode .modal-info-area {
+    background-color: #21252b;
+    border-top-color: #3a3f4b;
+    border-left: none;
+  }
+}
+
+body.modal-open .chatbot-assistant,
+body.modal-open .ai-portfolio-assistant-container,
+body.modal-open .bottom-right-button {
+  display: none !important;
+} 

@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { useTransition, a } from '@react-spring/web';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import Tooltip from '../../components/Tooltip/Tooltip';
 import { useTheme } from '../../context/ThemeContext';
 
 import './MasonryFusion.css';
@@ -34,16 +33,12 @@ interface MasonryProps {
   data: MasonryItem[];
 }
 
-// Estilos (ModalInfoTitle, DocumentLinksContainer, etc.) se mantienen igual por ahora
-// ... (copiar los componentes styled de Masonry.tsx aquí) ...
-
-// Nuevo componente estilizado para el título del modal
 const ModalInfoTitle = styled.h2`
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   font-size: 1.2rem;
   color: ${({ theme }) =>
-    theme.isDark || theme.themeMode === 'dark' ? '#E0E0E0' : '#333333'};
+    theme.isDark ? '#E0E0E0' : '#333333'};
   margin-bottom: 0.75rem;
   line-height: 1.3;
 `;
@@ -56,7 +51,7 @@ const DocumentLinksTitle = styled.h3`
   font-family: 'Inter', sans-serif;
   font-weight: 500;
   font-size: 1rem;
-  color: ${({ theme }) => (theme.isDark || theme.themeMode === 'dark' ? '#E0E0E0' : '#333333')};
+  color: ${({ theme }) => (theme.isDark ? '#E0E0E0' : '#333333')};
   margin-bottom: 0.75rem;
 `;
 
@@ -70,7 +65,7 @@ const DocumentLinkItem = styled.li`
   margin-bottom: 0.5rem;
 
   a {
-    color: ${({ theme }) => (theme.isDark || theme.themeMode === 'dark' ? '#4DABF7' : '#0072CE')};
+    color: ${({ theme }) => (theme.isDark ? '#4DABF7' : '#0072CE')};
     text-decoration: none;
     display: flex;
     align-items: center;
@@ -125,7 +120,7 @@ const AcrylicButton = styled.a<{ $isDark: boolean }>`
   }
 `;
 
-const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
+export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
   const { theme } = useTheme();
@@ -134,11 +129,6 @@ const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
   const [selectedContent, setSelectedContent] = useState<MasonryItem | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-
-  const ref = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState<number>(0);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -154,9 +144,11 @@ const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.changedTouches[0].screenX;
   };
+
   const handleTouchMove = (e: React.TouchEvent) => {
     touchEndX.current = e.changedTouches[0].screenX;
   };
+
   const handleTouchEnd = () => {
     if (touchStartX.current !== null && touchEndX.current !== null) {
       const diff = touchStartX.current - touchEndX.current;
@@ -172,8 +164,12 @@ const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
     touchEndX.current = null;
   };
 
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number>(0);
+
   useEffect(() => {
     const updateColumns = () => {
+      if (!ref.current) return;
       if (window.matchMedia('(min-width: 1500px)').matches) {
         setColumns(5);
       } else if (window.matchMedia('(min-width: 1000px)').matches) {
@@ -183,22 +179,18 @@ const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
       } else {
         setColumns(1);
       }
+      setWidth(ref.current.offsetWidth);
     };
     updateColumns();
     window.addEventListener('resize', updateColumns);
     return () => window.removeEventListener('resize', updateColumns);
   }, []);
-
+  
   useEffect(() => {
-    const handleResize = () => {
-      if (ref.current) {
-        setWidth(ref.current.offsetWidth);
-      }
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    if (ref.current) {
+      setWidth(ref.current.offsetWidth);
+    }
+  }, [ref]);
 
   const [heights, gridItems] = useMemo<[number[], GridItem[]]>(() => {
     let newHeights = new Array(columns).fill(0);
@@ -219,10 +211,10 @@ const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
   }, [columns, data, width]);
 
   const transitions = useTransition(gridItems, {
-    keys: item => item.id,
-    from: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 0 }),
-    enter: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 1 }),
-    update: ({ x, y, width, height }) => ({ x, y, width, height }),
+    keys: (item: GridItem) => item.id,
+    from: ({ x, y, width: w, height: h }: GridItem) => ({ x, y, width: w, height: h, opacity: 0 }),
+    enter: ({ x, y, width: w, height: h }: GridItem) => ({ x, y, width: w, height: h, opacity: 1 }),
+    update: ({ x, y, width: w, height: h }: GridItem) => ({ x, y, width: w, height: h }),
     leave: { height: 0, opacity: 0 },
     config: { mass: 5, tension: 500, friction: 100 },
     trail: 25,
@@ -240,14 +232,16 @@ const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
 
   const goToNext = () => {
     if (currentIndex === null || currentIndex >= data.length - 1) return;
-    setCurrentIndex(prevIndex => (prevIndex !== null ? prevIndex + 1 : null));
-    setSelectedContent(data[currentIndex !== null ? currentIndex + 1 : 0]);
+    const nextIndex = currentIndex + 1;
+    setSelectedContent(data[nextIndex]);
+    setCurrentIndex(nextIndex);
   };
 
   const goToPrevious = () => {
     if (currentIndex === null || currentIndex <= 0) return;
-    setCurrentIndex(prevIndex => (prevIndex !== null ? prevIndex - 1 : null));
-    setSelectedContent(data[currentIndex !== null ? currentIndex - 1 : 0]);
+    const prevIndex = currentIndex - 1;
+    setSelectedContent(data[prevIndex]);
+    setCurrentIndex(prevIndex);
   };
 
   useEffect(() => {
@@ -260,194 +254,183 @@ const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedContent, currentIndex, data]); // Asegúrate de incluir todas las dependencias
+  }, [selectedContent, currentIndex, data, goToNext, goToPrevious, closeModal]);
 
-  const handleShowTooltip = (e: React.MouseEvent) => {
-    setTooltipPosition({ x: e.clientX, y: e.clientY });
-    setTooltipVisible(true);
-  };
-
-  const handleHideTooltip = () => {
-    setTooltipVisible(false);
-  };
+  useEffect(() => {
+    if (selectedContent) {
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+    };
+  }, [selectedContent]);
 
   return (
-    <div ref={ref} className="masonry-grid" style={{ height: Math.max(...heights) }}>
-      {transitions((styleProps) => {
-        // Casting explícito para acceder a las propiedades
-        const typedStyle = styleProps as any;
-        const item = gridItems.find(item => 
-          item.x === typedStyle.x && 
-          item.y === typedStyle.y);
-        
-        return item ? (
-          <a.div
-            className="masonry-item"
-            style={styleProps as any}
-            onClick={() => handleItemClick(item, gridItems.findIndex(gi => gi.id === item.id))}
-          >
-            <img
-              src={item.image}
-              alt={item.title ? item.title[language] : 'Project image'}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              loading="lazy"
-            />
-          </a.div>
-        ) : null;
-      })}
-      {selectedContent &&
-        ReactDOM.createPortal(
-          <div
-            className={`modal-overlay ${isMobile ? 'mobile' : ''} ${isDark ? 'dark-mode' : ''}`}
-            onClick={closeModal}
-            onTouchStart={isMobile ? handleTouchStart : undefined}
-            onTouchMove={isMobile ? handleTouchMove : undefined}
-            onTouchEnd={isMobile ? handleTouchEnd : undefined}
-          >
-            <div className="modal-content-wrapper" onClick={e => e.stopPropagation()}>
-              <button
-                className="modal-close-button"
-                onClick={closeModal}
-                aria-label={t('masonry.closeModalAria', 'Cerrar modal')}
-              >
-                &times;
-              </button>
+    <>
+      <div ref={ref} className="masonry-grid" style={{ height: Math.max(0, ...heights) }}>
+        {transitions((style, item) => {
+          const originalDataIndex = data.findIndex(d => d.id === item.id);
+          return (
+            <a.div
+              className="masonry-item"
+              style={style as any}
+              onClick={() => {
+                if (originalDataIndex !== -1) {
+                  handleItemClick(item, originalDataIndex);
+                }
+              }}
+            >
+              <div
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  backgroundImage: `url(${item.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                }}
+              />
+            </a.div>
+          );
+        })}
+      </div>
 
-              <div className="modal-media-area">
-                {selectedContent.video ? (
-                  <video
-                    key={selectedContent.id}
-                    src={selectedContent.video}
-                    poster={selectedContent.image}
-                    controls
-                    autoPlay
-                    loop
-                    playsInline
-                    style={{ maxWidth: '100%', maxHeight: '100%', display: 'block', objectFit: 'contain' }}
-                  />
-                ) : (
-                  <img
-                    ref={imageRef}
-                    src={selectedContent.image}
-                    alt={selectedContent.title ? selectedContent.title[language] : 'Project image'}
-                    style={{ maxWidth: '100%', maxHeight: '100%', display: 'block', objectFit: 'contain' }}
-                    onLoad={() => {
-                      if (imageRef.current) {
-                        // const aspectRatio = imageRef.current.naturalWidth / imageRef.current.naturalHeight;
-                        // Lógica adicional basada en aspect ratio si es necesaria
-                      }
-                    }}
-                  />
-                )}
-              </div>
-              <div className="modal-info-area">
-                {selectedContent.title && (
-                  <ModalInfoTitle>
-                    {selectedContent.title[language]}
-                  </ModalInfoTitle>
-                )}
-                {selectedContent.description && (
-                  <p className="modal-description">{selectedContent.description[language]}</p>
-                )}
-
-                {selectedContent.documentLinks &&
-                  selectedContent.documentLinks.length > 0 && (
-                    <DocumentLinksContainer>
-                      <DocumentLinksTitle>
-                        {t('masonry.documentsTitle', 'Documentos Relacionados')}
-                      </DocumentLinksTitle>
-                      <DocumentLinksList>
-                        {selectedContent.documentLinks.map(link => (
-                          <DocumentLinkItem key={link.name}>
-                            <a
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onMouseMove={handleShowTooltip}
-                              onMouseLeave={handleHideTooltip}
-                            >
-                              <svg
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
-                              </svg>
-                              {link.name}
-                            </a>
-                          </DocumentLinkItem>
-                        ))}
-                      </DocumentLinksList>
-                    </DocumentLinksContainer>
-                  )}
-
-                {selectedContent.actionButton && (
-                  <AcrylicButton
-                    href={selectedContent.actionButton.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    $isDark={isDark}
-                    onMouseMove={handleShowTooltip}
-                    onMouseLeave={handleHideTooltip}
+      {selectedContent && ReactDOM.createPortal(
+        <div className={`modal-overlay ${isMobile ? 'mobile' : ''} ${isDark ? 'dark-mode' : ''}`} onClick={closeModal}>
+          <div className="modal-content-wrapper" onClick={e => e.stopPropagation()}>
+            {data.length > 1 && !isMobile && (
+              <>
+                <button
+                  className="modal-nav-button prev"
+                  onClick={goToPrevious}
+                  disabled={currentIndex === 0}
+                  aria-label={t('masonry.previousItemAria', 'Elemento anterior')}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    style={{ width: '28px', height: '28px' }}
                   >
-                    {i18n.language === 'es'
-                      ? selectedContent.actionButton.labelES
-                      : selectedContent.actionButton.labelEN}
-                  </AcrylicButton>
-                )}
-              </div>
+                    <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                  </svg>
+                </button>
+                <button
+                  className="modal-nav-button next"
+                  onClick={goToNext}
+                  disabled={currentIndex === data.length - 1}
+                  aria-label={t('masonry.nextItemAria', 'Siguiente elemento')}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    style={{ width: '28px', height: '28px' }}
+                  >
+                    <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                  </svg>
+                </button>
+              </>
+            )}
 
-              {/* Navegación del modal */}
-              {data.length > 1 && (
-                <>
-                  <button
-                    className="modal-nav-button prev"
-                    onClick={goToPrevious}
-                    disabled={currentIndex === 0}
-                    aria-label={t(
-                      'masonry.previousItemAria',
-                      'Elemento anterior',
-                    )}
-                  >
-                    &#10094;
-                  </button>
-                  <button
-                    className="modal-nav-button next"
-                    onClick={goToNext}
-                    disabled={currentIndex === data.length - 1}
-                    aria-label={t('masonry.nextItemAria', 'Siguiente elemento')}
-                  >
-                    &#10095;
-                  </button>
-                </>
+            <div
+              className="modal-media-area"
+              onTouchStart={isMobile ? handleTouchStart : undefined}
+              onTouchMove={isMobile ? handleTouchMove : undefined}
+              onTouchEnd={isMobile ? handleTouchEnd : undefined}
+            >
+              {selectedContent.video ? (
+                <video
+                  src={selectedContent.video}
+                  poster={selectedContent.image}
+                  controls
+                  autoPlay
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img
+                  ref={imageRef}
+                  src={selectedContent.image}
+                  alt={selectedContent.title ? selectedContent.title[language] : 'Project image'}
+                />
               )}
             </div>
-            {tooltipVisible && (
-              <Tooltip
-                text={t(
-                  selectedContent?.actionButton
-                    ? 'tooltip.viewProjectDetails'
-                    : 'tooltip.viewDocument',
-                  'Ver detalles'
-                )}
-                position={tooltipPosition}
-                isVisible={tooltipVisible}
-              />
-            )}
-          </div>,
-          document.body,
-        )}
-    </div>
-  );
-};
 
-export default MasonryFusion; 
+            <div className="modal-info-area">
+              {selectedContent.title && (
+                <ModalInfoTitle>
+                  {selectedContent.title[language]}
+                </ModalInfoTitle>
+              )}
+              {selectedContent.description && (
+                <p className="modal-description">{selectedContent.description[language]}</p>
+              )}
+
+              {selectedContent.documentLinks && selectedContent.documentLinks.length > 0 && (
+                <DocumentLinksContainer>
+                  <DocumentLinksTitle>
+                    {t('masonry.documentsTitle', 'Documentos Relacionados')}
+                  </DocumentLinksTitle>
+                  <DocumentLinksList>
+                    {selectedContent.documentLinks.map((link, index) => (
+                      <DocumentLinkItem key={`doc-link-${index}`}>
+                        <a
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                          </svg>
+                          {link.name}
+                        </a>
+                      </DocumentLinkItem>
+                    ))}
+                  </DocumentLinksList>
+                </DocumentLinksContainer>
+              )}
+
+              {selectedContent.actionButton && (
+                <AcrylicButton
+                  href={selectedContent.actionButton.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  $isDark={isDark}
+                  style={{ textDecoration: 'none' }}
+                >
+                  {i18n.language.startsWith('es')
+                    ? selectedContent.actionButton.labelES
+                    : selectedContent.actionButton.labelEN}
+                </AcrylicButton>
+              )}
+            </div>
+
+            <button
+              className="modal-close-button"
+              onClick={closeModal}
+              aria-label={t('masonry.closeModalAria', 'Cerrar modal')}
+            >
+              &times;
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
+  );
+}; 

@@ -11,7 +11,7 @@ import { FrontendDevelopmentExperience } from './components/FrontendDevelopmentE
 import type { FrontendExperienceCardData } from './components/FrontendDevelopmentExperience';
 import { frontendDevelopmentExperienceData } from './data/experiencesData';
 import StandardSectionTitle from '../components/shared/StandardSectionTitle'; // Ajustar ruta si es necesario
-import MasonryFusion from './components/MasonryFusion'; // Nueva importación
+import { MasonryFusion } from './components/MasonryFusion'; // Nueva importación
 import { fusionProjectsData } from './data/fusionProjectsData'; // Nueva importación
 
 const PageContainer = styled.div`
