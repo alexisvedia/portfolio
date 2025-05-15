@@ -129,7 +129,6 @@ const LogoImage = styled.img`
 `;
 
 const LogoText = styled.h1`
-  font-family: 'NHaasGrotesk', sans-serif;
   font-size: 18px;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text};
@@ -172,7 +171,6 @@ const ChatListContainer = styled.div`
 `;
 
 const ChatGroupTitle = styled.h4`
-  font-family: 'NHaasGrotesk', sans-serif;
   font-size: ${({ theme }) => theme.fontSizes.xs};
   color: ${({ theme }) => theme.colors.text};
   padding: ${({ theme }) => `0 ${theme.space.md} ${theme.space.xs}`};
@@ -603,7 +601,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
           console.warn(`Elemento con ID '${targetId}' no encontrado en el DOM.`);
         }
       } else {
-        navigate(`/${href}`);
+        navigate('/', { state: { scrollToSection: href.substring(1) } });
       }
     } else {
       navigate(href);

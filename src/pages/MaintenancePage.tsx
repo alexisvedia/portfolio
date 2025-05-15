@@ -26,14 +26,12 @@ const StyledImage = styled.img< { $isDark?: boolean } >`
 
 const Title = styled.h1< { $isDark: boolean } >`
   font-size: 2.5rem;
-  font-family: 'NHaasGroteskTXPro-75Bd', 'Inter', sans-serif;
   margin-bottom: 1rem;
   color: ${({ $isDark }) => $isDark ? '#FFFFFF' : '#1D1F23'}; // Blanco en modo oscuro, oscuro en modo claro
 `;
 
 const Message = styled.p`
   font-size: 1.2rem;
-  font-family: 'Inter', sans-serif;
   line-height: 1.6;
   max-width: 600px;
   // El color se hereda de MaintenanceContainer o se puede especificar aquí si es necesario

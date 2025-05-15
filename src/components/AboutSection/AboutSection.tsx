@@ -7,8 +7,11 @@ const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space.xl};
   background-color: ${({ theme }) => theme.colors.cardBackground};
   border-radius: 16px;
-  margin: 2rem auto;
   max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: -69px !important;
+  margin-bottom: 2rem !important;
 `;
 
 const SectionTitle = styled.h2`

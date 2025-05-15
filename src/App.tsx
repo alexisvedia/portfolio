@@ -33,7 +33,6 @@ const XConsExperiencePage = React.lazy(() => import('./xcons/XConsExperiencePage
 // Importar FusionAdsPage de forma diferida
 const FusionAdsPage = React.lazy(() => import('./fusionads/FusionAdsPage'));
 const MaintenancePage = React.lazy(() => import('./pages/MaintenancePage'));
-// const MorganiteExample = React.lazy(() => import('./components/MorganiteExample'));
 
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
@@ -145,15 +144,16 @@ const AppContent = () => {
 
   // Efecto para hacer scroll a la sección de contacto
   useEffect(() => {
-    if (location.state?.scrollToContact && location.pathname === '/') {
-      const contactSection = document.getElementById('contact');
-      if (contactSection) {
+    if (location.state?.scrollToSection && location.pathname === '/') {
+      const sectionId = location.state.scrollToSection;
+      const sectionElement = document.getElementById(sectionId);
+      if (sectionElement) {
         setTimeout(() => { // setTimeout para dar tiempo al DOM a actualizarse si es necesario
-          contactSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100); // Un pequeño delay puede ayudar
       }
       // Opcional: limpiar el estado para que no se repita el scroll en recargas o re-renders
-      // window.history.replaceState({}, ''); 
+      // window.history.replaceState({}, location.pathname, location.pathname);
     }
   }, [location.state, location.pathname]);
 

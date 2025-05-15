@@ -58,7 +58,6 @@ const Card = styled.div`
 const Title = styled.h3`
   font-size: ${({ theme }) => theme.fontSizes.xl};
   font-weight: 900;
-  font-family: 'Morganite', sans-serif;
   margin-bottom: 1rem;
   color: ${({ theme }) => theme.colors.text};
   position: relative;

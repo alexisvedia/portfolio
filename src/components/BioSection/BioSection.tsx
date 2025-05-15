@@ -16,7 +16,7 @@ const SectionContainer = styled.section`
   position: relative;
   overflow: hidden;
   width: 100%;
-  margin: -5vh 0 5rem 0;
+  margin: -169px 0 5rem 0;
   padding-top: 5vh;
 `;
 

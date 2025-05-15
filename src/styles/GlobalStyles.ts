@@ -1,5 +1,5 @@
 import { createGlobalStyle } from 'styled-components';
-import './fonts.css'; // Importar el archivo de fuentes Morganite
+import './fonts.css'; // Archivo para @font-face, actualmente vacío.
 
 // --- Importar Google Fonts ---
 // Guardar las URLs en constantes para claridad
