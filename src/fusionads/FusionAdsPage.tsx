@@ -8,9 +8,11 @@ import fusionAdsLogo from '../assets/Proyectos Fusion/Logo-color-fusion.png'; //
 import fusionAdsAppImage from '../assets/Proyectos Fusion/fusion-app.png'; // Importación para la imagen derecha
 // import fusionAdsIlustracion from '../assets/images/projects/fusionads-ilustracion.png'; // Placeholder para ilustración
 import { FrontendDevelopmentExperience } from './components/FrontendDevelopmentExperience';
-import type { FrontendExperienceData } from './components/FrontendDevelopmentExperience';
+import type { FrontendExperienceCardData } from './components/FrontendDevelopmentExperience';
 import { frontendDevelopmentExperienceData } from './data/experiencesData';
 import StandardSectionTitle from '../components/shared/StandardSectionTitle'; // Ajustar ruta si es necesario
+import MasonryFusion from './components/MasonryFusion'; // Nueva importación
+import { fusionProjectsData } from './data/fusionProjectsData'; // Nueva importación
 
 const PageContainer = styled.div`
   max-width: 1000px;
@@ -201,17 +203,41 @@ const SummaryText = styled.p<{ $isDark: boolean }>`
 
 // Contenedor para las secciones de experiencia (similar al de XCONS)
 const ExperienceContainer = styled.div`
-  display: flex; // Cambiado a flex para una sola columna, podrías usar grid si planeas más secciones lado a lado.
+  display: flex; 
   flex-direction: column;
-  gap: 3rem; // Espacio entre diferentes secciones de experiencia (si hubiera más)
-  margin-top: 3rem; // Espacio después de la sección de Resumen
+  gap: 3rem; 
+  margin-top: 3rem; 
+`;
+
+// Nuevo styled component para el wrapper del Masonry, similar a XConsExperiencePage
+const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  padding: 2.5rem;
+  border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
+  background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
+  ${glassEffectForDescriptionBox} // Asumiendo que glassEffectForDescriptionBox está definido arriba
+  color: ${({ theme }) => theme.colors.text};
+
+  & > *:first-child {
+    margin-bottom: 0.75rem; // Espacio para el título StandardSectionTitle
+  }
+
+  @media (max-width: 767px) {
+    padding: 0;
+    border: none;
+    background: none;
+    border-radius: 0;
+    margin-top: 2rem;
+  }
 `;
 
 const FusionAdsPage: React.FC = () => {
-  const { themeMode } = useTheme(); // Desestructurar themeMode
-  const { i18n } = useTranslation('fusionads');
+  const { themeMode } = useTheme();
+  const { t, i18n } = useTranslation('fusionads'); // Asegurarse que 'fusionads' es el namespace correcto
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
-  const isDark = themeMode === 'dark'; // Determinar isDark
+  const isDark = themeMode === 'dark';
 
   const bannerUrl = "https://backoffice.fusionos.ai";
 
@@ -243,8 +269,8 @@ const FusionAdsPage: React.FC = () => {
   };
 
   // Obtener los datos de la experiencia para el idioma actual
-  const currentExperienceData = frontendDevelopmentExperienceData[language] as FrontendExperienceData;
-  const experienceSectionTitle = frontendDevelopmentExperienceData[language].sectionTitle;
+  const currentExperienceData = frontendDevelopmentExperienceData[language] as FrontendExperienceCardData;
+  const experienceSectionTitleText = frontendDevelopmentExperienceData[language].sectionTitle;
 
   return (
     <PageTransition>
@@ -253,7 +279,7 @@ const FusionAdsPage: React.FC = () => {
           <BannerBackground />
           <BannerContent>
             <LeftContent>
-              <LogoImage src={fusionAdsLogo} alt="FusionAds Logo" />
+              <LogoImage src={fusionAdsLogo} alt={t('fusionadsBanner.logoAlt', 'FusionAds.ai Logo')} />
               <BannerText>
                 {bannerSectionTexts.description[language]}
               </BannerText>
@@ -263,7 +289,7 @@ const FusionAdsPage: React.FC = () => {
               </StyledSiteButton>
             </LeftContent>
             <RightContent>
-              <img src={fusionAdsAppImage} alt="FusionAds App Illustration" />
+              <img src={fusionAdsAppImage} alt={t('fusionadsBanner.appImageAlt', 'FusionAds Application Screenshot')} />
             </RightContent>
           </BannerContent>
         </FusionAdsBanner>
@@ -283,19 +309,25 @@ const FusionAdsPage: React.FC = () => {
 
         {/* Nueva sección de Experiencia Front-End */}
         <ExperienceContainer>
-          <div> {/* Envuelto en div para mantener la estructura si se añaden más experiencias lado a lado con grid más adelante */} 
-            <StandardSectionTitle>
-              {experienceSectionTitle}
-            </StandardSectionTitle>
-            <FrontendDevelopmentExperience 
-              experience={currentExperienceData}
-              isDark={isDark} 
-            />
-          </div>
+          <FrontendDevelopmentExperience
+            title={<StandardSectionTitle>{experienceSectionTitleText}</StandardSectionTitle>}
+            experience={currentExperienceData}
+            isDark={isDark}
+          />
         </ExperienceContainer>
 
-        {/* Aquí irán las demás secciones replicadas de XCONS */}
-        {/* Por ejemplo: Resumen, Experiencias, Galería, etc. */}
+        {/* Nueva sección de Proyectos Destacados */}
+        <MasonryWrapper $isDark={isDark}>
+          <StandardSectionTitle style={{ textAlign: 'left' }}>
+            {language === 'en' ? 'Featured Projects' : 'Proyectos Destacados'}
+          </StandardSectionTitle>
+          <DividerLine $isDark={isDark} />
+          {fusionProjectsData.length > 0 ? (
+            <MasonryFusion data={fusionProjectsData} />
+          ) : (
+            <p>{language === 'en' ? 'Projects will be added here soon.' : 'Próximamente se agregarán proyectos aquí.'}</p>
+          )}
+        </MasonryWrapper>
 
       </PageContainer>
     </PageTransition>

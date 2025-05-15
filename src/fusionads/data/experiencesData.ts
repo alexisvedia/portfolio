@@ -3,7 +3,7 @@ export const frontendDevelopmentExperienceData = {
     sectionTitle: 'Desarrollo Front-End & Integración',
     cardTitle: 'Desarrollador Front-End',
     subtitle: 'React, TypeScript y Gestión de Código Legacy',
-    period: 'Ene 2023 - Actualidad',
+    period: 'Mayo 2024 - Marzo 2025',
     tasksTitle: 'Tareas',
     tasks: [
       'Desarrollo de componentes reutilizables y elementos de UI con React y TypeScript',
@@ -28,6 +28,8 @@ export const frontendDevelopmentExperienceData = {
       'Vite',
       'Google Drive API',
       'Facebook API',
+      'Postman',
+      'MongoDB',
     ],
     resultsTitle: 'Resultados',
     results: [
@@ -42,7 +44,7 @@ export const frontendDevelopmentExperienceData = {
     sectionTitle: 'Front-End Development & Integration',
     cardTitle: 'Front-End Developer',
     subtitle: 'React, TypeScript and Legacy Code Management',
-    period: 'Jan 2023 - Present',
+    period: 'May 2024 - March 2025',
     tasksTitle: 'Tasks',
     tasks: [
       'Development of reusable components and UI elements with React and TypeScript',
@@ -67,6 +69,8 @@ export const frontendDevelopmentExperienceData = {
       'Vite',
       'Google Drive API',
       'Facebook API',
+      'Postman',
+      'MongoDB',
     ],
     resultsTitle: 'Results',
     results: [
