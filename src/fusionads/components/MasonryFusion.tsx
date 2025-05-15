@@ -194,6 +194,9 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
   }, [ref]);
 
   const [heights, gridItems] = useMemo<[number[], GridItem[]]>(() => {
+    if (width === 0) {
+      return [[], []];
+    }
     let newHeights = new Array(columns).fill(0);
     const newGridItems = data.map(child => {
       const column = newHeights.indexOf(Math.min(...newHeights));
@@ -213,12 +216,12 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
 
   const transitions = useTransition(gridItems, {
     keys: (item: GridItem) => item.id,
-    from: ({ x, y, width: w, height: h }: GridItem) => ({ x, y, width: w, height: h, opacity: 0 }),
+    from: { opacity: 0 },
     enter: ({ x, y, width: w, height: h }: GridItem) => ({ x, y, width: w, height: h, opacity: 1 }),
-    update: ({ x, y, width: w, height: h }: GridItem) => ({ x, y, width: w, height: h }),
-    leave: { height: 0, opacity: 0 },
-    config: { mass: 5, tension: 500, friction: 100 },
-    trail: 25,
+    update: ({ x, y, width: w, height: h }: GridItem) => ({ x, y, width: w, height: h, opacity: 1 }),
+    leave: { opacity: 0, height: 0 },
+    config: { duration: 0 },
+    trail: 0,
   });
 
   const handleItemClick = (item: MasonryItem, index: number) => {

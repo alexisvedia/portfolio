@@ -206,6 +206,9 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
   }, []);
 
   const [heights, gridItems] = useMemo<[number[], GridItem[]]>(() => {
+    if (width === 0) { // Si el ancho no está listo, no calcular items.
+      return [[], []];
+    }
     let newHeights = new Array(columns).fill(0);
     const newGridItems = data.map(child => {
       const column = newHeights.indexOf(Math.min(...newHeights));
@@ -228,12 +231,12 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     { x: number; y: number; width: number; height: number; opacity: number }
   >(gridItems, {
     keys: item => item.id,
-    from: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 0 }),
+    from: { opacity: 0 },
     enter: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 1 }),
-    update: ({ x, y, width, height }) => ({ x, y, width, height }),
+    update: ({ x, y, width, height }) => ({ x, y, width, height, opacity: 1 }),
     leave: { height: 0, opacity: 0 },
-    config: { mass: 5, tension: 500, friction: 100 },
-    trail: 25,
+    config: { duration: 0 },
+    trail: 0,
   });
 
   const handleItemClick = (item: MasonryItem, index: number) => {
