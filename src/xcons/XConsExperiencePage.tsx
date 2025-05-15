@@ -38,6 +38,7 @@ const XconsBanner = styled.div`
   border-radius: 12px;
   margin-bottom: 3rem;
   overflow: hidden;
+  min-height: 180px;
 `;
 
 const BannerBackground = styled.div`
@@ -56,12 +57,12 @@ const BannerBackground = styled.div`
 const BannerContent = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 50px;
   width: 100%;
   position: relative;
   z-index: 2;
-  padding: 10px;
+  padding: 10px 30px;
 
   @media (max-width: 992px) {
     flex-direction: column;
@@ -90,8 +91,9 @@ const LogoImage = styled.img`
 const BannerText = styled.p`
   font-size: 1rem;
   color: #333;
-  max-width: 400px;
+  max-width: 500px;
   line-height: 1.6;
+  margin-bottom: 10px;
 
   a {
     color: #15814b;
@@ -105,19 +107,38 @@ const BannerText = styled.p`
 const LocationText = styled.span`
   color: #888888;
   font-size: 0.9rem;
+  margin-bottom: 8px;
+`;
+
+const StyledSiteButton = styled.a`
+  display: inline-block;
+  background-color: #15814b; /* Color principal XCONS */
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-top: 8px;
+  transition: background-color 0.2s ease-in-out;
+
+  &:hover {
+    background-color: #106a3c; /* Un tono más oscuro para el hover */
+    text-decoration: none; /* Asegurar que no haya subrayado en hover */
+  }
 `;
 
 const RightContent = styled.div`
-  max-width: 40%;
+  max-width: 35%;
 
   @media (max-width: 992px) {
     max-width: 80%;
   }
 
   img {
-    max-width: 131%;
+    max-width: 100%;
     height: auto;
-    border-radius: 5px;
+    border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: block;
   }
@@ -418,6 +439,7 @@ const XConsExperiencePage: React.FC = () => {
       es: 'Como Diseñador UI/UX y Gráfico, lideré la creación y mantenimiento de bibliotecas de componentes, definiendo experiencias coherentes en desktop y mobile, y produciendo piezas visuales para campañas en redes sociales. Colaboré con otros diseñadores en la optimización de los flujos críticos del e-commerce —checkout, compra, micrositios y gestión de proveedores—, mejorando la conversión y la usabilidad. Participé activamente en el rebranding de ViviendaVerde a XCONS, aplicando la nueva identidad visual en todos los puntos de contacto digitales. Trabajé codo a codo con el equipo front-end, ejecutando maquetación semántica y guiando a otros diseñadores para garantizar consistencia y calidad en el producto.',
       en: 'As a UI/UX and Graphic Designer, I led the creation and maintenance of component libraries, defining coherent experiences on desktop and mobile, and producing visual pieces for social media campaigns. I collaborated with other designers in optimizing critical e-commerce flows—checkout, purchase, microsites, and supplier management—improving conversion and usability. I actively participated in the rebranding from ViviendaVerde to XCONS, applying the new visual identity across all digital touchpoints. I worked closely with the front-end team, executing semantic layout and guiding other designers to ensure consistency and quality in the product.',
     },
+    visitSiteButton: { es: 'Visitar sitio', en: 'Visit site' },
   };
 
   return (
@@ -449,25 +471,21 @@ const XConsExperiencePage: React.FC = () => {
                   <>
                     Plataforma de e-commerce especializada en la venta omnicanal de materiales de
                     construcción.
-                    <br />
-                    <a href="https://www.xcons.com.ar" target="_blank" rel="noopener noreferrer">
-                      www.xcons.com.ar
-                    </a>
-                    <br />
-                    <LocationText>Argentina</LocationText>
                   </>
                 ) : (
                   <>
                     E-commerce platform specialized in omnichannel sales of construction materials.
-                    <br />
-                    <a href="https://www.xcons.com.ar" target="_blank" rel="noopener noreferrer">
-                      www.xcons.com.ar
-                    </a>
-                    <br />
-                    <LocationText>Argentina</LocationText>
                   </>
                 )}
               </BannerText>
+              <LocationText>{language === 'es' ? 'Argentina' : 'Argentina'}</LocationText>
+              <StyledSiteButton
+                href="https://www.xcons.com.ar"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {translations.visitSiteButton[language]}
+              </StyledSiteButton>
             </LeftContent>
             <RightContent>
               <img src={xconsComercial} alt="XCONS Comercial" />

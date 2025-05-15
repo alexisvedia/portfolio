@@ -1,0 +1,12 @@
+{
+  "fusionadsBanner": {
+    "logoAlt": "FusionAds.ai Logo",
+    "appImageAlt": "FusionAds Application Screenshot"
+  },
+  "featuredProjects": {
+    "title": "Featured Projects"
+  },
+  "masonry": {
+    "noProjects": "Projects will be added here soon."
+  }
+} 

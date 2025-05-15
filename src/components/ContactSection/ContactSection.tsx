@@ -5,6 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 import emailjs from '@emailjs/browser';
 import Toast, { ToastType } from '../Toast/Toast';
 import confetti from 'canvas-confetti';
+import Tooltip from '../Tooltip/Tooltip';
 
 const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space['2xl']} 0;
@@ -35,6 +36,16 @@ const ContactText = styled.p`
   width: auto;
   max-width: 600px;
   padding: 0;
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    transition: opacity 0.2s ease;
+    
+    &:hover {
+      opacity: 0.8;
+    }
+  }
 `;
 
 // Estilo glass unificado y reforzado que mantiene consistencia
@@ -201,6 +212,12 @@ const ContactSection: React.FC = () => {
   const { themeMode } = useTheme();
   const isDark = themeMode === 'dark';
   const formRef = useRef<HTMLFormElement>(null);
+  const emailRef = useRef<HTMLAnchorElement>(null);
+
+  // Estados para el tooltip
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [tooltipText, setTooltipText] = useState(t('tooltip.copyEmail'));
 
   const [formData, setFormData] = useState({
     name: '',
@@ -224,6 +241,53 @@ const ContactSection: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const copyEmailToClipboard = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    
+    const email = 'alexisleonelvedia@gmail.com';
+    
+    // Actualizar posición del tooltip
+    if (emailRef.current) {
+      const rect = emailRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top
+      });
+    }
+    
+    navigator.clipboard.writeText(email)
+      .then(() => {
+        // Mostrar mensaje de copiado exitoso
+        setTooltipText(t('tooltip.copied'));
+        setTooltipVisible(true);
+        
+        // Ocultar el tooltip después de 1.5 segundos
+        setTimeout(() => {
+          setTooltipVisible(false);
+        }, 1500);
+      })
+      .catch(err => {
+        console.error('No se pudo copiar al portapapeles', err);
+      });
+  };
+
+  // Función para mostrar el tooltip con la instrucción
+  const handleEmailMouseEnter = () => {
+    if (emailRef.current) {
+      const rect = emailRef.current.getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top
+      });
+    }
+    setTooltipText(t('tooltip.copyEmail'));
+    setTooltipVisible(true);
+  };
+
+  const handleEmailMouseLeave = () => {
+    setTooltipVisible(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -290,7 +354,28 @@ const ContactSection: React.FC = () => {
       <ContactContent>
         <Form onSubmit={handleSubmit} $isDark={isDark} ref={formRef}>
           <SectionTitle>{t('contact')}</SectionTitle>
-          <ContactText>{t('contactText')}</ContactText>
+          <ContactText>
+            {t('contactText').split('alexisleonelvedia@gmail.com').map((part, i) => {
+              if (i === 0) {
+                return (
+                  <React.Fragment key={i}>
+                    {part}
+                    <a
+                      ref={emailRef}
+                      href="#"
+                      onClick={copyEmailToClipboard}
+                      onMouseEnter={handleEmailMouseEnter}
+                      onMouseLeave={handleEmailMouseLeave}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      alexisleonelvedia@gmail.com
+                    </a>
+                  </React.Fragment>
+                );
+              }
+              return part;
+            })}
+          </ContactText>
           <FormDivider $isDark={isDark} />
           <FormGroup>
             <Label htmlFor="name">{t('name')}</Label>
@@ -358,6 +443,13 @@ const ContactSection: React.FC = () => {
         isVisible={toast.visible}
         onClose={closeToast}
         duration={5000}
+      />
+
+      {/* Tooltip para la copia del email */}
+      <Tooltip 
+        text={tooltipText}
+        isVisible={tooltipVisible}
+        position={tooltipPosition}
       />
     </SectionContainer>
   );

@@ -38,7 +38,7 @@ const resources = {
       // Projects section
       // Skills section
       // Contact section
-      contactText: 'Want to work together? Have a project in mind? Feel free to reach out!',
+      contactText: 'Want to work together? Have a project in mind? Feel free to contact me at alexisleonelvedia@gmail.com or using the form!',
       name: 'Name',
       email: 'Email',
       message: 'Message',
@@ -69,6 +69,8 @@ const resources = {
         toggleTheme: 'Toggle Theme',
         selectLanguage: 'Select Language',
         viewOriginal: 'View original image in new tab',
+        copyEmail: 'Copy email to clipboard',
+        copied: 'Copied!',
       },
       // Document links
       documentLinksTitle: 'Proposal Defense',
@@ -173,7 +175,7 @@ const resources = {
       // Skills section
       // Contact section
       contactText:
-        '¿Quieres trabajar juntos? ¿Tienes un proyecto en mente? ¡No dudes en contactarme!',
+        '¿Quieres trabajar juntos? ¿Tienes un proyecto en mente? ¡No dudes en contactarme a alexisleonelvedia@gmail.com o usando el formulario!',
       name: 'Nombre',
       email: 'Correo electrónico',
       message: 'Mensaje',
@@ -204,6 +206,8 @@ const resources = {
         toggleTheme: 'Cambiar Tema',
         selectLanguage: 'Seleccionar Idioma',
         viewOriginal: 'Ver imagen original en nueva pestaña',
+        copyEmail: 'Copiar correo al portapapeles',
+        copied: '¡Copiado!',
       },
       // Enlaces a documentos
       documentLinksTitle: 'Defensa de la propuesta',
