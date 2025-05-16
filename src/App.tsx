@@ -83,7 +83,7 @@ const ContactButtonStyled = styled(ContactButton)<{ $hideOnScroll: boolean }>`
 const AppContent = () => {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [hideControls, setHideControls] = useState(false);
+  const [isContactSectionInView, setIsContactSectionInView] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [shouldShowLoader, setShouldShowLoader] = useState(false);
@@ -127,15 +127,6 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    if (!isMobile) return;
-    const handleScroll = () => {
-      setHideControls(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isMobile]);
-
-  useEffect(() => {
     const timer = window.setTimeout(() => {
       setChatbotVisible(true);
     }, isMobile ? 3000 : 2000);
@@ -176,6 +167,9 @@ const AppContent = () => {
     }
   };
 
+  // Nueva lógica para determinar si el botón de contacto debe ocultarse
+  const shouldHideContactButton = isMobile && isContactSectionInView;
+
   return (
     <AppWrapper>
       {shouldShowLoader && !fontsLoaded && <FontLoader onLoaded={handleFontsLoaded} />}
@@ -183,7 +177,7 @@ const AppContent = () => {
       
       <MainContentWrapper $isSidebarPresent={isSidebarOpen && !isMobile}>
         <GrainOverlay />
-        <ContactButtonStyled initialDelay={500} $hideOnScroll={hideControls && isMobile} />
+        <ContactButtonStyled initialDelay={500} $hideOnScroll={shouldHideContactButton} />
         {chatbotVisible && (
           <React.Suspense fallback={null}>
             <ChatbotAssistant initialDelay={500} />
@@ -196,7 +190,11 @@ const AppContent = () => {
               <Route
                 path="/"
                 element={
-                  <Home onAnimationComplete={handleAnimationComplete} fontsLoaded={fontsLoaded} />
+                  <Home 
+                    onAnimationComplete={handleAnimationComplete} 
+                    fontsLoaded={fontsLoaded} 
+                    onContactSectionViewChange={setIsContactSectionInView}
+                  />
                 }
               />
               <Route path="/xcons" element={<XConsExperiencePage />} />
