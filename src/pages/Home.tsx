@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import PageTransition from '@components/PageTransition/PageTransition';
 import HeroSection from '@components/HeroSection/HeroSection';
@@ -22,9 +22,35 @@ const ContentWrapper = styled.div`
 interface HomeProps {
   onAnimationComplete?: () => void;
   fontsLoaded: boolean;
+  onContactSectionViewChange: (isInView: boolean) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded }) => {
+const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded, onContactSectionViewChange }) => {
+  const contactSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        onContactSectionViewChange(entry.isIntersecting);
+      },
+      {
+        rootMargin: '0px',
+        threshold: 0.1,
+      }
+    );
+
+    const currentRef = contactSectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [onContactSectionViewChange]);
+
   return (
     <PageTransition>
       <HomeContainer id="home">
@@ -37,7 +63,7 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded }) => {
         </ContentWrapper>
         <TestimonialsSection />
         <ContentWrapper>
-          <ContactSection />
+          <ContactSection ref={contactSectionRef} id="contact-section-home" />
         </ContentWrapper>
       </HomeContainer>
     </PageTransition>

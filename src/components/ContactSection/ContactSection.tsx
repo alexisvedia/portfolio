@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, forwardRef } from 'react';
 import styled, { css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
@@ -207,7 +207,12 @@ const SubmitButton = styled.button<{ $isDark: boolean }>`
   }
 `;
 
-const ContactSection: React.FC = () => {
+// Definir props para ContactSection, incluyendo id
+interface ContactSectionProps {
+  id?: string;
+}
+
+const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, ref) => {
   const { t } = useTranslation();
   const { themeMode } = useTheme();
   const isDark = themeMode === 'dark';
@@ -350,7 +355,7 @@ const ContactSection: React.FC = () => {
   };
 
   return (
-    <SectionContainer id="contact">
+    <SectionContainer ref={ref} id={id}>
       <ContactContent>
         <Form onSubmit={handleSubmit} $isDark={isDark} ref={formRef}>
           <SectionTitle>{t('contact')}</SectionTitle>
@@ -453,6 +458,6 @@ const ContactSection: React.FC = () => {
       />
     </SectionContainer>
   );
-};
+});
 
 export default ContactSection;
