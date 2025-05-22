@@ -548,6 +548,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     if (location.pathname === '/') {
       if (location.hash) {
         setActiveLink(location.hash);
+      } else if (location.state?.scrollToSection) {
+        setActiveLink(`#${location.state.scrollToSection}`);
       } else {
         setActiveLink('#home');
       }

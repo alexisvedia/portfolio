@@ -23,7 +23,7 @@ const ContactButton: React.FC<ContactButtonProps> = ({ className, initialDelay =
   }, [initialDelay]);
 
   const handleClick = () => {
-    navigate('/', { state: { scrollToSection: 'contact-section-home' } });
+    navigate('/', { state: { scrollToSection: 'contact' } });
   };
 
   // Combinar clases: la del módulo y cualquier clase externa pasada por props

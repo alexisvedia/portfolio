@@ -144,7 +144,7 @@ const AppContent = () => {
         }, 100); // Un pequeño delay puede ayudar
       }
       // Opcional: limpiar el estado para que no se repita el scroll en recargas o re-renders
-      // window.history.replaceState({}, location.pathname, location.pathname);
+      window.history.replaceState({}, location.pathname, location.pathname);
     }
   }, [location.state, location.pathname]);
 
