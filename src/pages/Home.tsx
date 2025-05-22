@@ -63,7 +63,7 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded, onContact
         </ContentWrapper>
         <TestimonialsSection />
         <ContentWrapper>
-          <ContactSection ref={contactSectionRef} id="contact-section-home" />
+          <ContactSection ref={contactSectionRef} id="contact" />
         </ContentWrapper>
       </HomeContainer>
     </PageTransition>

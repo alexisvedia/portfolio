@@ -449,7 +449,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
         { href: '/xcons', labelKey: 'navbar.xcons', defaultLabel: 'XCONS', IconComponent: ChevronRight }, 
         { href: '/fusionads', labelKey: 'navbar.fusionads', defaultLabel: 'FusionAds', IconComponent: ChevronRight },
         { href: '/bandit', labelKey: 'navbar.bandit', defaultLabel: 'Bandit', IconComponent: ChevronRight },
-        { href: '/condamind', labelKey: 'navbar.condamind', defaultLabel: 'Condamind', IconComponent: ChevronRight },
+        { href: '/otros', labelKey: 'navbar.otros', defaultLabel: 'Otros proyectos', IconComponent: ChevronRight },
       ],
     },
     { href: '#contact', labelKey: 'contact', defaultLabel: 'Contacto', IconComponent: ContactIcon },
@@ -548,6 +548,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     if (location.pathname === '/') {
       if (location.hash) {
         setActiveLink(location.hash);
+      } else if (location.state?.scrollToSection) {
+        setActiveLink(`#${location.state.scrollToSection}`);
       } else {
         setActiveLink('#home');
       }
