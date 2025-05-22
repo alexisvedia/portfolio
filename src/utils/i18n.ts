@@ -61,6 +61,10 @@ const resources = {
         about: 'About Me',
         projects: 'Projects',
         resume: 'Resume',
+        xcons: 'XCONS',
+        fusionads: 'FusionAds',
+        bandit: 'Bandit',
+        otros: 'Other Projects'
       },
       // Tooltips for Sidebar Controls
       tooltip: {
@@ -137,6 +141,12 @@ const resources = {
       },
       viewOriginalButton: 'View Original',
       openOriginalTitle: 'Open original image in new tab',
+      companyDescriptions: {
+        xcons: 'E-commerce platform specialized in omnichannel sales of construction materials.',
+        fusionads: 'AI-powered generative advertising platform that creates professional omni-channel ads.',
+        bandit: 'Platform focused on tour and live concert management for artists and managers.',
+        otros: 'Various personal and professional projects under development.'
+      },
     },
   },
   es: {
@@ -198,6 +208,10 @@ const resources = {
         about: 'Sobre Mí',
         projects: 'Proyectos',
         resume: 'Currículum',
+        xcons: 'XCONS',
+        fusionads: 'FusionAds',
+        bandit: 'Bandit',
+        otros: 'Otros Proyectos'
       },
       // Tooltips para Controles de Sidebar
       tooltip: {
@@ -274,6 +288,12 @@ const resources = {
       },
       viewOriginalButton: 'Ver Original',
       openOriginalTitle: 'Abrir imagen original en nueva pestaña',
+      companyDescriptions: {
+        xcons: 'Plataforma de e-commerce especializada en la venta omnicanal de materiales de construcción.',
+        fusionads: 'Plataforma de publicidad generativa impulsada por IA que crea anuncios profesionales omnicanal.',
+        bandit: 'Plataforma enfocada en la gestión de giras y conciertos en vivo para artistas y managers.',
+        otros: 'Diversos proyectos personales y profesionales en desarrollo.'
+      },
     },
   },
 };

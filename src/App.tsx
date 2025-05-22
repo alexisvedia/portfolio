@@ -32,6 +32,8 @@ const ProjectPage = React.lazy(() => import('./pages/ProjectPage'));
 const XConsExperiencePage = React.lazy(() => import('./xcons/XConsExperiencePage'));
 // Importar FusionAdsPage de forma diferida
 const FusionAdsPage = React.lazy(() => import('./fusionads/FusionAdsPage'));
+// Importar BanditPage de forma diferida
+const BanditPage = React.lazy(() => import('./bandit/BanditPage'));
 const MaintenancePage = React.lazy(() => import('./pages/MaintenancePage'));
 
 // Aseguramos que i18n se inicialice
@@ -88,6 +90,7 @@ const AppContent = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [shouldShowLoader, setShouldShowLoader] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile); // Abierta en escritorio, cerrada en móvil por defecto
+  const [n8nServerReady, setN8nServerReady] = useState(false); // Nuevo estado para controlar si el servidor está listo
 
   useEffect(() => {
     const hasVisitedBefore = localStorage.getItem('hasVisitedBefore');
@@ -105,9 +108,41 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      initializeN8NServer();
+    // Intentar inicializar el servidor con un retraso inicial
+    const timer = setTimeout(async () => {
+      try {
+        // Llamar a initializeN8NServer y actualizar el estado según el resultado
+        const success = await initializeN8NServer();
+        setN8nServerReady(success);
+        
+        // Si no fue exitoso en el primer intento, seguir intentando hasta un máximo de 3 veces
+        if (!success) {
+          let retryCount = 0;
+          const maxRetries = 3;
+          
+          const retryInterval = setInterval(async () => {
+            retryCount++;
+            console.log(`Reintento ${retryCount} de ${maxRetries} para conectar con n8n`);
+            
+            const retrySuccess = await initializeN8NServer();
+            if (retrySuccess) {
+              setN8nServerReady(true);
+              clearInterval(retryInterval);
+            } else if (retryCount >= maxRetries) {
+              // Alcanzó el número máximo de reintentos, detener los intentos
+              console.log('Se alcanzó el número máximo de reintentos para conectar con n8n');
+              clearInterval(retryInterval);
+            }
+          }, 3000);
+          
+          // Limpieza del intervalo si el componente se desmonta
+          return () => clearInterval(retryInterval);
+        }
+      } catch (error) {
+        console.error("Error al inicializar el servidor n8n:", error);
+      }
     }, 2500);
+    
     return () => clearTimeout(timer);
   }, []);
 
@@ -127,11 +162,14 @@ const AppContent = () => {
   }, []);
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setChatbotVisible(true);
-    }, isMobile ? 3000 : 2000);
-    return () => clearTimeout(timer);
-  }, [isMobile]);
+    // Mostrar el chatbot solo si el servidor n8n está listo
+    if (n8nServerReady) {
+      const timer = window.setTimeout(() => {
+        setChatbotVisible(true);
+      }, isMobile ? 1000 : 500); // Tiempos más cortos ya que ya esperamos a que el servidor esté listo
+      return () => clearTimeout(timer);
+    }
+  }, [n8nServerReady, isMobile]);
 
   // Efecto para hacer scroll a la sección de contacto
   useEffect(() => {
@@ -178,7 +216,7 @@ const AppContent = () => {
       <MainContentWrapper $isSidebarPresent={isSidebarOpen && !isMobile}>
         <GrainOverlay />
         <ContactButtonStyled initialDelay={500} $hideOnScroll={shouldHideContactButton} />
-        {chatbotVisible && (
+        {chatbotVisible && n8nServerReady && (
           <React.Suspense fallback={null}>
             <ChatbotAssistant initialDelay={500} />
           </React.Suspense>
@@ -199,8 +237,8 @@ const AppContent = () => {
               />
               <Route path="/xcons" element={<XConsExperiencePage />} />
               <Route path="/fusionads" element={<FusionAdsPage />} />
-              <Route path="/bandit" element={<MaintenancePage />} />
-              <Route path="/condamind" element={<MaintenancePage />} />
+              <Route path="/bandit" element={<BanditPage />} />
+              <Route path="/otros" element={<MaintenancePage />} />
               <Route path="/:projectId" element={<ProjectPage />} />
             </Routes>
           </React.Suspense>

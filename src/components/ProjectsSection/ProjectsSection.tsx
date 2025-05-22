@@ -75,13 +75,13 @@ const ProjectsSection: React.FC = () => {
       ),
     },
     {
-      link: '/condamind', // 4. Condamind
-      text: 'Condamind',
+      link: '/otros', // 4. Otros proyectos (antes Condamind)
+      text: 'Otros proyectos',
       image: condamindLogo,  
       color: '#262626',
       description: t(
-        'companyDescriptions.condamind',
-        'Empresa líder en tecnologías cognitivas y soluciones de IA avanzadas.'
+        'companyDescriptions.otros',
+        'Diversos proyectos personales y profesionales en desarrollo.'
       ),
     },
   ];
