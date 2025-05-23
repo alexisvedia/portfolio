@@ -3,7 +3,7 @@ import styled, { css } from 'styled-components';
 import { useTheme, ThemeMode } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import banditLogo from '../assets/Proyectos Bandit/Logo Bandit Oscuro.png';
-import banditFondo from '../assets/Proyectos Bandit/Bandit-fondo.svg';
+import banditFondo from '../assets/Proyectos Bandit/fondo-bandit.svg';
 import banditApp from '../assets/Proyectos Bandit/Bandit-app.png';
 import PageTransition from '@components/PageTransition/PageTransition';
 import StandardSectionTitle from '@components/shared/StandardSectionTitle';

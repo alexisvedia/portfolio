@@ -19,6 +19,55 @@ const fadeIn = keyframes`
   to { opacity: 1; transform: translateY(0); }
 `;
 
+// Nuevas animaciones para el botón con efecto de luz
+const fadeInWithGlow = keyframes`
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+const rotateLightRing = keyframes`
+  0% {
+    opacity: 0;
+    transform: rotate(0deg);
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+    transform: rotate(360deg);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(360deg);
+  }
+`;
+
+const flashEffect = keyframes`
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
+`;
+
 // Estilo glass unificado y reforzado que mantiene consistencia
 const glassStyle = (isDark: boolean) => css`
   background: ${isDark ? 'rgba(30, 30, 35, 0.5)' : 'rgba(240, 240, 245, 0.5)'};
@@ -32,11 +81,71 @@ const glassStyle = (isDark: boolean) => css`
   will-change: backdrop-filter;
 `;
 
-// Componente de botón flotante simple (sin animación pulsante)
-const ChatButton = styled.button<{ $isDark: boolean }>`
+// Contenedor del botón con posición
+const ChatButtonContainer = styled.div`
   position: fixed;
   bottom: 20px;
   right: 20px;
+  z-index: 9999;
+  pointer-events: auto !important;
+`;
+
+// Efecto de luz circular
+const LightRing = styled.div<{ $isDark?: boolean }>`
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 1;
+  background: ${({ $isDark }) => $isDark
+    ? `conic-gradient(
+      transparent 0deg,
+      transparent 280deg,
+      rgba(255, 255, 255, 0.4) 300deg,
+      rgba(255, 255, 255, 0.8) 320deg,
+      rgba(255, 255, 255, 0.9) 330deg,
+      rgba(255, 255, 255, 0.8) 340deg,
+      rgba(255, 255, 255, 0.4) 360deg,
+      transparent 380deg
+    )`
+    : `conic-gradient(
+      transparent 0deg,
+      transparent 280deg,
+      rgba(100, 100, 255, 0.3) 300deg,
+      rgba(100, 100, 255, 0.6) 320deg,
+      rgba(100, 100, 255, 0.7) 330deg,
+      rgba(100, 100, 255, 0.6) 340deg,
+      rgba(100, 100, 255, 0.3) 360deg,
+      transparent 380deg
+    )`
+  };
+  filter: blur(5px);
+  animation: ${rotateLightRing} 0.4s linear 0s;
+`;
+
+// Destello final
+const FlashEffect = styled.div<{ $isDark?: boolean }>`
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border-radius: 50%;
+  background: ${({ $isDark }) => $isDark
+    ? 'radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 60%)'
+    : 'radial-gradient(circle, rgba(100, 100, 255, 0.15) 0%, transparent 60%)'
+  };
+  opacity: 0;
+  z-index: 2;
+  animation: ${flashEffect} 0.3s ease-out 0.4s;
+`;
+
+// Componente de botón con nuevas animaciones
+const ChatButton = styled.button<{ $isDark: boolean; $isFirstAppearance: boolean }>`
+  position: relative;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -46,13 +155,18 @@ const ChatButton = styled.button<{ $isDark: boolean }>`
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 9999;
+  z-index: 3;
+  opacity: 0;
+  animation: ${props => props.$isFirstAppearance ? fadeInWithGlow : fadeIn} 1s ease-out forwards;
   pointer-events: auto !important;
-  color: ${({ $isDark }) => ($isDark ? 'white' : 'inherit')};
+  color: ${({ $isDark }) => ($isDark ? 'white' : 'white')};
 
   ${({ $isDark }) => glassStyle($isDark)}
 
+  background: ${({ $isDark }) => ($isDark ? 'rgba(30, 30, 35, 0.5)' : 'rgba(40, 40, 45, 0.8)')};
+
   &:hover {
+    background: ${({ $isDark }) => ($isDark ? 'rgba(35, 35, 40, 0.5)' : 'rgba(50, 50, 55, 0.8)')};
     transform: translateZ(0) scale(1.05);
   }
 `;
@@ -383,6 +497,7 @@ const ChatInputArea = styled.div<{ $isDark: boolean }>`
 const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 500 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isFirstAppearance, setIsFirstAppearance] = useState(true);
   const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language;
   const { themeMode } = useTheme();
@@ -531,6 +646,7 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
   // Cerrar el chat y ocultar cualquier tooltip visible
   const handleCloseChat = () => {
     setIsOpen(false);
+    setIsFirstAppearance(false); // Ya no será la primera aparición la próxima vez
     setTooltipVisible(false); // Asegurarse de que no quede ningún tooltip visible
   };
 
@@ -577,9 +693,17 @@ const ChatbotAssistant: React.FC<{ initialDelay?: number }> = ({ initialDelay = 
       </Tooltip>
 
       {!isOpen ? (
-        <ChatButton $isDark={isDark} onClick={() => setIsOpen(true)}>
-          <HiSparkles size={24} />
-        </ChatButton>
+        <ChatButtonContainer>
+          <ChatButton $isDark={isDark} $isFirstAppearance={isFirstAppearance} onClick={() => setIsOpen(true)}>
+            {isFirstAppearance && (
+              <>
+                <LightRing $isDark={isDark} />
+                <FlashEffect $isDark={isDark} />
+              </>
+            )}
+            <HiSparkles size={24} />
+          </ChatButton>
+        </ChatButtonContainer>
       ) : (
         <ChatWindow $isDark={isDark} ref={chatWindowRef}>
           <ChatHeader $isDark={isDark}>

@@ -8,7 +8,6 @@ const LANGUAGE_CHANGE_COOLDOWN = 3000;
 
 interface LanguageSelectorProps {
   className?: string;
-  initialDelay?: number; // Retraso inicial para la aparición en ms
 }
 
 // Animación de carga
@@ -18,18 +17,9 @@ const loadingAnimation = keyframes`
 `;
 
 // Estilos ajustados para que funcione dentro del ControlsContainer de la Sidebar
-const LanguageSelectorContainer = styled.div<{ $visible: boolean }>`
-  /* position: fixed; // Comentado */
-  /* top: 20px; // Comentado */
-  /* right: 20px; // Comentado */
-  /* z-index: 1000; // Comentado */
-  display: flex; // Mantenemos flex para alinear el botón interno si es necesario
-  align-items: center; // Añadido para centrar el botón si el contenedor es más alto
-  opacity: ${props => (props.$visible ? 1 : 0)}; // Se mantiene por ahora, podría simplificarse
-  transform: translateY(${props => (props.$visible ? 0 : -10)}px); // Se mantiene por ahora
-  transition:
-    opacity 0.6s ease-in-out,
-    transform 0.6s ease-in-out; // Se mantiene por ahora
+const LanguageSelectorContainer = styled.div`
+  display: flex; 
+  align-items: center;
 `;
 
 const LanguageButton = styled.button<{ $active?: boolean; $changing: boolean }>`
@@ -99,7 +89,6 @@ const LanguageIcon = styled(MdOutlineLanguage)<{ $changing?: boolean }>`
 
 const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   className,
-  initialDelay = 0, // Quitar retraso por defecto si está dentro de la sidebar
 }) => {
   const { i18n } = useTranslation();
   const [currentLang, setCurrentLang] = useState(i18n.language?.startsWith('es') ? 'es' : 'en');
@@ -107,18 +96,6 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   // Un solo estado para controlar si el botón está en cooldown
   const [isDisabled, setIsDisabled] = useState(false);
   
-  // Estado para controlar la animación inicial de aparición
-  const [isVisible, setIsVisible] = useState(false);
-
-  // Efecto para la animación inicial de aparición
-  useEffect(() => {
-    const initialTimer = setTimeout(() => {
-      setIsVisible(true);
-    }, initialDelay);
-
-    return () => clearTimeout(initialTimer);
-  }, [initialDelay]);
-
   // Sincronizar el estado con el idioma actual de i18n
   useEffect(() => {
     const lang = i18n.language?.startsWith('es') ? 'es' : 'en';
@@ -158,11 +135,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <LanguageSelectorContainer 
-      className={className} 
-      $visible={isVisible}
-      // style prop ya no es necesario para la lógica de $hideOnScroll que estaba aquí
-    >
+    <LanguageSelectorContainer className={className}>
       <LanguageButton onClick={toggleLanguage} $changing={isDisabled}>
         <LanguageIcon $changing={isDisabled} />
         {currentLang === 'es' ? 'ES' : 'EN'}

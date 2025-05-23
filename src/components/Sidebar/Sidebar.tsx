@@ -68,7 +68,7 @@ const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
   }
 `;
 
-const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean }>`
+const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean; $isFirstRender: boolean }>`
   background-color: ${({ theme }) => theme.colors.sidebarBackground};
   color: ${({ theme }) => theme.colors.text};
   padding: ${({ theme }) => theme.space.lg};
@@ -80,7 +80,7 @@ const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean }>`
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  transition: transform 0.5s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
 
   ${({ $isMobile, $isOpen }) =>
     $isMobile &&
@@ -89,10 +89,20 @@ const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean }>`
       box-shadow: ${$isOpen ? '0 0 20px rgba(0,0,0,0.3)' : 'none'};
     `}
   
-  ${({ $isMobile }) => 
+  ${({ $isMobile, $isFirstRender }) => 
     !$isMobile && 
     css`
-      transform: translateX(0);
+      transform: ${$isFirstRender ? 'translateX(-100%)' : 'translateX(0)'};
+      animation: ${$isFirstRender ? 'slideIn 0.7s ease-in-out forwards 0.3s' : 'none'};
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(0);
+        }
+      }
     `}
 `;
 
@@ -421,6 +431,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
   const [activeLink, setActiveLink] = useState<string>("#home");
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const [isFirstRender, setIsFirstRender] = useState(true);
 
   // Efecto para controlar el scroll del body cuando el sidebar está abierto en móvil
   useEffect(() => {
@@ -640,6 +651,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     setTooltip(prev => ({ ...prev, visible: false }));
   };
 
+  useEffect(() => {
+    if (isFirstRender) {
+      setIsFirstRender(false);
+    }
+  }, []);
+
   return (
     <>
       <Tooltip 
@@ -664,6 +681,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       <SidebarContainer 
         $isOpen={isOpen} 
         $isMobile={isMobile}
+        $isFirstRender={isFirstRender}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
