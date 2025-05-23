@@ -12,7 +12,7 @@ const resources = {
       // Hero
       heroTitle: 'UX/UI Designer and Frontend Developer',
       heroSubtitle:
-        'Artificial Intelligence • User Experience • E-commerce • WordPress • Chatbots • Blogs • Interface Design • Mobile App Design • Automations',
+        'Artificial Intelligence • User Experience • E-commerce • WordPress • Chatbots • Interface Design • Mobile App Design • Automations',
       viewProjects: 'View Projects',
       contactMe: 'Contact Me',
 
@@ -158,7 +158,7 @@ const resources = {
       // Hero
       heroTitle: 'Diseñador UX/UI y Desarrollador Frontend',
       heroSubtitle:
-        'Inteligencia Artificial • Experiencia de usuario • E-commerce • Wordpress • Chatbots • Blogs • Diseño de interfaces • Diseño de aplicaciones móviles • Automatizaciones',
+        'Inteligencia Artificial • Experiencia de usuario • E-commerce • Wordpress • Chatbots • Diseño de interfaces • Diseño de aplicaciones móviles • Automatizaciones',
       viewProjects: 'Ver Proyectos',
       contactMe: 'Contáctame',
 

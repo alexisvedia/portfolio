@@ -24,6 +24,26 @@ const CenteringWrapper = styled.div`
   margin-bottom: auto;
 `;
 
+// Nuevo componente para el rol profesional
+const RoleLabel = styled.div`
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: ${({ theme }) => `${theme.colors.text}aa`};
+  text-transform: uppercase;
+  margin-bottom: ${({ theme }) => theme.space.xs};
+  user-select: none;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: 0.9rem;
+    margin-bottom: ${({ theme }) => theme.space.xs};
+  }
+  
+  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: 1.2rem;
+  }
+`;
+
 const Title = styled.h1`
   font-weight: 900;
   color: ${({ theme }) => theme.colors.text};
@@ -99,7 +119,7 @@ const ParallaxSubtitle = styled.div`
 
 // Subtítulo con animación de aparición original
 const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
-  font-size: 1.3rem;
+  font-size: 1rem;
   font-weight: 400;
   margin-bottom: 0;
   color: ${({ theme }) => `${theme.colors.text}cc`};
@@ -114,11 +134,11 @@ const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
   }};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 18px;
+    font-size: 0.9rem;
   }
 
   @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 1.3rem;
+    font-size: 1rem;
   }
 `;
 
@@ -239,6 +259,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoa
     <HeroContainer>
       <CenteringWrapper>
         <ParallaxTitle ref={titleRef}>
+          <RoleLabel>UX/UI Developer</RoleLabel>
           <Title>
             {isMobile ? (
               <>

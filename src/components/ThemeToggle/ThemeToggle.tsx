@@ -1,31 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import './toggle-styles.css';
 
 interface ThemeToggleProps {
   className?: string;
-  initialDelay?: number;
   $hideOnScroll?: boolean;
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ 
   className, 
-  initialDelay = 500,
   $hideOnScroll = false
 }) => {
   const { themeMode, toggleTheme } = useTheme();
   const isDark = themeMode === 'dark';
-  // Estado para controlar la visibilidad inicial
-  const [isVisible, setIsVisible] = useState(false);
-  
-  // Efecto para la animación de aparición con retraso
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, initialDelay);
-    
-    return () => clearTimeout(timer);
-  }, [initialDelay]);
   
   // Aplicamos estilos inline para adaptar el toggle al tema actual
   const toggleStyle = {
@@ -35,11 +22,10 @@ const ThemeToggle: React.FC<ThemeToggleProps> = ({
   };
   
   return (
-    <div className={`toggle-container ${className || ''} ${isVisible ? 'visible' : 'hidden'}`}
+    <div className={`toggle-container ${className || ''}`}
       style={{
-        opacity: isVisible ? 1 : 0,
-        transform: `translateY(${isVisible ? 0 : -10}px)${$hideOnScroll ? ' translateY(-100px)' : ''}`,
-        transition: 'opacity 0.6s ease-in-out, transform 0.3s ease'
+        transform: $hideOnScroll ? 'translateY(-100px)' : 'translateY(0)',
+        transition: 'transform 0.3s ease'
       }}
     >
       <label htmlFor="switch" className="toggle" style={toggleStyle}>
