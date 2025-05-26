@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import FlowingMenu from '@components/FlowingMenu';
 
 // Nuevas importaciones de imágenes
-import condamindLogo from '../../assets/images/projects/Condamind.svg';
 import fusionadsLogo from '../../assets/images/projects/Fusionads.svg';
 import banditLogo from '../../assets/images/projects/Bandit.svg';
 import xconsLogo from '../../assets/images/projects/XCONS.svg';
@@ -76,8 +75,7 @@ const ProjectsSection: React.FC = () => {
     },
     {
       link: '/otros', // 4. Otros proyectos (antes Condamind)
-      text: 'Otros proyectos',
-      image: condamindLogo,  
+      text: t('navbar.otros', 'Otros Proyectos'),
       color: '#262626',
       description: t(
         'companyDescriptions.otros',

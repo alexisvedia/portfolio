@@ -64,7 +64,7 @@
   position: relative;
   cursor: pointer;
   text-transform: uppercase;
-  text-decoration: none;
+  text-decoration: none !important;
   white-space: nowrap;
   font-weight: 600;
   color: #fff;
@@ -136,4 +136,23 @@
 
 .company-button:active {
   transform: translateY(0);
+}
+
+/* Estilos para texto cuando no hay imagen */
+.company-text {
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.menu__item-link:hover .company-text {
+  transform: scale(1.1);
+}
+
+/* Hover para texto en dark mode */
+.menu-wrap[data-theme="dark"] .menu__item-link:hover .company-text {
+  color: #000000 !important;
+}
+
+/* Hover para texto en light mode */
+.menu-wrap[data-theme="light"] .menu__item-link:hover .company-text {
+  color: #ffffff !important;
 }
