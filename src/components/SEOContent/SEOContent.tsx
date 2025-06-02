@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useTranslation } from 'react-i18next';
 
 const SEOContainer = styled.div`
   position: absolute;
@@ -53,7 +52,6 @@ const SEOLink = styled.a`
 `;
 
 const SEOContent: React.FC = () => {
-  const { t } = useTranslation();
 
   return (
     <SEOContainer>

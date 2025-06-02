@@ -79,22 +79,7 @@ const SectionTitle = styled.h2`
   }
 `;
 
-const SectionTitleStyles = styled.div`
-  .title-text {
-    font-family: ${({ theme }) => theme.fonts.body};
-    font-weight: 700;
-    font-size: 2.5rem;
-    text-transform: uppercase;
-    color: ${({ theme }) => theme.colors.text};
-    margin-bottom: 1.5rem;
-    line-height: 1.2;
-    
-    @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-    }
-  }
-`;
+
 
 const StyledScrollReveal = styled(ScrollReveal)`
   margin-bottom: 0;
