@@ -63,6 +63,22 @@ const TextContainer = styled.div`
   }
 `;
 
+const SectionTitle = styled.h2`
+  font-family: ${({ theme }) => theme.fonts.body};
+  font-weight: 700;
+  font-size: 2.5rem;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.text};
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  text-align: center;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+`;
+
 const SectionTitleStyles = styled.div`
   .title-text {
     font-family: ${({ theme }) => theme.fonts.body};
@@ -189,25 +205,15 @@ const BioSection: React.FC = () => {
   
   return (
     <SectionContainer ref={sectionRef} id="about">
+      <SectionTitle ref={titleRef}>{i18n.language === 'es' ? 'SOBRE MÍ' : 'ABOUT ME'}</SectionTitle>
       <ContentWrapper>
         <ProfileImageContainer ref={imageRef}>
           <ProfileImage 
             src={alexisImage}
-            alt="Alexis Vedia" 
+            alt="Alexis Vedia - Desarrollador Full Stack especializado en React, TypeScript y Node.js" 
           />
         </ProfileImageContainer>
         <TextContainer>
-          <SectionTitleStyles ref={titleRef}>
-            <StyledScrollReveal
-              baseOpacity={0}
-              enableBlur={true}
-              baseRotation={10}
-              blurStrength={20}
-              textClassName="title-text"
-            >
-              {i18n.language === 'es' ? 'SOBRE MÍ' : 'ABOUT ME'}
-            </StyledScrollReveal>
-          </SectionTitleStyles>
           
           <BioTextContainer>
             {/* Usar el texto completo para el párrafo 1 */}
@@ -244,4 +250,4 @@ const BioSection: React.FC = () => {
   );
 };
 
-export default BioSection; 
+export default BioSection;

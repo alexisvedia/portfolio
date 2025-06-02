@@ -4,8 +4,8 @@ import PageTransition from '@components/PageTransition/PageTransition';
 import HeroSection from '@components/HeroSection/HeroSection';
 import BioSection from '@components/BioSection';
 import ProjectsSection from '@components/ProjectsSection/ProjectsSection';
-import TestimonialsSection from '@components/TestimonialsSection/TestimonialsSection';
 import ContactSection from '@components/ContactSection/ContactSection';
+import SEOContent from '@components/SEOContent';
 
 const HomeContainer = styled.div`
   position: relative;
@@ -54,6 +54,7 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded, onContact
   return (
     <PageTransition>
       <HomeContainer id="home">
+        <SEOContent />
         <ContentWrapper>
           <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
           <BioSection />
@@ -61,7 +62,7 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded, onContact
         <ContentWrapper>
           <ProjectsSection />
         </ContentWrapper>
-        <TestimonialsSection />
+
         <ContentWrapper>
           <ContactSection ref={contactSectionRef} id="contact" />
         </ContentWrapper>
