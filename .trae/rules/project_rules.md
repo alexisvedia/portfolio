@@ -4,22 +4,22 @@
 This is a modern portfolio website built with React 18, TypeScript, Vite, and styled-components. The project features advanced animations, internationalization (i18n), and a component-based architecture with a focus on performance and user experience.
 
 ## Technology Stack
-- **Frontend Framework**: React 18 with TypeScript
-- **Build Tool**: Vite
-- **Styling**: Styled-components, CSS modules, Tailwind utilities
-- **State Management**: Redux Toolkit
-- **Routing**: React Router DOM v6
-- **Animations**: Framer Motion, GSAP, React Spring
-- **Internationalization**: i18next, react-i18next
-- **Testing**: Jest, React Testing Library
-- **Code Quality**: ESLint, Prettier, Husky
-- **3D Graphics**: Spline, OGL
+- *Frontend Framework*: React 18 with TypeScript
+- *Build Tool*: Vite
+- *Styling*: Styled-components, CSS modules, Tailwind utilities
+- *State Management*: Redux Toolkit
+- *Routing*: React Router DOM v6
+- *Animations*: Framer Motion, GSAP, React Spring
+- *Internationalization*: i18next, react-i18next
+- *Testing*: Jest, React Testing Library
+- *Code Quality*: ESLint, Prettier, Husky
+- *3D Graphics*: Spline, OGL
 
 ## Code Style and Formatting
 
 ### TypeScript Guidelines
 - Use strict TypeScript configuration
-- Prefer explicit typing over `any`
+- Prefer explicit typing over any
 - Use interface for object shapes, type for unions/primitives
 - Enable all strict mode options in tsconfig.json
 - Use proper generic constraints and conditional types
@@ -41,14 +41,14 @@ This is a modern portfolio website built with React 18, TypeScript, Vite, and st
 - Use proper prop types and default values
 
 ### File Naming Conventions
-- Components: PascalCase (e.g., `ContactButton.tsx`)
-- Hooks: camelCase starting with 'use' (e.g., `useScrollDirection.ts`)
-- Utilities: camelCase (e.g., `scrollDetection.ts`)
+- Components: PascalCase (e.g., ContactButton.tsx)
+- Hooks: camelCase starting with 'use' (e.g., useScrollDirection.ts)
+- Utilities: camelCase (e.g., scrollDetection.ts)
 - Types: PascalCase with descriptive names
 - Constants: UPPER_SNAKE_CASE
 
 ### Import Organization
-```typescript
+typescript
 // 1. React and React-related imports
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
@@ -65,30 +65,30 @@ import { cn } from '@utils/cn';
 
 // 4. Relative imports
 import './Component.css';
-```
+
 
 ### Path Aliases Usage
 Always use the configured path aliases:
-- `@/*` for src root
-- `@components/*` for components
-- `@styles/*` for styles
-- `@utils/*` for utilities
-- `@hooks/*` for custom hooks
-- `@store/*` for Redux store
-- `@types/*` for TypeScript types
-- `@services/*` for API services
+- @/* for src root
+- @components/* for components
+- @styles/* for styles
+- @utils/* for utilities
+- @hooks/* for custom hooks
+- @store/* for Redux store
+- @types/* for TypeScript types
+- @services/* for API services
 
 ## Styling Guidelines
 
 ### Styled-Components
 - Use styled-components for component-specific styles
-- Follow the theme system defined in `@styles/theme.ts`
+- Follow the theme system defined in @styles/theme.ts
 - Use proper TypeScript typing for styled components
 - Prefer theme values over hardcoded values
 
 ### CSS Organization
 - Use CSS modules for component-specific styles when needed
-- Global styles in `@styles/GlobalStyles.ts`
+- Global styles in @styles/GlobalStyles.ts
 - Animation styles in separate CSS files
 - Use CSS custom properties for dynamic theming
 
@@ -120,7 +120,7 @@ Always use the configured path aliases:
 
 ### Translation Keys
 - Use descriptive, hierarchical keys
-- Keep translations in `public/locales/[lang]/`
+- Keep translations in public/locales/[lang]/
 - Use interpolation for dynamic content
 - Implement proper fallback mechanisms
 
@@ -228,7 +228,7 @@ Always use the configured path aliases:
 ## Deployment and Build
 
 ### Build Process
-- Use `npm run build` for production builds
+- Use npm run build for production builds
 - Test builds locally before deployment
 - Monitor build performance and size
 
@@ -241,25 +241,25 @@ Always use the configured path aliases:
 
 When working with this codebase:
 
-1. **Always follow the established patterns** in the existing codebase
-2. **Use the configured path aliases** instead of relative imports
-3. **Maintain the component folder structure** with index files
-4. **Follow the TypeScript strict mode** requirements
-5. **Use the theme system** for consistent styling
-6. **Implement proper error handling** and loading states
-7. **Consider performance implications** of changes
-8. **Maintain accessibility standards** in all components
-9. **Use the established animation libraries** (Framer Motion, GSAP)
-10. **Follow the i18n patterns** for any text content
-11. **Write tests** for new functionality
-12. **Update documentation** when making significant changes
-13. **Adhere to Fluent Design aesthetics** – every new component must follow the project’s Fluent Design look-and-feel, including acrylic transparency layers reminiscent of Windows 11.
+1. *Always follow the established patterns* in the existing codebase
+2. *Use the configured path aliases* instead of relative imports
+3. *Maintain the component folder structure* with index files
+4. *Follow the TypeScript strict mode* requirements
+5. *Use the theme system* for consistent styling
+6. *Implement proper error handling* and loading states
+7. *Consider performance implications* of changes
+8. *Maintain accessibility standards* in all components
+9. *Use the established animation libraries* (Framer Motion, GSAP)
+10. *Follow the i18n patterns* for any text content
+11. *Write tests* for new functionality
+12. *Update documentation* when making significant changes
+13. *Adhere to Fluent Design aesthetics* – every new component must follow the project’s Fluent Design look-and-feel, including acrylic transparency layers reminiscent of Windows 11.
 
 
 ## Common Patterns to Follow
 
 ### Component Creation
-```typescript
+typescript
 // ComponentName/ComponentName.tsx
 import React from 'react';
 import styled from 'styled-components';
@@ -282,10 +282,10 @@ const StyledWrapper = styled(motion.div)`
 `;
 
 export default ComponentName;
-```
+
 
 ### Custom Hook Pattern
-```typescript
+typescript
 // hooks/useCustomHook.ts
 import { useState, useEffect } from 'react';
 
@@ -298,6 +298,6 @@ export const useCustomHook = (dependency: any) => {
   
   return { state, setState };
 };
-```
+
 
 This project emphasizes modern React development practices, performance optimization, and user experience. Always consider the impact of changes on bundle size, runtime performance, and accessibility.
