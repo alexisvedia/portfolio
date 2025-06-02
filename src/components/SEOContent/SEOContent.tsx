@@ -55,10 +55,10 @@ const SEOContent: React.FC = () => {
 
   return (
     <SEOContainer>
-      <SEOHeading>Desarrollador Full Stack - Alexis Vedia</SEOHeading>
+      <SEOHeading>Alexis Vedia - Desarrollador Full Stack Profesional</SEOHeading>
       <SEOText>
-        Alexis Vedia es un desarrollador full stack especializado en tecnologías modernas como React, TypeScript, Node.js y desarrollo web avanzado. 
-        Con experiencia en empresas como XCONS, FusionAds y Bandit, ofrece soluciones innovadoras en desarrollo frontend y backend.
+        Alexis Vedia es un desarrollador full stack profesional especializado en tecnologías modernas como React, TypeScript, Node.js y desarrollo web avanzado. 
+        Este portfolio profesional muestra la experiencia de Alexis Vedia en empresas como XCONS, FusionAds y Bandit, ofreciendo soluciones innovadoras en desarrollo frontend y backend.
       </SEOText>
       
       <SEOSubHeading>Servicios de Desarrollo Web</SEOSubHeading>
@@ -93,8 +93,9 @@ const SEOContent: React.FC = () => {
       </SEOText>
       
       <SEOText>
-        Portfolio profesional actualizado con proyectos recientes, experiencia laboral y 
-        información de contacto para servicios de desarrollo web full stack.
+        Portfolio profesional de Alexis Vedia actualizado con proyectos recientes, experiencia laboral y 
+        información de contacto para servicios de desarrollo web full stack. Desarrollador profesional 
+        especializado en crear soluciones web modernas y escalables.
       </SEOText>
     </SEOContainer>
   );
