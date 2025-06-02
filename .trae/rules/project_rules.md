@@ -254,6 +254,8 @@ When working with this codebase:
 11. *Write tests* for new functionality
 12. *Update documentation* when making significant changes
 13. *Adhere to Fluent Design aesthetics* – every new component must follow the project’s Fluent Design look-and-feel, including acrylic transparency layers reminiscent of Windows 11.
+14. *Provide bilingual text*: whenever you add UI text that I give you in Spanish (button label, heading, paragraph, etc.), include the corresponding English version as well so the site’s i18n toggle works.
+
 
 
 ## Common Patterns to Follow
