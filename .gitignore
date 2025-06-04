@@ -26,3 +26,6 @@ dist-ssr
 .env
 .qodo
 temp/
+**/__pycache__/
+backend/instance/
+instance/

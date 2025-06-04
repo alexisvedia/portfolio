@@ -57,6 +57,15 @@ El backend lee las siguientes variables, que puedes definir en un archivo `.env`
 | `NLWEB_API_KEY`     | Credencial para acceder al servicio NLWeb de Microsoft |
 | `NLWEB_ENDPOINT`    | (Opcional) URL del endpoint de NLWeb               |
 
+Para que el front-end pueda comunicarse con el backend durante el desarrollo,
+define `VITE_API_BASE` en un archivo `.env` en la raíz del proyecto:
+
+```dotenv
+VITE_API_BASE=http://localhost:5000/api
+```
+
+En producción este valor puede mantenerse como `/api` si se usa un proxy.
+
 Ejemplo de `.env`:
 
 ```dotenv

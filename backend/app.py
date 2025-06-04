@@ -2,7 +2,8 @@ from __future__ import annotations
 import os
 import requests
 from dotenv import load_dotenv
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Blueprint
+from flask_cors import CORS
 from flask_jwt_extended import (
     JWTManager,
     create_access_token,
@@ -18,6 +19,9 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'change-me')
+CORS(app)
+
+api = Blueprint('api', __name__)
 
 db.init_app(app)
 jwt = JWTManager(app)
@@ -38,7 +42,7 @@ def init_db() -> None:
         db.create_all()
 
 
-@app.route('/register', methods=['POST'])
+@api.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
     if not data or 'username' not in data or 'password' not in data:
@@ -54,7 +58,7 @@ def register():
     return jsonify({'msg': 'User created'}), 201
 
 
-@app.route('/login', methods=['POST'])
+@api.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     if not data or 'username' not in data or 'password' not in data:
@@ -68,7 +72,7 @@ def login():
     return jsonify(access_token=access_token), 200
 
 
-@app.route('/ai', methods=['GET'])
+@api.route('/ai', methods=['GET'])
 def list_ai_pages():
     pages = AIPage.query.all()
     return jsonify([
@@ -94,7 +98,7 @@ def fetch_favicon(url: str) -> str | None:
     return None
 
 
-@app.route('/ai', methods=['POST'])
+@api.route('/ai', methods=['POST'])
 @jwt_required()
 def add_ai_page():
     user_id = get_jwt_identity()
@@ -118,7 +122,7 @@ def add_ai_page():
     return jsonify({'msg': 'Page added', 'id': page.id}), 201
 
 
-@app.route('/favorites', methods=['GET'])
+@api.route('/favorites', methods=['GET'])
 @jwt_required()
 def get_favorites():
     user_id = get_jwt_identity()
@@ -135,7 +139,7 @@ def get_favorites():
     return jsonify(favs)
 
 
-@app.route('/favorites', methods=['POST'])
+@api.route('/favorites', methods=['POST'])
 @jwt_required()
 def add_favorite():
     user_id = get_jwt_identity()
@@ -152,7 +156,7 @@ def add_favorite():
     return jsonify({'msg': 'Favorite added'}), 201
 
 
-@app.route('/search')
+@api.route('/search')
 def search():
     query = request.args.get('q')
     if not query:
@@ -181,6 +185,7 @@ def search():
 
     return jsonify(resp.json().get('results', []))
 
+app.register_blueprint(api, url_prefix='/api')
 
 if __name__ == '__main__':
     init_db()

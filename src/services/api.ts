@@ -1,6 +1,6 @@
 import { useUser } from '../context/UserContext';
 
-export const API_BASE = '/api';
+export const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 
 export const useApi = () => {
   const { token } = useUser();
