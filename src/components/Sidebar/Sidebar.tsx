@@ -62,13 +62,17 @@ const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 999;
   display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
-  
+
   @media (min-width: 769px) {
     display: none;
   }
 `;
 
-const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean; $isFirstRender: boolean }>`
+const SidebarContainer = styled.aside<{
+  $isOpen: boolean;
+  $isMobile: boolean;
+  $isFirstRender: boolean;
+}>`
   background-color: ${({ theme }) => theme.colors.sidebarBackground};
   color: ${({ theme }) => theme.colors.text};
   padding: ${({ theme }) => theme.space.lg};
@@ -80,7 +84,10 @@ const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean; $i
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  transition: transform 0.5s ease-in-out, box-shadow 0.3s ease-in-out, background-color 0.3s ease-in-out;
+  transition:
+    transform 0.5s ease-in-out,
+    box-shadow 0.3s ease-in-out,
+    background-color 0.3s ease-in-out;
 
   ${({ $isMobile, $isOpen }) =>
     $isMobile &&
@@ -88,9 +95,9 @@ const SidebarContainer = styled.aside<{ $isOpen: boolean; $isMobile: boolean; $i
       transform: ${$isOpen ? 'translateX(0)' : 'translateX(-100%)'};
       box-shadow: ${$isOpen ? '0 0 20px rgba(0,0,0,0.3)' : 'none'};
     `}
-  
-  ${({ $isMobile, $isFirstRender }) => 
-    !$isMobile && 
+
+  ${({ $isMobile, $isFirstRender }) =>
+    !$isMobile &&
     css`
       transform: ${$isFirstRender ? 'translateX(-100%)' : 'translateX(0)'};
       animation: ${$isFirstRender ? 'slideIn 0.7s ease-in-out forwards 0.3s' : 'none'};
@@ -213,7 +220,10 @@ const ChatLink = styled.a`
   color: ${({ theme }) => theme.colors.text};
   text-decoration: none !important;
   border-radius: 4px;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: 400;
   cursor: pointer;
@@ -223,7 +233,8 @@ const ChatLink = styled.a`
   opacity: 0.75;
 
   &:hover {
-    background-color: ${({ theme }) => (theme.isDark ? 'rgba(33,33,33,0.5)' : 'rgba(236,236,236,0.5)')};
+    background-color: ${({ theme }) =>
+      theme.isDark ? 'rgba(33,33,33,0.5)' : 'rgba(236,236,236,0.5)'};
     color: ${({ theme }) => theme.colors.text};
     opacity: 1;
   }
@@ -250,7 +261,9 @@ const NavLink = styled.a`
   color: ${({ theme }) => theme.colors.text};
   text-decoration: none !important;
   border-radius: 6px;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
   font-size: ${({ theme }) => theme.fontSizes.md};
   font-weight: 500;
   cursor: pointer;
@@ -262,10 +275,12 @@ const NavLink = styled.a`
   }
 
   &.active {
-    background-color: ${({ theme }) => (theme.isDark ? theme.colors.text : theme.colors.text)}; 
-    color: ${({ theme }) => (theme.isDark ? theme.colors.sidebarBackground : theme.colors.background)}; 
+    background-color: ${({ theme }) => (theme.isDark ? theme.colors.text : theme.colors.text)};
+    color: ${({ theme }) =>
+      theme.isDark ? theme.colors.sidebarBackground : theme.colors.background};
     svg {
-        color: ${({ theme }) => (theme.isDark ? theme.colors.sidebarBackground : theme.colors.background)};
+      color: ${({ theme }) =>
+        theme.isDark ? theme.colors.sidebarBackground : theme.colors.background};
     }
   }
 
@@ -312,21 +327,26 @@ const SubNavLink = styled.a`
   color: ${({ theme }) => theme.colors.text};
   text-decoration: none !important;
   border-radius: 4px;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  transition:
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out;
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: 400;
   cursor: pointer;
 
   &:hover {
-    background-color: ${({ theme }) => (theme.isDark ? 'rgba(33,33,33,0.5)' : 'rgba(236,236,236,0.5)')};
+    background-color: ${({ theme }) =>
+      theme.isDark ? 'rgba(33,33,33,0.5)' : 'rgba(236,236,236,0.5)'};
     color: ${({ theme }) => theme.colors.text};
   }
 
   &.active {
-    background-color: ${({ theme }) => (theme.isDark ? theme.colors.text : theme.colors.text)}; 
-    color: ${({ theme }) => (theme.isDark ? theme.colors.sidebarBackground : theme.colors.background)}; 
+    background-color: ${({ theme }) => (theme.isDark ? theme.colors.text : theme.colors.text)};
+    color: ${({ theme }) =>
+      theme.isDark ? theme.colors.sidebarBackground : theme.colors.background};
     svg {
-        color: ${({ theme }) => (theme.isDark ? theme.colors.sidebarBackground : theme.colors.background)};
+      color: ${({ theme }) =>
+        theme.isDark ? theme.colors.sidebarBackground : theme.colors.background};
     }
   }
 
@@ -354,10 +374,10 @@ const SocialMediaButton = styled.a`
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: ${({ theme }) => 
-    theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'}; 
+  background: ${({ theme }) => (theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)')};
   color: ${({ theme }) => theme.colors.text};
-  border: 1px solid ${({ theme }) => (theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)')};
+  border: 1px solid
+    ${({ theme }) => (theme.isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)')};
   border-radius: 50%;
   font-size: 1.1rem;
   text-decoration: none;
@@ -365,8 +385,8 @@ const SocialMediaButton = styled.a`
   cursor: pointer;
 
   &:hover {
-    background: ${({ theme }) => 
-      theme.isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'}; 
+    background: ${({ theme }) =>
+      theme.isDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'};
     transform: scale(1.05);
   }
 
@@ -387,7 +407,7 @@ const ThemeToggleWrapper = styled.div`
   justify-content: center;
 
   label.toggle {
-      transform: scale(0.9);
+    transform: scale(0.9);
   }
 `;
 
@@ -402,8 +422,12 @@ const MobileMenuButton = styled.button<{ $isMobile: boolean; $isOpen: boolean }>
   border-radius: 50%;
   padding: ${({ theme }) => theme.space.xs};
   cursor: pointer;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: background-color 0.2s, box-shadow 0.2s, opacity 0.3s ease, transform 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s,
+    opacity 0.3s ease,
+    transform 0.3s ease;
   width: 40px;
   height: 40px;
   display: ${({ $isMobile, $isOpen }) => (!$isMobile ? 'none' : $isOpen ? 'none' : 'flex')};
@@ -422,13 +446,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const [tooltip, setTooltip] = useState<TooltipState>({ 
-    visible: false, 
-    text: '', 
-    position: { x: 0, y: 0 } 
+  const [tooltip, setTooltip] = useState<TooltipState>({
+    visible: false,
+    text: '',
+    position: { x: 0, y: 0 },
   });
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
-  const [activeLink, setActiveLink] = useState<string>("#home");
+  const [activeLink, setActiveLink] = useState<string>('#home');
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const [isFirstRender, setIsFirstRender] = useState(true);
@@ -450,18 +474,49 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
 
   const navLinks: NavLinkItem[] = [
     { href: '#home', labelKey: 'home', defaultLabel: 'Inicio', IconComponent: HomeIcon },
-    { href: '#about', labelKey: 'navbar.about', defaultLabel: 'Sobre mí', IconComponent: AboutIcon },
+    {
+      href: '#about',
+      labelKey: 'navbar.about',
+      defaultLabel: 'Sobre mí',
+      IconComponent: AboutIcon,
+    },
     {
       href: '#experience',
       labelKey: 'experience',
-      defaultLabel: 'Experiencia', 
+      defaultLabel: 'Experiencia',
       IconComponent: ExperienceIcon,
       subLinks: [
-        { href: '/xcons', labelKey: 'navbar.xcons', defaultLabel: 'XCONS', IconComponent: ChevronRight }, 
-        { href: '/fusionads', labelKey: 'navbar.fusionads', defaultLabel: 'FusionAds', IconComponent: ChevronRight },
-        { href: '/bandit', labelKey: 'navbar.bandit', defaultLabel: 'Bandit', IconComponent: ChevronRight },
-        { href: '/otros', labelKey: 'navbar.otros', defaultLabel: 'Otros proyectos', IconComponent: ChevronRight },
+        {
+          href: '/xcons',
+          labelKey: 'navbar.xcons',
+          defaultLabel: 'XCONS',
+          IconComponent: ChevronRight,
+        },
+        {
+          href: '/fusionads',
+          labelKey: 'navbar.fusionads',
+          defaultLabel: 'FusionAds',
+          IconComponent: ChevronRight,
+        },
+        {
+          href: '/bandit',
+          labelKey: 'navbar.bandit',
+          defaultLabel: 'Bandit',
+          IconComponent: ChevronRight,
+        },
+        {
+          href: '/otros',
+          labelKey: 'navbar.otros',
+          defaultLabel: 'Otros proyectos',
+          IconComponent: ChevronRight,
+        },
       ],
+    },
+    {
+      href: '/ai',
+      labelKey: 'navbar.aiRepo',
+      defaultLabel: 'AI Repo',
+      IconComponent: ExperienceIcon,
     },
     { href: '#contact', labelKey: 'contact', defaultLabel: 'Contacto', IconComponent: ContactIcon },
   ];
@@ -471,25 +526,78 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       titleKey: 'sidebar.chats.today',
       defaultTitle: 'Hoy',
       chats: [
-        { id: 'chat1', title: '¿Por qué Alexis es necesario en tu proyecto?', displayText: { es: '¿Por qué Alexis es necesario en tu proyecto?', en: 'Why is Alexis needed in your project?' } },
-        { id: 'chat2', title: 'Planes de dominación mundial (con Alexis)', displayText: { es: 'Planes de dominación mundial (con Alexis)', en: 'World domination plans (with Alexis)' } },
-        { id: 'chat3', title: 'Contratar a Alexis: la mejor decisión', displayText: { es: 'Contratar a Alexis: la mejor decisión', en: 'Hiring Alexis: the best decision' } },
-        { id: 'chat_new1', title: 'El secreto del café perfecto según Alexis', displayText: { es: 'El secreto del café perfecto según Alexis', en: 'Alexis\'s secret to the perfect coffee' } },
+        {
+          id: 'chat1',
+          title: '¿Por qué Alexis es necesario en tu proyecto?',
+          displayText: {
+            es: '¿Por qué Alexis es necesario en tu proyecto?',
+            en: 'Why is Alexis needed in your project?',
+          },
+        },
+        {
+          id: 'chat2',
+          title: 'Planes de dominación mundial (con Alexis)',
+          displayText: {
+            es: 'Planes de dominación mundial (con Alexis)',
+            en: 'World domination plans (with Alexis)',
+          },
+        },
+        {
+          id: 'chat3',
+          title: 'Contratar a Alexis: la mejor decisión',
+          displayText: {
+            es: 'Contratar a Alexis: la mejor decisión',
+            en: 'Hiring Alexis: the best decision',
+          },
+        },
+        {
+          id: 'chat_new1',
+          title: 'El secreto del café perfecto según Alexis',
+          displayText: {
+            es: 'El secreto del café perfecto según Alexis',
+            en: "Alexis's secret to the perfect coffee",
+          },
+        },
       ],
     },
     {
       titleKey: 'sidebar.chats.yesterday',
       defaultTitle: 'Ayer',
       chats: [
-        { id: 'chat4', title: 'Ideas de proyectos innovadores con Alexis', displayText: { es: 'Ideas de proyectos innovadores con Alexis', en: 'Innovative project ideas with Alexis?' } },
-        { id: 'chat5', title: '¿Cómo contactar a este genio?', displayText: { es: '¿Cómo contactar a este genio?', en: 'How to contact this genius?' } },
-        { id: 'chat6', title: 'El impacto de Alexis en la industria tech', displayText: { es: 'El impacto de Alexis en la industria tech', en: 'Alexis\'s impact on the tech industry' } },
-        { id: 'chat_new2', title: 'Debate: ¿Piña en la pizza? La opinión de Alexis', displayText: { es: 'Debate: ¿Piña en la pizza? La opinión de Alexis', en: 'Debate: Pineapple on pizza? Alexis\'s take' } },
+        {
+          id: 'chat4',
+          title: 'Ideas de proyectos innovadores con Alexis',
+          displayText: {
+            es: 'Ideas de proyectos innovadores con Alexis',
+            en: 'Innovative project ideas with Alexis?',
+          },
+        },
+        {
+          id: 'chat5',
+          title: '¿Cómo contactar a este genio?',
+          displayText: { es: '¿Cómo contactar a este genio?', en: 'How to contact this genius?' },
+        },
+        {
+          id: 'chat6',
+          title: 'El impacto de Alexis en la industria tech',
+          displayText: {
+            es: 'El impacto de Alexis en la industria tech',
+            en: "Alexis's impact on the tech industry",
+          },
+        },
+        {
+          id: 'chat_new2',
+          title: 'Debate: ¿Piña en la pizza? La opinión de Alexis',
+          displayText: {
+            es: 'Debate: ¿Piña en la pizza? La opinión de Alexis',
+            en: "Debate: Pineapple on pizza? Alexis's take",
+          },
+        },
       ],
     },
   ];
 
-  const swipeThreshold = 50; 
+  const swipeThreshold = 50;
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchStartX.current = e.touches[0].clientX;
@@ -505,15 +613,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     }
 
     const swipeDistance = touchEndX.current - touchStartX.current;
-    
+
     if (swipeDistance > swipeThreshold && !isOpen) {
       toggleSidebar();
     }
-    
+
     if (swipeDistance < -swipeThreshold && isOpen) {
       toggleSidebar();
     }
-    
+
     touchStartX.current = null;
     touchEndX.current = null;
   };
@@ -523,30 +631,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       const handleDocumentTouchStart = (e: TouchEvent) => {
         touchStartX.current = e.touches[0].clientX;
       };
-      
+
       const handleDocumentTouchMove = (e: TouchEvent) => {
         touchEndX.current = e.touches[0].clientX;
       };
-      
+
       const handleDocumentTouchEnd = () => {
         if (touchStartX.current === null || touchEndX.current === null) {
           return;
         }
-        
+
         const swipeDistance = touchEndX.current - touchStartX.current;
-        
+
         if (swipeDistance > swipeThreshold && !isOpen && touchStartX.current < 30) {
           toggleSidebar();
         }
-        
+
         touchStartX.current = null;
         touchEndX.current = null;
       };
-      
+
       document.addEventListener('touchstart', handleDocumentTouchStart);
       document.addEventListener('touchmove', handleDocumentTouchMove);
       document.addEventListener('touchend', handleDocumentTouchEnd);
-      
+
       return () => {
         document.removeEventListener('touchstart', handleDocumentTouchStart);
         document.removeEventListener('touchmove', handleDocumentTouchMove);
@@ -572,12 +680,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, linkItem: NavLinkItem) => {
     e.preventDefault();
     const { href, subLinks } = linkItem;
-    
+
     setActiveLink(href);
-    
+
     const isExperienceSublink = navLinks
-        .find(link => link.href === '#experience')
-        ?.subLinks?.some(subLink => subLink.href === href);
+      .find(link => link.href === '#experience')
+      ?.subLinks?.some(subLink => subLink.href === href);
 
     if (subLinks && subLinks.length > 0) {
       if (openSubmenuKey === href) {
@@ -588,26 +696,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     } else if (!isExperienceSublink) {
       setOpenSubmenuKey(null);
     }
-    
+
     if (href.startsWith('#')) {
       if (location.pathname === '/') {
         const targetId = href.substring(1);
         const element = document.getElementById(targetId);
-        
+
         if (element) {
           setTimeout(() => {
             window.scrollTo({
               top: element.offsetTop - 80,
-              behavior: 'smooth'
+              behavior: 'smooth',
             });
-            
+
             try {
-              element.scrollIntoView({ 
+              element.scrollIntoView({
                 behavior: 'smooth',
-                block: 'start'
+                block: 'start',
               });
             } catch (error) {
-              console.error("Error en scrollIntoView:", error);
+              console.error('Error en scrollIntoView:', error);
             }
           }, 50);
         } else {
@@ -619,11 +727,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     } else {
       navigate(href);
     }
-    
+
     if (isMobile && isOpen) {
       const isSublinkClick = navLinks.some(link => link.subLinks?.some(sl => sl.href === href));
-      if ((!subLinks || subLinks.length === 0) || isSublinkClick) {
-         toggleSidebar();
+      if (!subLinks || subLinks.length === 0 || isSublinkClick) {
+        toggleSidebar();
       }
     }
   };
@@ -635,7 +743,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     }
   };
 
-  const showTooltip = (textKey: string, e: React.MouseEvent<HTMLElement>, displayText?: { es: string; en: string }) => {
+  const showTooltip = (
+    textKey: string,
+    e: React.MouseEvent<HTMLElement>,
+    displayText?: { es: string; en: string }
+  ) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTooltip({
       visible: true,
@@ -643,7 +755,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       position: {
         x: rect.left + rect.width / 2,
         y: rect.top,
-      }
+      },
     });
   };
 
@@ -659,14 +771,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
 
   return (
     <>
-      <Tooltip 
-        text={tooltip.text} 
-        isVisible={tooltip.visible} 
-        position={tooltip.position} 
-      />
-      
+      <Tooltip text={tooltip.text} isVisible={tooltip.visible} position={tooltip.position} />
+
       {isMobile && (
-        <MobileMenuButton 
+        <MobileMenuButton
           $isMobile={isMobile}
           $isOpen={isOpen}
           onClick={toggleSidebar}
@@ -678,8 +786,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
 
       {isMobile && <SidebarOverlay $isOpen={isOpen} onClick={toggleSidebar} />}
 
-      <SidebarContainer 
-        $isOpen={isOpen} 
+      <SidebarContainer
+        $isOpen={isOpen}
         $isMobile={isMobile}
         $isFirstRender={isFirstRender}
         onTouchStart={handleTouchStart}
@@ -693,33 +801,42 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
           <LogoText>{t('sidebar.logoText', 'Portfolio')}</LogoText>
         </LogoContainer>
         <NavList>
-          {navLinks.map((linkItemMap) => {
-            const { href: itemHref, labelKey, defaultLabel, IconComponent: ItemIconComponent, subLinks: itemSubLinks } = linkItemMap;
-            
+          {navLinks.map(linkItemMap => {
+            const {
+              href: itemHref,
+              labelKey,
+              defaultLabel,
+              IconComponent: ItemIconComponent,
+              subLinks: itemSubLinks,
+            } = linkItemMap;
+
             const isSubmenuOpen = openSubmenuKey === itemHref;
-            
+
             const isLinkActive = activeLink === itemHref;
-            
+
             return (
               <NavItem key={itemHref}>
-                <NavLink 
-                  href={itemHref} 
-                  onClick={(e) => handleLinkClick(e, linkItemMap)}
+                <NavLink
+                  href={itemHref}
+                  onClick={e => handleLinkClick(e, linkItemMap)}
                   className={isLinkActive ? 'active' : ''}
                 >
                   <ItemIconComponent />
                   {t(labelKey, defaultLabel)}
                   {itemSubLinks && itemSubLinks.length > 0 && (
-                    <ChevronDown size={16} className={`chevron-icon ${isSubmenuOpen ? 'open' : ''}`} />
+                    <ChevronDown
+                      size={16}
+                      className={`chevron-icon ${isSubmenuOpen ? 'open' : ''}`}
+                    />
                   )}
                 </NavLink>
                 {itemSubLinks && itemSubLinks.length > 0 && (
                   <SubNavList className={isSubmenuOpen ? 'open' : ''}>
-                    {itemSubLinks.map((subLinkItem) => (
+                    {itemSubLinks.map(subLinkItem => (
                       <SubNavItem key={subLinkItem.href}>
-                        <SubNavLink 
-                          href={subLinkItem.href} 
-                          onClick={(e) => handleLinkClick(e, subLinkItem)}
+                        <SubNavLink
+                          href={subLinkItem.href}
+                          onClick={e => handleLinkClick(e, subLinkItem)}
                           className={activeLink === subLinkItem.href ? 'active' : ''}
                         >
                           {t(subLinkItem.labelKey, subLinkItem.defaultLabel)}
@@ -734,19 +851,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
         </NavList>
 
         <ChatListContainer>
-          {chatGroups.map((group) => (
+          {chatGroups.map(group => (
             <ChatGroupWrapper key={group.titleKey}>
               <ChatGroupTitle>{t(group.titleKey, group.defaultTitle)}</ChatGroupTitle>
               <ChatListStyled>
-                {group.chats.map((chat) => (
+                {group.chats.map(chat => (
                   <ChatItemStyled key={chat.id}>
                     <ChatLink
                       href={`#chat-${chat.id}`}
-                      onClick={(e) => {
+                      onClick={e => {
                         e.preventDefault();
                         handleChatClick(chat);
                       }}
-                      onMouseEnter={(e) => showTooltip(chat.titleKey || chat.title, e, chat.displayText)}
+                      onMouseEnter={e =>
+                        showTooltip(chat.titleKey || chat.title, e, chat.displayText)
+                      }
                       onMouseLeave={hideTooltip}
                     >
                       {i18n.language === 'es' ? chat.displayText.es : chat.displayText.en}
@@ -759,39 +878,39 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
         </ChatListContainer>
 
         <ControlsContainer>
-          <SocialMediaButton 
-            href="https://github.com/AxSRockS" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <SocialMediaButton
+            href="https://github.com/AxSRockS"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="GitHub"
-            onMouseEnter={(e) => showTooltip('tooltip.github', e)}
+            onMouseEnter={e => showTooltip('tooltip.github', e)}
             onMouseLeave={hideTooltip}
           >
             <FaGithub />
           </SocialMediaButton>
-          <SocialMediaButton 
-            href="https://www.linkedin.com/in/alexis-vedia-80b936190/" 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <SocialMediaButton
+            href="https://www.linkedin.com/in/alexis-vedia-80b936190/"
+            target="_blank"
+            rel="noopener noreferrer"
             aria-label="LinkedIn"
-            onMouseEnter={(e) => showTooltip('tooltip.linkedin', e)}
+            onMouseEnter={e => showTooltip('tooltip.linkedin', e)}
             onMouseLeave={hideTooltip}
           >
             <FaLinkedin />
           </SocialMediaButton>
-          <div 
-             onMouseEnter={(e) => showTooltip('tooltip.toggleTheme', e)} 
-             onMouseLeave={hideTooltip} 
-             style={{ lineHeight: 1 }}
+          <div
+            onMouseEnter={e => showTooltip('tooltip.toggleTheme', e)}
+            onMouseLeave={hideTooltip}
+            style={{ lineHeight: 1 }}
           >
             <ThemeToggleWrapper>
               <ThemeToggle />
             </ThemeToggleWrapper>
           </div>
-          <div 
-             onMouseEnter={(e) => showTooltip('tooltip.selectLanguage', e)} 
-             onMouseLeave={hideTooltip}
-             style={{ lineHeight: 1 }}
+          <div
+            onMouseEnter={e => showTooltip('tooltip.selectLanguage', e)}
+            onMouseLeave={hideTooltip}
+            style={{ lineHeight: 1 }}
           >
             <LanguageSelector />
           </div>
@@ -801,4 +920,4 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

@@ -38,7 +38,8 @@ const resources = {
       // Projects section
       // Skills section
       // Contact section
-      contactText: 'Want to work together? Have a project in mind? Feel free to contact me at alexisleonelvedia@gmail.com or using the form!',
+      contactText:
+        'Want to work together? Have a project in mind? Feel free to contact me at alexisleonelvedia@gmail.com or using the form!',
       name: 'Name',
       email: 'Email',
       message: 'Message',
@@ -64,7 +65,8 @@ const resources = {
         xcons: 'XCONS',
         fusionads: 'FusionAds',
         bandit: 'Bandit',
-        otros: 'Other Projects'
+        otros: 'Other Projects',
+        aiRepo: 'AI Repository',
       },
       // Tooltips for Sidebar Controls
       tooltip: {
@@ -136,16 +138,23 @@ const resources = {
           '"Alexis started as one person and ended as another in his process at Fusion. Undoubtedly, in a short time he adapted, learned, and surpassed himself. He was of great help to us in very accelerated implementation times, and his knowledge in design saved us hours of understanding with the design team."',
         milena:
           '"Whenever I have to work with a new client, I think of Alexis, and how his help could serve me. He is a person who is at the forefront. Highly recommended!"',
-        kodi:
-          '"I met Alexis through Mile. He made an initial redesign proposal for my app without me asking. That\'s when I realized I had to work with him. We worked together for hours, and he never hesitated to tell me if something wasn\'t on the right track. He also introduced me to many tools, a genius!"',
+        kodi: '"I met Alexis through Mile. He made an initial redesign proposal for my app without me asking. That\'s when I realized I had to work with him. We worked together for hours, and he never hesitated to tell me if something wasn\'t on the right track. He also introduced me to many tools, a genius!"',
       },
       viewOriginalButton: 'View Original',
       openOriginalTitle: 'Open original image in new tab',
       companyDescriptions: {
         xcons: 'E-commerce platform specialized in omnichannel sales of construction materials.',
-        fusionads: 'AI-powered generative advertising platform that creates professional omni-channel ads.',
+        fusionads:
+          'AI-powered generative advertising platform that creates professional omni-channel ads.',
         bandit: 'Platform focused on tour and live concert management for artists and managers.',
-        otros: 'Various personal and professional projects under development.'
+        otros: 'Various personal and professional projects under development.',
+      },
+      auth: {
+        login: 'Login',
+        register: 'Create account',
+        username: 'Username',
+        password: 'Password',
+        submit: 'Submit',
       },
     },
   },
@@ -211,7 +220,8 @@ const resources = {
         xcons: 'XCONS',
         fusionads: 'FusionAds',
         bandit: 'Bandit',
-        otros: 'Otros Proyectos'
+        otros: 'Otros Proyectos',
+        aiRepo: 'Repositorio de IA',
       },
       // Tooltips para Controles de Sidebar
       tooltip: {
@@ -283,16 +293,25 @@ const resources = {
           '"Alexis empezó como una persona y terminó como otra en su proceso en Fusion. Sin duda en poco tiempo se adaptó, aprendió y se superó a sí mismo. Nos fue de gran ayuda en tiempos muy acelerados de implementación, y su conocimiento en diseño nos ahorró horas de entendimiento con el equipo de diseñadores."',
         milena:
           '"Siempre que debo trabajar con algún cliente nuevo pienso en Alexis, y en cómo podría servirme su ayuda. Es una persona que está a la vanguardia. ¡Recomendadísimo!"',
-        kodi:
-          '"A Alexis lo conocí por contacto con Mile. Realizó una primer propuesta de rediseño de mi app sin habérselo pedido. Ahí me di cuenta que debía trabajar con él. Trabajamos en conjunto durante horas, y no dudaba nunca en decirme que algo no iba por buen camino. Además me hizo conocer muchas herramientas, ¡un genio!"',
+        kodi: '"A Alexis lo conocí por contacto con Mile. Realizó una primer propuesta de rediseño de mi app sin habérselo pedido. Ahí me di cuenta que debía trabajar con él. Trabajamos en conjunto durante horas, y no dudaba nunca en decirme que algo no iba por buen camino. Además me hizo conocer muchas herramientas, ¡un genio!"',
       },
       viewOriginalButton: 'Ver Original',
       openOriginalTitle: 'Abrir imagen original en nueva pestaña',
       companyDescriptions: {
-        xcons: 'Plataforma de e-commerce especializada en la venta omnicanal de materiales de construcción.',
-        fusionads: 'Plataforma de publicidad generativa impulsada por IA que crea anuncios profesionales omnicanal.',
-        bandit: 'Plataforma enfocada en la gestión de giras y conciertos en vivo para artistas y managers.',
-        otros: 'Diversos proyectos personales y profesionales en desarrollo.'
+        xcons:
+          'Plataforma de e-commerce especializada en la venta omnicanal de materiales de construcción.',
+        fusionads:
+          'Plataforma de publicidad generativa impulsada por IA que crea anuncios profesionales omnicanal.',
+        bandit:
+          'Plataforma enfocada en la gestión de giras y conciertos en vivo para artistas y managers.',
+        otros: 'Diversos proyectos personales y profesionales en desarrollo.',
+      },
+      auth: {
+        login: 'Iniciar sesión',
+        register: 'Crear cuenta',
+        username: 'Usuario',
+        password: 'Contraseña',
+        submit: 'Enviar',
       },
     },
   },

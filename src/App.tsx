@@ -24,6 +24,11 @@ import { initializeN8NServer } from '@services/n8nService';
 // Importar el nuevo componente
 import ScrollToTop from './components/ScrollToTop/ScrollToTop';
 
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import AIRepositoryPage from './pages/AIRepositoryPage';
+import { UserProvider, useUser } from './context/UserContext';
+
 // Importar páginas
 import Home from './pages/Home';
 // Using dynamic imports for code splitting
@@ -84,6 +89,7 @@ const ContactButtonStyled = styled(ContactButton)<{ $hideOnScroll: boolean }>`
 
 const AppContent = () => {
   const location = useLocation();
+  const { token } = useUser();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isContactSectionInView, setIsContactSectionInView] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
@@ -114,16 +120,16 @@ const AppContent = () => {
         // Llamar a initializeN8NServer y actualizar el estado según el resultado
         const success = await initializeN8NServer();
         setN8nServerReady(success);
-        
+
         // Si no fue exitoso en el primer intento, seguir intentando hasta un máximo de 3 veces
         if (!success) {
           let retryCount = 0;
           const maxRetries = 3;
-          
+
           const retryInterval = setInterval(async () => {
             retryCount++;
             console.log(`Reintento ${retryCount} de ${maxRetries} para conectar con n8n`);
-            
+
             const retrySuccess = await initializeN8NServer();
             if (retrySuccess) {
               setN8nServerReady(true);
@@ -134,15 +140,15 @@ const AppContent = () => {
               clearInterval(retryInterval);
             }
           }, 3000);
-          
+
           // Limpieza del intervalo si el componente se desmonta
           return () => clearInterval(retryInterval);
         }
       } catch (error) {
-        console.error("Error al inicializar el servidor n8n:", error);
+        console.error('Error al inicializar el servidor n8n:', error);
       }
     }, 2500);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -164,9 +170,12 @@ const AppContent = () => {
   useEffect(() => {
     // Mostrar el chatbot solo si el servidor n8n está listo
     if (n8nServerReady) {
-      const timer = window.setTimeout(() => {
-        setChatbotVisible(true);
-      }, isMobile ? 1000 : 500); // Tiempos más cortos ya que ya esperamos a que el servidor esté listo
+      const timer = window.setTimeout(
+        () => {
+          setChatbotVisible(true);
+        },
+        isMobile ? 1000 : 500
+      ); // Tiempos más cortos ya que ya esperamos a que el servidor esté listo
       return () => clearTimeout(timer);
     }
   }, [n8nServerReady, isMobile]);
@@ -177,7 +186,8 @@ const AppContent = () => {
       const sectionId = location.state.scrollToSection;
       const sectionElement = document.getElementById(sectionId);
       if (sectionElement) {
-        setTimeout(() => { // setTimeout para dar tiempo al DOM a actualizarse si es necesario
+        setTimeout(() => {
+          // setTimeout para dar tiempo al DOM a actualizarse si es necesario
           sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100); // Un pequeño delay puede ayudar
       }
@@ -200,8 +210,9 @@ const AppContent = () => {
   };
 
   const toggleSidebar = () => {
-    if (isMobile) { // Solo permitir toggle en móvil
-        setIsSidebarOpen(!isSidebarOpen);
+    if (isMobile) {
+      // Solo permitir toggle en móvil
+      setIsSidebarOpen(!isSidebarOpen);
     }
   };
 
@@ -212,7 +223,7 @@ const AppContent = () => {
     <AppWrapper>
       {shouldShowLoader && !fontsLoaded && <FontLoader onLoaded={handleFontsLoaded} />}
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} isMobile={isMobile} />
-      
+
       <MainContentWrapper $isSidebarPresent={isSidebarOpen && !isMobile}>
         <GrainOverlay />
         <ContactButtonStyled initialDelay={500} $hideOnScroll={shouldHideContactButton} />
@@ -225,21 +236,32 @@ const AppContent = () => {
         <Container>
           <React.Suspense fallback={<div>Loading...</div>}>
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <Home 
-                    onAnimationComplete={handleAnimationComplete} 
-                    fontsLoaded={fontsLoaded} 
-                    onContactSectionViewChange={setIsContactSectionInView}
+              {!token && (
+                <>
+                  <Route path="/" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                </>
+              )}
+              {token && (
+                <>
+                  <Route
+                    path="/"
+                    element={
+                      <Home
+                        onAnimationComplete={handleAnimationComplete}
+                        fontsLoaded={fontsLoaded}
+                        onContactSectionViewChange={setIsContactSectionInView}
+                      />
+                    }
                   />
-                }
-              />
-              <Route path="/xcons" element={<XConsExperiencePage />} />
-              <Route path="/fusionads" element={<FusionAdsPage />} />
-              <Route path="/bandit" element={<BanditPage />} />
-              <Route path="/otros" element={<MaintenancePage />} />
-              <Route path="/:projectId" element={<ProjectPage />} />
+                  <Route path="/ai" element={<AIRepositoryPage />} />
+                  <Route path="/xcons" element={<XConsExperiencePage />} />
+                  <Route path="/fusionads" element={<FusionAdsPage />} />
+                  <Route path="/bandit" element={<BanditPage />} />
+                  <Route path="/otros" element={<MaintenancePage />} />
+                  <Route path="/:projectId" element={<ProjectPage />} />
+                </>
+              )}
             </Routes>
           </React.Suspense>
         </Container>
@@ -252,11 +274,13 @@ function App() {
   return (
     <Provider store={store}>
       <ThemeProvider>
-        <GlobalStyles />
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-          <ScrollToTop />
-          <AppContent />
-        </Router>
+        <UserProvider>
+          <GlobalStyles />
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <ScrollToTop />
+            <AppContent />
+          </Router>
+        </UserProvider>
       </ThemeProvider>
     </Provider>
   );
