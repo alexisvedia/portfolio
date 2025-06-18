@@ -16,10 +16,7 @@ const resources = {
       viewProjects: 'View Projects',
       contactMe: 'Contact Me',
 
-      // Sidebar chats
-      'sidebar.chats.today': 'TODAY',
-      'sidebar.chats.yesterday': 'YESTERDAY',
-      'sidebar.chats.previous': 'PREVIOUS',
+
 
       // Chat translations
       'AI Portfolio Assistant': 'AI Portfolio Assistant',
@@ -162,10 +159,7 @@ const resources = {
       viewProjects: 'Ver Proyectos',
       contactMe: 'Contáctame',
 
-      // Sidebar chats
-      'sidebar.chats.today': 'HOY',
-      'sidebar.chats.yesterday': 'AYER',
-      'sidebar.chats.previous': 'ANTERIORES',
+
 
       // Chat translations
       'AI Portfolio Assistant': 'AI Portfolio Assistant',

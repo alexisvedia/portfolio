@@ -25,21 +25,7 @@ interface NavLinkItem {
   subLinks?: NavLinkItem[];
 }
 
-interface ChatItem {
-  id: string;
-  title: string;
-  titleKey?: string;
-  displayText: {
-    es: string;
-    en: string;
-  };
-}
 
-interface ChatGroup {
-  titleKey: string;
-  defaultTitle: string;
-  chats: ChatItem[];
-}
 
 interface SidebarProps {
   isOpen: boolean;
@@ -155,84 +141,7 @@ const NavList = styled.ul`
   margin-bottom: ${({ theme }) => theme.space.xs};
 `;
 
-const ChatListContainer = styled.div`
-  margin-top: 0;
-  padding-top: ${({ theme }) => theme.space.md};
-  border-top: 1px solid ${({ theme }) => (theme.isDark ? theme.colors.border : '#dee2e6')};
-  flex-grow: 2;
-  overflow-y: auto;
 
-  /* Estilos de scrollbar consistentes */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
-
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(155, 155, 155, 0.5);
-    border-radius: 20px;
-  }
-`;
-
-const ChatGroupTitle = styled.h4`
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ theme }) => theme.colors.text};
-  padding: ${({ theme }) => `0 ${theme.space.md} ${theme.space.xs}`};
-  margin: 0 0 ${({ theme }) => theme.space.xs} 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
-  opacity: 0.9;
-`;
-
-const ChatGroupWrapper = styled.div`
-  &:not(:last-child) {
-    margin-bottom: ${({ theme }) => theme.space.sm}; /* Espacio entre grupos de chat */
-  }
-`;
-
-const ChatListStyled = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-`;
-
-const ChatItemStyled = styled.li`
-  margin-bottom: ${({ theme }) => theme.space.xs};
-`;
-
-const ChatLink = styled.a`
-  display: block;
-  padding: ${({ theme }) => `${theme.space.xs} ${theme.space.md}`};
-  color: ${({ theme }) => theme.colors.text};
-  text-decoration: none !important;
-  border-radius: 4px;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, opacity 0.2s ease-in-out;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  font-weight: 400;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  opacity: 0.75;
-
-  &:hover {
-    background-color: ${({ theme }) => (theme.isDark ? 'rgba(33,33,33,0.5)' : 'rgba(236,236,236,0.5)')};
-    color: ${({ theme }) => theme.colors.text};
-    opacity: 1;
-  }
-
-  &.active {
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.text};
-  }
-`;
 
 const NavItem = styled.li`
   margin-bottom: ${({ theme }) => theme.space.xs};
@@ -466,28 +375,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     { href: '#contact', labelKey: 'contact', defaultLabel: 'Contacto', IconComponent: ContactIcon },
   ];
 
-  const chatGroups: ChatGroup[] = [
-    {
-      titleKey: 'sidebar.chats.today',
-      defaultTitle: 'Hoy',
-      chats: [
-        { id: 'chat1', title: '¿Por qué Alexis es necesario en tu proyecto?', displayText: { es: '¿Por qué Alexis es necesario en tu proyecto?', en: 'Why is Alexis needed in your project?' } },
-        { id: 'chat2', title: 'Planes de dominación mundial (con Alexis)', displayText: { es: 'Planes de dominación mundial (con Alexis)', en: 'World domination plans (with Alexis)' } },
-        { id: 'chat3', title: 'Contratar a Alexis: la mejor decisión', displayText: { es: 'Contratar a Alexis: la mejor decisión', en: 'Hiring Alexis: the best decision' } },
-        { id: 'chat_new1', title: 'El secreto del café perfecto según Alexis', displayText: { es: 'El secreto del café perfecto según Alexis', en: 'Alexis\'s secret to the perfect coffee' } },
-      ],
-    },
-    {
-      titleKey: 'sidebar.chats.yesterday',
-      defaultTitle: 'Ayer',
-      chats: [
-        { id: 'chat4', title: 'Ideas de proyectos innovadores con Alexis', displayText: { es: 'Ideas de proyectos innovadores con Alexis', en: 'Innovative project ideas with Alexis?' } },
-        { id: 'chat5', title: '¿Cómo contactar a este genio?', displayText: { es: '¿Cómo contactar a este genio?', en: 'How to contact this genius?' } },
-        { id: 'chat6', title: 'El impacto de Alexis en la industria tech', displayText: { es: 'El impacto de Alexis en la industria tech', en: 'Alexis\'s impact on the tech industry' } },
-        { id: 'chat_new2', title: 'Debate: ¿Piña en la pizza? La opinión de Alexis', displayText: { es: 'Debate: ¿Piña en la pizza? La opinión de Alexis', en: 'Debate: Pineapple on pizza? Alexis\'s take' } },
-      ],
-    },
-  ];
+
 
   const swipeThreshold = 50; 
 
@@ -628,12 +516,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
     }
   };
 
-  const handleChatClick = (chatItem: ChatItem) => {
-    console.log('Chat item clicked:', chatItem.id);
-    if (isMobile && isOpen) {
-      toggleSidebar();
-    }
-  };
+
 
   const showTooltip = (textKey: string, e: React.MouseEvent<HTMLElement>, displayText?: { es: string; en: string }) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -733,30 +616,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
           })}
         </NavList>
 
-        <ChatListContainer>
-          {chatGroups.map((group) => (
-            <ChatGroupWrapper key={group.titleKey}>
-              <ChatGroupTitle>{t(group.titleKey, group.defaultTitle)}</ChatGroupTitle>
-              <ChatListStyled>
-                {group.chats.map((chat) => (
-                  <ChatItemStyled key={chat.id}>
-                    <ChatLink
-                      href={`#chat-${chat.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleChatClick(chat);
-                      }}
-                      onMouseEnter={(e) => showTooltip(chat.titleKey || chat.title, e, chat.displayText)}
-                      onMouseLeave={hideTooltip}
-                    >
-                      {i18n.language === 'es' ? chat.displayText.es : chat.displayText.en}
-                    </ChatLink>
-                  </ChatItemStyled>
-                ))}
-              </ChatListStyled>
-            </ChatGroupWrapper>
-          ))}
-        </ChatListContainer>
+
 
         <ControlsContainer>
           <SocialMediaButton 
@@ -801,4 +661,4 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
   );
 };
 
-export default Sidebar; 
+export default Sidebar;
