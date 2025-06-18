@@ -1,6 +1,7 @@
 /* Estilos para el Masonry Grid (iguales a XCons) */
 .masonry-grid-container {
-  /* padding: 5px; */ /* Eliminado, el MasonryWrapper lo maneja */
+  /* padding: 5px; */
+  /* Eliminado, el MasonryWrapper lo maneja */
 }
 
 .masonry-grid {
@@ -74,7 +75,7 @@
   min-height: 450px;
 }
 
-.modal-media-area img, 
+.modal-media-area img,
 .modal-media-area video {
   max-width: 100%;
   max-height: 100%;
@@ -89,6 +90,9 @@
   flex: 1;
   padding: 25px;
   padding-right: 70px;
+  padding-bottom: 100px;
+  /* Increased padding to ensure text is never covered by thumbnails */
+  /* Espacio para thumbnails */
   overflow-y: auto;
   background-color: #f9f9f9;
   border-left: 1px solid #eee;
@@ -96,7 +100,28 @@
   min-width: 300px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  /* Cambiar de center a flex-start para mejor scroll */
+}
+
+/* Scrollbar personalizado para modal-info-area */
+.modal-info-area::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-info-area::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 10px;
+}
+
+.modal-info-area::-webkit-scrollbar-thumb {
+  background: #ddd;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.modal-info-area::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
 }
 
 .modal-info-area h2 {
@@ -189,94 +214,127 @@
 
 /* --- Dark Mode para el Modal (Revisión detallada basada en XCons) --- */
 .modal-overlay.dark-mode .modal-content-wrapper {
-  background-color: #1e1e1e; 
-  border: 1px solid #383838; /* Borde XCons .dark-mode .modal-content-wrapper */
+  background-color: #1e1e1e;
+  border: 1px solid #383838;
+  /* Borde XCons .dark-mode .modal-content-wrapper */
 }
 
 .modal-overlay.dark-mode .modal-media-area {
-  background-color: #111111; 
+  background-color: #111111;
 }
 
 .modal-overlay.dark-mode .modal-info-area {
-  background-color: #2a2a2a; 
-  border-left: 1px solid #383838; 
+  background-color: #2a2a2a;
+  border-left: 1px solid #383838;
 }
 
-.modal-overlay.dark-mode .modal-description { /* p */
-  color: #bbb; /* De XCons .dark-mode p */
+/* Scrollbar personalizado para modo oscuro */
+.modal-overlay.dark-mode .modal-info-area::-webkit-scrollbar-track {
+  background: #2a2a2a;
+}
+
+.modal-overlay.dark-mode .modal-info-area::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+.modal-overlay.dark-mode .modal-info-area::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}
+
+.modal-overlay.dark-mode .modal-description {
+  /* p */
+  color: #bbb;
+  /* De XCons .dark-mode p */
 }
 
 /* Colores de ModalInfoTitle (h2) y otros textos (links, etc.) se manejan en styled-components */
 
 .modal-overlay.dark-mode .modal-close-button {
-  background: rgba(255, 255, 255, 0.1); /* De XCons .dark-mode */
+  background: rgba(255, 255, 255, 0.1);
+  /* De XCons .dark-mode */
   color: #f0f0f0;
 }
 
 .modal-overlay.dark-mode .modal-close-button:hover {
-  background: rgba(255, 255, 255, 0.2); /* De XCons .dark-mode */
+  background: rgba(255, 255, 255, 0.2);
+  /* De XCons .dark-mode */
 }
 
 .modal-overlay.dark-mode .modal-nav-button {
-  background-color: rgba(50, 50, 50, 0.3); /* De XCons .dark-mode */
-  border: 1px solid rgba(255, 255, 255, 0.15); /* De XCons .dark-mode */
+  background-color: rgba(50, 50, 50, 0.3);
+  /* De XCons .dark-mode */
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* De XCons .dark-mode */
   color: #f0f0f0;
 }
 
 .modal-overlay.dark-mode .modal-nav-button:hover:not(:disabled) {
-  background-color: rgba(70, 70, 70, 0.5); /* De XCons .dark-mode */
+  background-color: rgba(70, 70, 70, 0.5);
+  /* De XCons .dark-mode */
 }
 
 /* --- Responsive (Revisión detallada basada en XCons) --- */
-@media (max-width: 992px) { 
+@media (max-width: 992px) {
   .modal-content-wrapper {
-    flex-direction: column; 
+    flex-direction: column;
     width: 95vw;
     max-height: 95vh;
   }
 
   .modal-media-area {
-    flex: none; 
-    height: auto; /* De XCons responsive */
-    min-height: 300px; /* De XCons responsive */
-    padding: 15px; /* De XCons responsive */
-    border-bottom: 1px solid #ddd; 
+    flex: none;
+    height: auto;
+    /* De XCons responsive */
+    min-height: 300px;
+    /* De XCons responsive */
+    padding: 15px;
+    /* De XCons responsive */
+    border-bottom: 1px solid #ddd;
   }
 
   .modal-overlay.dark-mode .modal-media-area {
-    border-bottom: 1px solid #383838; 
+    border-bottom: 1px solid #383838;
   }
 
   .modal-info-area {
     flex: none;
-    max-width: 100%; /* De XCons responsive */
-    min-width: 0; /* De XCons responsive */
+    max-width: 100%;
+    /* De XCons responsive */
+    min-width: 0;
+    /* De XCons responsive */
     border-left: none;
-    padding: 20px; 
-    height: auto; /* De XCons responsive */
-    max-height: none; /* De XCons responsive, permite que el contenido defina la altura */
-    overflow-y: auto; /* Asegurar scroll si el contenido es largo */
+    padding: 20px;
+    padding-bottom: 20px;
+    /* Remover padding extra en mobile ya que no hay thumbnails */
+    height: auto;
+    /* De XCons responsive */
+    max-height: none;
+    /* De XCons responsive, permite que el contenido defina la altura */
+    overflow-y: auto;
+    /* Asegurar scroll si el contenido es largo */
   }
 
   .modal-nav-button {
     width: 40px;
     height: 40px;
   }
+
   .modal-nav-button.prev {
     left: 10px;
   }
+
   .modal-nav-button.next {
     right: 10px;
   }
 }
 
-@media (max-width: 767px) { 
+@media (max-width: 767px) {
   .modal-overlay {
-    padding: 10px; 
+    padding: 10px;
   }
 
   .modal-content-wrapper {
-    width: calc(100vw - 20px); 
+    width: calc(100vw - 20px);
     max-height: calc(100vh - 20px);
   }
 }
@@ -286,8 +344,69 @@ body.modal-open {
 }
 
 body.modal-open .chatbot-assistant,
-body.modal-open .ai-portfolio-assistant-container { 
-  display: none !important; 
+body.modal-open .ai-portfolio-assistant-container {
+  display: none !important;
+}
+
+/* Estilos para el Pasador de Miniaturas */
+.modal-thumbnail-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid #ddd;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overflow-y: hidden;
+  z-index: 1005;
+  -webkit-overflow-scrolling: touch;
+}
+
+.modal-thumbnail-strip::-webkit-scrollbar {
+  height: 5px;
+}
+
+.modal-thumbnail-strip::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+.thumbnail-item {
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  margin-right: 8px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.thumbnail-item:last-child {
+  margin-right: 0;
+}
+
+.thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbnail-item:hover {
+  border-color: #aaa;
+  transform: scale(1.05);
+}
+
+.thumbnail-item.active {
+  border-color: #007bff;
+  transform: scale(1.05);
 }
 
 /* Estilo para el masonry grid y sus items */
@@ -300,29 +419,36 @@ body.modal-open .ai-portfolio-assistant-container {
   position: absolute;
   will-change: transform, width, height, opacity;
   /* padding: 10px; El padding se puede manejar dentro del item o quitar si el contenido lo maneja */
-  box-sizing: border-box; /* Importante si se añade padding o borde al item */
+  box-sizing: border-box;
+  /* Importante si se añade padding o borde al item */
 }
 
-.masonry-item > * { /* El hijo directo, que sería la imagen */
-  display: block; /* Asegurar que la imagen sea un bloque */
+.masonry-item>* {
+  /* El hijo directo, que sería la imagen */
+  display: block;
+  /* Asegurar que la imagen sea un bloque */
   width: 100%;
   height: 100%;
-  object-fit: cover; /* La imagen cubre el área sin distorsionarse */
-  border-radius: 8px; /* Bordes redondeados para la imagen */
+  object-fit: cover;
+  /* La imagen cubre el área sin distorsionarse */
+  border-radius: 8px;
+  /* Bordes redondeados para la imagen */
   box-shadow: 0px 8px 20px -8px rgba(0, 0, 0, 0.15);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
-  overflow: hidden; /* Por si acaso, aunque object-fit debería manejarlo */
+  overflow: hidden;
+  /* Por si acaso, aunque object-fit debería manejarlo */
 }
 
-.masonry-item:hover > * {
+.masonry-item:hover>* {
   transform: scale(1.03);
   box-shadow: 0px 12px 30px -10px rgba(0, 0, 0, 0.25);
 }
 
 /* Para asegurar que el padding entre items no colapse visualmente con el contenedor externo */
 .masonry-grid-container {
-    padding: 5px; /* Un pequeño padding alrededor de toda la grilla */
+  padding: 5px;
+  /* Un pequeño padding alrededor de toda la grilla */
 }
 
 /* Si los items tienen un padding, por ejemplo 10px como en el original:
@@ -386,6 +512,24 @@ Elegí la opción de que la imagen llene el .masonry-item y tenga su propio esti
 
 .modal-overlay.dark-mode .modal-nav-button:disabled {
   opacity: 0.4;
+}
+
+/* Estilos para thumbnails en modo oscuro */
+.modal-overlay.dark-mode .modal-thumbnail-strip {
+  background-color: rgba(42, 42, 42, 0.95);
+  border-top: 1px solid #383838;
+}
+
+.modal-overlay.dark-mode .modal-thumbnail-strip::-webkit-scrollbar-thumb {
+  background: #555;
+}
+
+.modal-overlay.dark-mode .thumbnail-item:hover {
+  border-color: #777;
+}
+
+.modal-overlay.dark-mode .thumbnail-item.active {
+  border-color: #4DABF7;
 }
 
 @media (max-width: 992px) {
@@ -494,7 +638,7 @@ Elegí la opción de que la imagen llene el .masonry-item y tenga su propio esti
     margin-left: auto;
     margin-right: auto;
   }
-  
+
   .modal-overlay.dark-mode .modal-info-area {
     background-color: #21252b;
     border-top-color: #3a3f4b;
@@ -506,4 +650,4 @@ body.modal-open .chatbot-assistant,
 body.modal-open .ai-portfolio-assistant-container,
 body.modal-open .bottom-right-button {
   display: none !important;
-} 
+}

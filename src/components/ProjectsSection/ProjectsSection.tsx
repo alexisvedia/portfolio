@@ -56,7 +56,7 @@ const ProjectsSection: React.FC = () => {
     {
       link: '/fusionads', // 2. FusionAds
       text: 'FusionAds',
-      image: fusionadsLogo, 
+      image: fusionadsLogo,
       color: '#F7480B',
       description: t(
         'companyDescriptions.fusionads',
@@ -66,7 +66,7 @@ const ProjectsSection: React.FC = () => {
     {
       link: '/bandit', // 3. Bandit
       text: 'Bandit',
-      image: banditLogo, 
+      image: banditLogo,
       color: '#F70F43',
       description: t(
         'companyDescriptions.bandit',
