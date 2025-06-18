@@ -380,7 +380,7 @@ const masonryItemDetails: Array<
     height: 330,
     type: 'image' as const,
     actionButton: {
-      url: 'https://comercial.xcons.com/',
+      url: 'https://www.xcons.com/',
       labelES: 'Visitar sitio',
       labelEN: 'Visit site',
     },
