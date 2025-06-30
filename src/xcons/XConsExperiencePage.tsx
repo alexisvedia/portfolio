@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { useSearchParams } from 'react-router-dom';
 import { useTheme, ThemeMode } from '../context/ThemeContext';
 import { MarketingExperiences, OperationsExperiences } from './components/Experiences';
 import { marketingExperiences, operationsExperiences } from './data/experiencesData';
@@ -414,8 +415,12 @@ const masonryItemDetails: Array<
 const XConsExperiencePage: React.FC = () => {
   const { themeMode } = useTheme();
   const { i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
   const isDark = themeMode === 'dark';
+  
+  // Obtener el proyecto inicial de los query parameters
+  const initialProject = searchParams.get('project');
 
   // Generar masonryData con los textos traducidos
   const masonryData: MasonryItem[] = masonryItemDetails.map(item => {
@@ -531,7 +536,18 @@ const XConsExperiencePage: React.FC = () => {
             {translations.projectsTitle[language]}
           </StandardSectionTitle>
           <DividerLine $isDark={isDark} />
-          <Masonry data={masonryData} themeMode={themeMode} />
+          <Masonry 
+            data={masonryData} 
+            themeMode={themeMode} 
+            initialSelectedProject={initialProject}
+            onModalStateChange={(isOpen, projectId) => {
+              if (isOpen && projectId) {
+                setSearchParams({ project: projectId });
+              } else {
+                setSearchParams({});
+              }
+            }}
+          />
         </MasonryWrapper>
       </PageContainer>
     </PageTransition>

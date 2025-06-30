@@ -36,6 +36,8 @@ interface GridItem extends MasonryItem {
 interface MasonryProps {
   data: MasonryItem[];
   themeMode?: 'light' | 'dark'; // Añadir themeMode a las props
+  initialSelectedProject?: string | null; // Proyecto inicial a abrir
+  onModalStateChange?: (isOpen: boolean, projectId?: string) => void; // Callback para cambios de estado del modal
 }
 
 // Nuevo componente estilizado para el título del modal
@@ -127,7 +129,7 @@ const AcrylicButton = styled.a<{ $isDark: boolean }>`
   }
 `;
 
-const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
+const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProject, onModalStateChange }) => {
   const { t, i18n } = useTranslation(); // Hook de traducción
   const [columns, setColumns] = useState<number>(2);
   const [selectedContent, setSelectedContent] = useState<MasonryItem | null>(null);
@@ -174,6 +176,23 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
     touchStartX.current = null;
     touchEndX.current = null;
   };
+
+  // Efecto para abrir automáticamente el modal del proyecto inicial
+  useEffect(() => {
+    if (initialSelectedProject && data.length > 0) {
+      const projectItem = data.find(item => 
+        item.id.toString() === initialSelectedProject ||
+        (item.title && item.title.toLowerCase().replace(/\s+/g, '').includes(initialSelectedProject.toLowerCase().replace(/\s+/g, '')))
+      );
+      
+      if (projectItem) {
+        const index = data.indexOf(projectItem);
+        setSelectedContent(projectItem);
+        setCurrentIndex(index);
+        onModalStateChange?.(true, initialSelectedProject);
+      }
+    }
+  }, [initialSelectedProject, data, onModalStateChange]);
 
   useEffect(() => {
     const updateColumns = () => {
@@ -242,11 +261,13 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode }) => {
   const handleItemClick = (item: MasonryItem, index: number) => {
     setSelectedContent(item);
     setCurrentIndex(index);
+    onModalStateChange?.(true, item.id.toString());
   };
 
   const closeModal = () => {
     setSelectedContent(null);
     setCurrentIndex(null);
+    onModalStateChange?.(false);
   };
 
   const goToNext = () => {

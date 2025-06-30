@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { useSearchParams } from 'react-router-dom';
 import { useTheme, ThemeMode } from '../context/ThemeContext'; // Importar ThemeMode
 import { useTranslation } from 'react-i18next';
 import PageTransition from '@components/PageTransition/PageTransition'; // Asumiendo alias correcto
@@ -234,8 +235,12 @@ const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
 const FusionAdsPage: React.FC = () => {
   const { themeMode } = useTheme();
   const { t, i18n } = useTranslation('fusionads'); // Asegurarse que 'fusionads' es el namespace correcto
+  const [searchParams, setSearchParams] = useSearchParams();
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
   const isDark = themeMode === 'dark';
+  
+  // Obtener el proyecto inicial de los query parameters
+  const initialProject = searchParams.get('project');
 
   const bannerUrl = "https://backoffice.fusionos.ai";
 
@@ -321,7 +326,17 @@ const FusionAdsPage: React.FC = () => {
           </StandardSectionTitle>
           <DividerLine $isDark={isDark} />
           {fusionProjectsData.length > 0 ? (
-            <MasonryFusion data={fusionProjectsData} />
+            <MasonryFusion 
+              data={fusionProjectsData} 
+              initialSelectedProject={initialProject}
+              onModalStateChange={(isOpen, projectId) => {
+                if (isOpen && projectId) {
+                  setSearchParams({ project: projectId });
+                } else {
+                  setSearchParams({});
+                }
+              }}
+            />
           ) : (
             <p>{language === 'en' ? 'Projects will be added here soon.' : 'Próximamente se agregarán proyectos aquí.'}</p>
           )}
@@ -332,4 +347,4 @@ const FusionAdsPage: React.FC = () => {
   );
 };
 
-export default FusionAdsPage; 
+export default FusionAdsPage;

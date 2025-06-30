@@ -32,6 +32,8 @@ interface GridItem extends MasonryItem {
 
 interface MasonryProps {
   data: MasonryItem[];
+  initialSelectedProject?: string | null;
+  onModalStateChange?: (isOpen: boolean, projectId?: string) => void;
 }
 
 const ModalInfoTitle = styled.h2`
@@ -121,7 +123,7 @@ const AcrylicButton = styled.a<{ $isDark: boolean }>`
   }
 `;
 
-export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
+export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedProject, onModalStateChange }) => {
   const { t, i18n } = useTranslation();
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
   const { theme } = useTheme();
@@ -130,6 +132,24 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
   const [selectedContent, setSelectedContent] = useState<MasonryItem | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
+
+  // Efecto para abrir automáticamente el modal del proyecto inicial
+  useEffect(() => {
+    if (initialSelectedProject && data.length > 0) {
+      const projectItem = data.find(item => 
+        item.id.toString() === initialSelectedProject ||
+        (item.title && (item.title.es.toLowerCase().replace(/\s+/g, '').includes(initialSelectedProject.toLowerCase().replace(/\s+/g, '')) ||
+         item.title.en.toLowerCase().replace(/\s+/g, '').includes(initialSelectedProject.toLowerCase().replace(/\s+/g, ''))))
+      );
+      
+      if (projectItem) {
+        const index = data.indexOf(projectItem);
+        setSelectedContent(projectItem);
+        setCurrentIndex(index);
+        onModalStateChange?.(true, initialSelectedProject);
+      }
+    }
+  }, [initialSelectedProject, data, onModalStateChange]);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -227,11 +247,13 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
   const handleItemClick = (item: MasonryItem, index: number) => {
     setSelectedContent(item);
     setCurrentIndex(index);
+    onModalStateChange?.(true, item.id.toString());
   };
 
   const closeModal = () => {
     setSelectedContent(null);
     setCurrentIndex(null);
+    onModalStateChange?.(false);
   };
 
   const goToNext = () => {
@@ -498,4 +520,4 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data }) => {
       )}
     </>
   );
-}; 
+};
