@@ -329,23 +329,23 @@ const masonryItemDetails: Array<
     documentLinks: [
       {
         name: 'Diseño general.pdf',
-        url: 'https://storage.googleapis.com/brandify-usercontent-dev/c4e43e71-4702-4e55-88be-4308c9fdce23?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=eayt9wA%2B98j7WjMDtdCzsujR3%2Bs%3D%0A',
+        url: '/assets/Diseño general.pdf',
       },
       {
-        name: 'Distribuidores.pdf',
-        url: 'https://storage.googleapis.com/brandify-usercontent-dev/f5ce9fd5-3397-40fc-b914-930f0c293986?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=kM7WtIcN0oXOEELf9%2FB2LBrhYyA%3D%0A',
+        name: 'Corralones.pdf',
+        url: '/assets/Corralones.pdf',
       },
       {
         name: 'Calculadores.pdf',
-        url: 'https://storage.googleapis.com/brandify-usercontent-dev/c4e43e71-4702-4e55-88be-4308c9fdce23?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=eayt9wA%2B98j7WjMDtdCzsujR3%2Bs%3D%0A',
+        url: '/assets/Calculadores.pdf',
       },
       {
         name: 'Calificación.pdf',
-        url: 'https://storage.googleapis.com/brandify-usercontent-dev/7d81c133-7384-4782-af57-a27e8ab5a7e2?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=8p412QJ5P0mYrEqrKJy%2FmQ3WOrQ%3D%0A',
+        url: '/assets/Calificación.pdf',
       },
       {
         name: 'Otras consideraciones.pdf',
-        url: 'https://storage.googleapis.com/brandify-usercontent-dev/22709981-98c0-4926-8f80-376a095fea2a?Expires=1746921599&GoogleAccessId=GOOG1EQYYUCN45RGYHGLHRS57FY5LN3ZFJOZEUIRTNHTBDZURLXQ4KVCAN4BI&Signature=j0HPmAei9M1RfCrqigusBboXCb0%3D%0A',
+        url: '/assets/Otras consideraciones.pdf',
       },
     ],
   },
