@@ -1,1 +1,80 @@
-/* Archivo de definiciones @font-face. Actualmente vacío después del cambio a Poppins vía Google Fonts. */
+/* Prosa Font Family */
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-ThinOblique.ttf') format('truetype');
+  font-weight: 100;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-LightOblique.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-RegularOblique.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-BoldOblique.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-Black.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Prosa';
+  src: url('/fonts/Prosa/ProsaGT-BlackOblique.ttf') format('truetype');
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}

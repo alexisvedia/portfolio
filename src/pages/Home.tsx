@@ -16,7 +16,6 @@ const HomeContainer = styled.div`
 const ContentWrapper = styled.div`
   max-width: 1000px;
   margin: 0 auto;
-  padding: 0 1rem;
 `;
 
 interface HomeProps {
@@ -55,8 +54,8 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded, onContact
     <PageTransition>
       <HomeContainer id="home">
         <SEOContent />
+        <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
         <ContentWrapper>
-          <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
           <BioSection />
         </ContentWrapper>
         <ContentWrapper>

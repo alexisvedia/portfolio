@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styled from 'styled-components';
-import { Home } from 'lucide-react';
+import { Home, FolderOpen, Mail } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useScrollDirection } from '../../utils/useScrollDirection';
+import { useBackgroundColorDetection } from '../../hooks/useBackgroundColorDetection';
 
 interface NavItem {
   name: string;
@@ -45,8 +46,10 @@ const NavContent = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background-color: rgba(30, 30, 30, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(30, 30, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   padding: 0.25rem 0.25rem;
   border-radius: 9999px;
@@ -62,21 +65,31 @@ const NavContent = styled.div`
 `;
 
 // Elemento de navegación
-const NavLink = styled(Link)<{ $isActive: boolean }>`
+const NavLink = styled(Link)<{ 
+  $isActive: boolean;
+  $textColor: string;
+  $textColorSecondary: string;
+}>`
   position: relative;
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: 600;
   padding: 0.5rem 1.5rem;
   border-radius: 9999px;
-  transition: all 0.3s cubic-bezier(0.215, 0.61, 0.355, 1);
-  color: ${({ $isActive }) => ($isActive ? '#FFFFFF' : 'rgba(255, 255, 255, 0.53)')};
-  background-color: ${({ $isActive }) => ($isActive ? 'rgba(100, 108, 255, 0.01)' : 'transparent')};
+  transition: all 0.4s cubic-bezier(0.215, 0.61, 0.355, 1);
+  color: ${({ $isActive, $textColor, $textColorSecondary }) => 
+    $isActive ? $textColor : $textColorSecondary};
+  background-color: ${({ $isActive }) => ($isActive ? 'rgba(100, 108, 255, 0.15)' : 'transparent')};
   text-decoration: none;
+  text-shadow: ${({ $isActive, $textColor }) => 
+    $isActive && $textColor === '#000000' ? '0 0 8px rgba(0, 0, 0, 0.3)' : 
+    $isActive && $textColor === '#ffffff' ? '0 0 8px rgba(255, 255, 255, 0.3)' : 'none'};
 
   &:hover {
-    color: #ffffff;
+    color: ${({ $textColor }) => $textColor};
     transform: translateY(-1px);
+    text-shadow: ${({ $textColor }) => 
+      $textColor === '#000000' ? '0 0 12px rgba(0, 0, 0, 0.4)' : '0 0 12px rgba(255, 255, 255, 0.4)'};
   }
 
   @media (max-width: 768px) {
@@ -180,12 +193,20 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
   // Definir los elementos de navegación con sus nombres y URLs
   const items: NavItem[] = [
     { name: 'Home', nameKey: 'navbar.home', url: '/', icon: Home },
+    { name: 'Proyectos', nameKey: 'navbar.projects', url: '/projects', icon: FolderOpen },
+    { name: 'Contacto', nameKey: 'navbar.contact', url: '/contact', icon: Mail },
   ];
 
   const [isMobile, setIsMobile] = useState(false);
   const location = useLocation();
   const { direction } = useScrollDirection({ threshold: 5 });
   const [isVisible, setIsVisible] = useState(true);
+  
+  // Ref para el contenedor del navbar
+  const navRef = useRef<HTMLDivElement>(null);
+  
+  // Hook para detectar el color de fondo y ajustar el contraste
+  const { textColor, textColorSecondary } = useBackgroundColorDetection(navRef);
 
   // Configurar detector de tamaño de pantalla
   useEffect(() => {
@@ -225,6 +246,7 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
   return (
     <AnimatePresence>
       <NavContainer 
+        ref={navRef}
         className={className}
         initial="visible"
         animate={isVisible ? "visible" : "hidden"}
@@ -237,7 +259,14 @@ export const NavBar: React.FC<NavBarProps> = ({ className, t }) => {
             location.pathname === item.url || (location.pathname === '' && item.url === '/');
 
           return (
-            <NavLink key={item.name} to={item.url} $isActive={isActive}>
+            <NavLink 
+              key={item.name} 
+              to={item.url} 
+              $isActive={isActive}
+              $textColor={textColor}
+              $textColorSecondary={textColorSecondary}
+              data-navbar-link
+            >
               <span className="text">{t(item.nameKey)}</span>
               <IconWrapper className="icon">
                 <Icon size={isMobile ? 22 : 18} strokeWidth={2.5} />

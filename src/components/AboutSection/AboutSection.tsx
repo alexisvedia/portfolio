@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import profileImage from '../../assets/profile-image.webp';
+
 
 const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space.xl};
@@ -24,7 +24,7 @@ const SectionTitle = styled.h2`
 
 const ContentWrapper = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 1fr;
   gap: 2rem;
   align-items: center;
   margin-bottom: 2rem;
@@ -34,21 +34,7 @@ const ContentWrapper = styled.div`
   }
 `;
 
-const ImageContainer = styled.div`
-  height: 300px;
-  width: 300px;
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  margin: 0 auto;
-`;
 
-const ProfileImage = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
 
 const BioText = styled.p`
   color: ${({ theme }) => theme.colors.text};
@@ -157,12 +143,7 @@ const AboutSection: React.FC = () => {
     <SectionContainer id="about">
       <SectionTitle>{t('navbar.about')}</SectionTitle>
       
-      <ContentWrapper>
-        <ImageContainer>
-          <ProfileImage src={profileImage} alt={t('navbar.about')} />
-        </ImageContainer>
-        
-        <div>
+      
           <BioText>{t('about.bio.part1')}</BioText>
           <BioText>{t('about.bio.part2')}</BioText>
         </div>

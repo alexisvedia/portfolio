@@ -7,7 +7,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // Nueva importación de imagen
-import alexisImage from '../../assets/images/projects/alexis.png';
+
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -16,8 +16,13 @@ const SectionContainer = styled.section`
   position: relative;
   overflow: hidden;
   width: 100%;
-  margin: -169px 0 5rem 0;
+  margin: 5rem 0 5rem 0;
   padding-top: 5vh;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
+    margin-top: 2rem;
+    padding-top: 2rem;
+  }
 `;
 
 const ContentWrapper = styled.div`
@@ -29,19 +34,19 @@ const ContentWrapper = styled.div`
   
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     flex-direction: column;
-    padding: 0 ${({ theme }) => theme.space.md};
+    padding: 0;
+    width: 100%;
   }
 `;
 
 const ProfileImageContainer = styled.div`
-  max-width: 45%;
+  max-width: 100%;
   overflow: hidden;
   position: relative;
   will-change: transform, opacity, filter;
   
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    max-width: 80%;
-    margin-bottom: 1.5rem;
+    display: none;
   }
 `;
 
@@ -54,7 +59,7 @@ const ProfileImage = styled.img`
 const TextContainer = styled.div`
   flex: 1;
   padding-left: 10px;
-  max-width: 45%;
+  max-width: 100%;
   
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     padding-left: 0;
@@ -192,12 +197,7 @@ const BioSection: React.FC = () => {
     <SectionContainer ref={sectionRef} id="about">
       <SectionTitle ref={titleRef}>{i18n.language === 'es' ? 'SOBRE MÍ' : 'ABOUT ME'}</SectionTitle>
       <ContentWrapper>
-        <ProfileImageContainer ref={imageRef}>
-          <ProfileImage 
-            src={alexisImage}
-            alt="Alexis Vedia - Desarrollador Full Stack especializado en React, TypeScript y Node.js" 
-          />
-        </ProfileImageContainer>
+        
         <TextContainer>
           
           <BioTextContainer>

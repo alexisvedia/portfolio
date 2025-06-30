@@ -1,0 +1,11 @@
+{
+  "navbar": {
+    "home": "Home",
+    "projects": "Projects",
+    "contact": "Contact"
+  },
+  "hero": {
+    "title": "ALEXIS VEDIA",
+    "subtitle": "UX/UI Developer & Creative Technologist"
+  }
+}

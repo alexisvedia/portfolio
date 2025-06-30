@@ -5,11 +5,11 @@ import { Provider } from 'react-redux';
 import { store, setLoaded } from '@store/index';
 import { GlobalStyles } from '@styles/GlobalStyles';
 import styled from 'styled-components';
-import ContactButton from '@components/ContactButton';
+
 import { ThemeProvider } from './context/ThemeContext';
 import FontLoader from '@components/FontLoader/FontLoader';
 import GrainOverlay from '@components/GrainOverlay';
-import Sidebar from '@components/Sidebar/Sidebar';
+
 
 // Cargar el componente del chatbot de manera diferida para mejorar el rendimiento inicial
 const ChatbotAssistant = React.lazy(
@@ -39,7 +39,7 @@ const MaintenancePage = React.lazy(() => import('./pages/MaintenancePage'));
 // Aseguramos que i18n se inicialice
 import '@utils/i18n';
 
-const SIDEBAR_WIDTH = '280px'; // Definir el ancho de la sidebar para usarlo en los estilos
+
 
 const AppWrapper = styled.div`
   position: relative;
@@ -47,18 +47,12 @@ const AppWrapper = styled.div`
   display: flex; // Para alinear Sidebar y Content
 `;
 
-const MainContentWrapper = styled.div<{ $isSidebarPresent: boolean }>`
+const MainContentWrapper = styled.div`
   flex-grow: 1;
   position: relative;
   min-height: 100vh;
   overflow: visible;
   background-color: ${({ theme }) => theme.colors.background};
-  margin-left: ${({ $isSidebarPresent }) => ($isSidebarPresent ? SIDEBAR_WIDTH : '0')};
-  transition: margin-left 0.3s ease-in-out;
-
-  @media (max-width: 768px) {
-    margin-left: 0; // En móvil no hay margen permanente
-  }
 `;
 
 // Container de páginas (ahora dentro de MainContentWrapper)
@@ -66,21 +60,8 @@ const Container = styled.div`
   position: relative;
 `;
 
-// Contact Button position - puede necesitar ajustes si la sidebar lo afecta
-const ContactButtonStyled = styled(ContactButton)<{ $hideOnScroll: boolean }>`
-  position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
-  z-index: 100;
-  transition: transform 0.3s ease;
 
-  @media (max-width: 768px) {
-    transform: translateY(${props => (props.$hideOnScroll ? '-100px' : '0')});
-    // Asegurar que no colisione con el botón de menú de la sidebar si es necesario
-    // left: auto; // Descomentar si se necesita ajustar
-    // right: 1.5rem;
-  }
-`;
+
 
 const AppContent = () => {
   const location = useLocation();
@@ -89,7 +70,7 @@ const AppContent = () => {
   const [chatbotVisible, setChatbotVisible] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [shouldShowLoader, setShouldShowLoader] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile); // Abierta en escritorio, cerrada en móvil por defecto
+
   const [n8nServerReady, setN8nServerReady] = useState(false); // Nuevo estado para controlar si el servidor está listo
 
   useEffect(() => {
@@ -150,11 +131,6 @@ const AppContent = () => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (!mobile) {
-        setIsSidebarOpen(true); // Siempre abierta en escritorio
-      } else {
-        setIsSidebarOpen(false); // Cerrada por defecto en móvil al redimensionar
-      }
     };
     handleResize();
     window.addEventListener('resize', handleResize);
@@ -199,23 +175,16 @@ const AppContent = () => {
     setFontsLoaded(true);
   };
 
-  const toggleSidebar = () => {
-    if (isMobile) { // Solo permitir toggle en móvil
-        setIsSidebarOpen(!isSidebarOpen);
-    }
-  };
 
-  // Nueva lógica para determinar si el botón de contacto debe ocultarse
-  const shouldHideContactButton = isMobile && isContactSectionInView;
+
+
 
   return (
     <AppWrapper>
       {shouldShowLoader && !fontsLoaded && <FontLoader onLoaded={handleFontsLoaded} />}
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} isMobile={isMobile} />
-      
-      <MainContentWrapper $isSidebarPresent={isSidebarOpen && !isMobile}>
+      <MainContentWrapper>
         <GrainOverlay />
-        <ContactButtonStyled initialDelay={500} $hideOnScroll={shouldHideContactButton} />
+
         {chatbotVisible && n8nServerReady && (
           <React.Suspense fallback={null}>
             <ChatbotAssistant initialDelay={500} />

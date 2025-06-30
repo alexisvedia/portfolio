@@ -1,0 +1,11 @@
+{
+  "navbar": {
+    "home": "Inicio",
+    "projects": "Proyectos",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "title": "ALEXIS VEDIA",
+    "subtitle": "Desarrollador UX/UI y Tecnólogo Creativo"
+  }
+}

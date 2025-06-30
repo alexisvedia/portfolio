@@ -1,145 +1,257 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import SimpleBlurText from '../SimpleBlurText';
 import { useTheme } from '../../context/ThemeContext';
 
 const HeroContainer = styled.section`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  padding: 0 ${({ theme }) => theme.space.xl};
-  text-align: center;
+  width: 100vw;
   position: relative;
   overflow: hidden;
   margin-bottom: 0;
+  background-image: url('/images/hero-desktop.webp');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  
+  @media (max-width: 768px) {
+    background-image: url('/images/fondo-mobile.webp');
+    background-size: cover;
+    background-position: center -80px;
+  }
+  
+
 `;
 
-const CenteringWrapper = styled.div`
+const ContentWrapper = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: auto;
-  margin-bottom: auto;
-`;
-
-// Nuevo componente para el rol profesional
-const RoleLabel = styled.div`
-  font-size: 1.2rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: ${({ theme }) => `${theme.colors.text}aa`};
-  text-transform: uppercase;
-  margin-bottom: ${({ theme }) => theme.space.xs};
-  user-select: none;
-  
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 0.9rem;
-    margin-bottom: ${({ theme }) => theme.space.xs};
-  }
-  
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 1.2rem;
-  }
-`;
-
-const Title = styled.h1`
-  font-weight: 900;
-  color: ${({ theme }) => theme.colors.text};
-  line-height: 0.9;
-  text-transform: uppercase;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  z-index: 5;
+  padding: 0;
   width: 100%;
-  user-select: none;
+  height: 100vh;
   
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 75px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    line-height: 1;
-  }
-
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 130px;
-    margin-bottom: ${({ theme }) => theme.space.sm};
+  @media (max-width: 768px) {
+    padding: 0;
+    justify-content: flex-start;
+    padding-top: 20vh;
   }
 `;
 
-const StyledVedia = styled.div`
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    margin-top: -15px;
-    display: flex;
-    justify-content: center;
-  }
-`;
-
-const StyledAlexis = styled.div`
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    display: flex;
-    justify-content: center;
-  }
-`;
-
-const fadeIn = keyframes`
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-`;
-
-const fadeOut = keyframes`
-  0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
-`;
-
-// Contenedor con efecto parallax
-const ParallaxTitle = styled.div`
-  position: relative;
-  will-change: transform, filter, opacity;
-`;
-
-// Contenedor para el subtítulo con efecto parallax
-const ParallaxSubtitle = styled.div`
-  position: relative;
-  will-change: transform, filter, opacity;
-  margin-top: 0;
-  max-width: 800px;
+const HeroImage = styled.div`
+  display: block;
+  position: absolute;
+  bottom: 4.3vh;
+  left: 50%;
+  transform: translateX(-51%);
+  width: 100vw;
+  max-width: 400px;
+  height: 61vh;
+  background-image: url('/images/hero-mobile.webp');
+  background-size: contain;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  z-index: 20;
+  pointer-events: none;
   
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    margin-top: ${({ theme }) => theme.space.xs};
+  @media (min-width: 769px) {
+    display: none;
   }
 `;
 
-// Subtítulo con animación de aparición original
-const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
-  font-size: 1rem;
+const MainTitle = styled.h1`
+  font-family: 'Prosa', sans-serif;
   font-weight: 400;
-  margin-bottom: 0;
-  color: ${({ theme }) => `${theme.colors.text}cc`};
+  font-size: clamp(5rem, 15vw, 12rem);
+  line-height: 0.8;
+  color: #FFE2D4;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  margin: 0;
+
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  
+  @media (max-width: 768px) {
+    font-size: clamp(5rem, 22vw, 8rem);
+    line-height: 0.7;
+    letter-spacing: -0.01em;
+    text-align: center;
+    padding-left: 0;
+    margin-top: -2rem;
+  }
+`;
+
+const AlexisText = styled.span`
+  font-size: 250.68px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 0;
+  padding: 0;
   position: relative;
-  z-index: 2;
-  opacity: ${props => props.$visible ? 1 : 0};
-  user-select: none;
-  animation: ${props => {
-    if (props.$fadeOut) return css`${fadeOut} 0.4s ease-out forwards`;
-    if (props.$visible) return css`${fadeIn} 0.8s ease-out forwards`;
-    return 'none';
-  }};
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 0.9rem;
+  /* Ajustes manuales de posición */
+  transform: translateX(-400px) translateY(-50px);
+  
+  @media (max-width: 768px) {
+    font-size: clamp(4rem, 40vw, 171.68px);
+    transform: translateX(0px) translateY(-3rem);
   }
+`;
 
-  @media (min-width: ${({ theme }) => theme.breakpoints.md}) {
+const VediaText = styled.span`
+  font-size: 311.68px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  /* Ajustes manuales de posición */
+  transform: translateX(-397px) translateY(0px);
+  
+  @media (max-width: 768px) {
+    font-size: clamp(5rem, 49.5vw, 214.68px);
+    transform: translateX(0px) translateY(0px);
+  }
+`;
+
+const NavBarContainer = styled.div`
+  position: fixed;
+  top: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  
+  @media (max-width: 768px) {
+    top: auto;
+    bottom: 3rem;
+  }
+`;
+
+
+
+const LiquidGlassNav = styled.nav`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 30%,
+    rgba(255, 255, 255, 0.08) 70%,
+    rgba(255, 255, 255, 0.12) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  color: white;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+      transparent, 
+      rgba(255, 255, 255, 0.1), 
+      transparent
+    );
+    transition: left 0.6s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    
+    &::before {
+      left: 100%;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 1rem 2rem;
+    gap: 1rem;
+  }
+`;
+
+const NavItem = styled.a`
+  color: white;
+  text-decoration: none;
+  font-family: 'Prosa', sans-serif;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+  
+  @media (max-width: 768px) {
     font-size: 1rem;
+    padding: 0.5rem 1rem;
   }
+`;
+
+const fadeInUp = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
+
+const float = keyframes`
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+`;
+
+const AnimatedTitle = styled(MainTitle)<{ scrollY: number }>`
+  animation: ${fadeInUp} 1s ease-out 0.5s both;
+  transform: translateY(${props => props.scrollY * 1.5}px);
+  opacity: ${props => Math.max(0, 1 - (props.scrollY / 100))};
+  transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  will-change: transform, opacity;
+  
+  @media (max-width: 768px) {
+    transform: translateY(${props => props.scrollY * 2}px);
+    opacity: ${props => Math.max(0, 1 - (props.scrollY / 80))};
+  }
+`;
+
+const StaticNav = styled(LiquidGlassNav)`
+  animation: ${fadeInUp} 1s ease-out 1s both;
 `;
 
 interface HeroSectionProps {
@@ -148,159 +260,89 @@ interface HeroSectionProps {
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoaded = false }) => {
-  const { t, i18n } = useTranslation();
-  const { themeMode } = useTheme();
-  const [titleKey, setTitleKey] = useState(`title-${themeMode}`);
-  const [isMobile, setIsMobile] = useState(false);
-  const [subtitleVisible, setSubtitleVisible] = useState(false);
-  const [subtitleFadeOut, setSubtitleFadeOut] = useState(false);
-  const [currentSubtitleText, setCurrentSubtitleText] = useState('');
-  const [startAnimations, setStartAnimations] = useState(false);
-  const titleRef = useRef<HTMLDivElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
-  const prevLangRef = useRef(i18n.language);
+  const { t } = useTranslation();
+  const [scrollY, setScrollY] = useState(0);
   
   useEffect(() => {
-    setCurrentSubtitleText(t('heroSubtitle'));
-  }, []);
+    if (onAnimationComplete) {
+      const timer = setTimeout(() => {
+        onAnimationComplete();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [onAnimationComplete]);
   
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
     };
     
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  useEffect(() => {
-    setTitleKey(`title-${themeMode}`);
-  }, [themeMode]);
-  
-  useEffect(() => {
-    if (fontsLoaded) {
-      if (localStorage.getItem('hasVisitedBefore')) {
-        setStartAnimations(true);
-      } else {
-        const timer = setTimeout(() => {
-          setStartAnimations(true);
-        }, 1000);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [fontsLoaded]);
-  
-  useEffect(() => {
-    if (i18n.language !== prevLangRef.current) {
-      if (subtitleVisible) {
-        setSubtitleFadeOut(true);
-        const timer = setTimeout(() => {
-          setCurrentSubtitleText(t('heroSubtitle'));
-          setSubtitleFadeOut(false);
-          setSubtitleVisible(false);
-          setTimeout(() => {
-            setSubtitleVisible(true);
-          }, 50);
-        }, 400); 
-        return () => clearTimeout(timer);
-      } else {
-        setCurrentSubtitleText(t('heroSubtitle'));
-        prevLangRef.current = i18n.language;
-      }
-    }
-  }, [i18n.language, subtitleVisible, t]);
-  
-  useEffect(() => {
-    prevLangRef.current = i18n.language;
-  }, [i18n.language]);
-  
-  useEffect(() => {
-    const titleElement = titleRef.current;
-    const subtitleElement = subtitleRef.current;
-    if (!titleElement || !subtitleElement) return;
-    const parallaxFactor = -0.4;
-    const subtitleParallaxFactor = -0.5;
-    const heroHeight = window.innerHeight;
-    const handleScroll = () => {
-      requestAnimationFrame(() => {
-        const scrollY = window.scrollY;
-        const offsetY = scrollY * parallaxFactor;
-        const subtitleOffsetY = scrollY * subtitleParallaxFactor;
-        const scrollProgress = Math.min(scrollY / heroHeight, 1);
-        const blurAmount = scrollProgress * 20;
-        const opacity = Math.max(1 - scrollProgress * 2, 0);
-        if (titleElement) {
-          titleElement.style.transform = `translateY(${offsetY}px)`;
-          titleElement.style.filter = `blur(${blurAmount}px)`;
-          titleElement.style.opacity = opacity.toString();
-        }
-        if (subtitleElement) {
-          subtitleElement.style.transform = `translateY(${subtitleOffsetY}px)`;
-          subtitleElement.style.filter = `blur(${blurAmount}px)`;
-          subtitleElement.style.opacity = opacity.toString();
-        }
-      });
-    };
-    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const handleTitleAnimationComplete = () => {
-    setCurrentSubtitleText(t('heroSubtitle'));
-    setSubtitleVisible(true);
-    if (onAnimationComplete) {
-      onAnimationComplete();
-    }
-  };
   
   return (
-    <HeroContainer>
-      <CenteringWrapper>
-        <ParallaxTitle ref={titleRef}>
-          <RoleLabel>UX/UI Developer</RoleLabel>
-          <Title>
-            {isMobile ? (
-              <>
-                <StyledAlexis>
-                  <SimpleBlurText
-                    key={`${titleKey}-1`}
-                    text="ALEXIS"
-                    onAnimationComplete={undefined}
-                    delayStart={!startAnimations}
-                  />
-                </StyledAlexis>
-                <StyledVedia>
-                  <SimpleBlurText
-                    key={`${titleKey}-2`}
-                    text="VEDIA"
-                    onAnimationComplete={handleTitleAnimationComplete}
-                    delayStart={!startAnimations}
-                  />
-                </StyledVedia>
-              </>
-            ) : (
-              <SimpleBlurText
-                key={titleKey}
-                text="ALEXIS VEDIA"
-                onAnimationComplete={handleTitleAnimationComplete}
-                delayStart={!startAnimations}
-              />
-            )}
-          </Title>
-        </ParallaxTitle>
+    <>
+      {/* Subtle SVG Filter for Liquid Glass Effect */}
+      <svg width="0" height="0" style={{ position: 'absolute' }}>
+        <defs>
+          <filter id="liquid-glass-subtle" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
+            {/* Gentle turbulence */}
+            <feTurbulence 
+              type="fractalNoise" 
+              baseFrequency="0.01 0.015" 
+              numOctaves="2" 
+              seed="13" 
+              result="noise"
+            />
+            
+            {/* Soft blur */}
+            <feGaussianBlur in="noise" stdDeviation="1" result="softNoise" />
+            
+            {/* Very subtle displacement */}
+            <feDisplacementMap 
+              in="SourceGraphic" 
+              in2="softNoise" 
+              scale="2" 
+              xChannelSelector="R" 
+              yChannelSelector="G" 
+              result="displaced"
+            />
+            
+            {/* Final composition with original */}
+            <feComposite 
+              in="displaced" 
+              in2="SourceGraphic" 
+              operator="over" 
+              k1="0.1" 
+              k2="0.9" 
+              k3="0" 
+              k4="0" 
+              result="final"
+            />
+          </filter>
+        </defs>
+      </svg>
+      
+      <NavBarContainer>
+        <LiquidGlassNav>
+          <NavItem href="#home">{t('navbar.home')}</NavItem>
+          <NavItem href="#projects">{t('navbar.projects')}</NavItem>
+          <NavItem href="#contact">{t('contact')}</NavItem>
+        </LiquidGlassNav>
+      </NavBarContainer>
+      
+      <HeroContainer>
+        <ContentWrapper>
+          <AnimatedTitle scrollY={scrollY}>
+            <AlexisText>ALEXIS</AlexisText>
+            <VediaText>VEDIA</VediaText>
+          </AnimatedTitle>
+        </ContentWrapper>
         
-        <ParallaxSubtitle ref={subtitleRef}>
-          <Subtitle 
-            $visible={subtitleVisible} 
-            $fadeOut={subtitleFadeOut}
-          >
-            {currentSubtitleText}
-          </Subtitle>
-        </ParallaxSubtitle>
-      </CenteringWrapper>
-    </HeroContainer>
+      <HeroImage />
+      </HeroContainer>
+    </>
   );
 };
 
