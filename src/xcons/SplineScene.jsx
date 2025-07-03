@@ -18,7 +18,7 @@ const SplineOverlay = styled.div`
   height: 100%;
   z-index: 1;
   pointer-events: auto;
-  /* Transparente para permitir ver el contenido de Spline */
+  
   background-color: transparent; 
 `;
 
@@ -54,26 +54,25 @@ export default function SplineScene() {
   const containerRef = useRef(null);
   
   useEffect(() => {
-    // Función para configurar el iframe de Spline
+    
     const setupSplineIframe = () => {
       if (!containerRef.current) return;
       
-      // Buscar todos los iframes dentro del contenedor
+      
       const iframes = containerRef.current.querySelectorAll('iframe');
       
       if (iframes.length > 0) {
         iframes.forEach(iframe => {
-          // Asegurarnos de que el iframe no captura eventos de puntero
+          
           iframe.style.pointerEvents = 'none';
         });
       }
     };
     
-    // Configurar inicialmente
+    
     setupSplineIframe();
     
-    // Crear un observador para detectar cambios en el DOM
-    // Esto ayudará si Spline crea dinámicamente el iframe después de cargar
+    
     const observer = new MutationObserver(setupSplineIframe);
     
     if (containerRef.current) {
@@ -83,11 +82,10 @@ export default function SplineScene() {
       });
     }
     
-    // También configurar un intervalo como respaldo para asegurarnos 
-    // de que se aplican los cambios
+    
     const intervalId = setInterval(setupSplineIframe, 500);
     
-    // Limpieza
+    
     return () => {
       observer.disconnect();
       clearInterval(intervalId);
@@ -100,9 +98,9 @@ export default function SplineScene() {
         scene="https://prod.spline.design/kFgAlvghlLyIp78Q/scene.splinecode"
         style={{ width: '100%', height: '100%', zIndex: 0 }}
       />
-      {/* Esta capa transparente capturará todos los eventos del mouse */}
+      
       <SplineOverlay />
       <WatermarkCover $isDark={isDark} />
     </SplineContainer>
   );
-} 
+}

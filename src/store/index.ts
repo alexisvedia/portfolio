@@ -1,6 +1,6 @@
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 
-// Crear un slice simple para el estado de la aplicación
+
 const appSlice = createSlice({
   name: 'app',
   initialState: {

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import GooeyText from '../GooeyText';
 import styled from 'styled-components';
 
 interface LanguageMorphingTitleProps {
@@ -33,7 +32,7 @@ const MorphContainer = styled.div<{ $shouldMorph: boolean }>`
   }
 `;
 
-// Seguimos la estructura general del ScrollFloat para mantener coherencia
+
 const SectionTitle = styled.div`
   position: relative;
   display: flex;
@@ -42,8 +41,8 @@ const SectionTitle = styled.div`
   width: 100%;
 `;
 
-// Tiempo mínimo de animación para asegurar que todo termine correctamente
-const MIN_ANIMATION_DURATION = 2500; // ms
+
+const MIN_ANIMATION_DURATION = 2500;
 
 const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
   translationKey,
@@ -55,69 +54,69 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
   const [shouldMorph, setShouldMorph] = useState(false);
   const [texts, setTexts] = useState<string[]>(['', '']);
 
-  // Refs para seguimiento
+
   const previousLanguageRef = useRef<string>(i18n.language);
   const animationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const initializedRef = useRef(false);
   const isChangingRef = useRef(false);
   const lastChangeTimeRef = useRef<number>(0);
 
-  // Efecto para la inicialización inicial
+
   useEffect(() => {
     if (!initializedRef.current) {
-      // Configuración inicial
+  
       const currentText = t(translationKey);
       setTexts([currentText, currentText]);
       initializedRef.current = true;
     }
   }, [t, translationKey]);
 
-  // Función para calcular la duración total de la animación
+
   const getTotalAnimationDuration = () => {
-    // Calcular la duración en ms y asegurarnos de que no sea menor que el mínimo
+
     const calculatedDuration = (morphTime + cooldownTime) * 1000 + 500;
     return Math.max(calculatedDuration, MIN_ANIMATION_DURATION);
   };
 
-  // Efecto para detectar cambios de idioma
+
   useEffect(() => {
-    // Si ya estamos procesando un cambio, no hacer nada
+
     if (isChangingRef.current) {
       return;
     }
 
-    // Si el idioma ha cambiado
+
     if (previousLanguageRef.current !== i18n.language) {
       const now = Date.now();
 
-      // Verificar si ha pasado suficiente tiempo desde el último cambio
+
       const timeElapsed = now - lastChangeTimeRef.current;
       if (timeElapsed < MIN_ANIMATION_DURATION) {
-        // Cambio demasiado rápido
+
       }
 
       isChangingRef.current = true;
       lastChangeTimeRef.current = now;
 
-      // Obtener el texto en el idioma anterior
+
       const oldText = t(translationKey, { lng: previousLanguageRef.current });
 
-      // Obtener el texto en el nuevo idioma
+
       const newText = t(translationKey, { lng: i18n.language });
 
-      // Solo animar si los textos son diferentes
+
       if (oldText !== newText) {
-        // Actualizar los textos para la animación
+
         setTexts([oldText, newText]);
         setShouldMorph(true);
 
-        // Limpiar cualquier timeout anterior
+
         if (animationTimeoutRef.current) {
           clearTimeout(animationTimeoutRef.current);
           animationTimeoutRef.current = null;
         }
 
-        // Configurar un nuevo timeout para finalizar la animación
+
         const totalDuration = getTotalAnimationDuration();
 
         animationTimeoutRef.current = setTimeout(() => {
@@ -125,21 +124,21 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
           isChangingRef.current = false;
           animationTimeoutRef.current = null;
 
-          // Asegurar que el texto mostrado coincida con el idioma actual
+
           const finalText = t(translationKey);
           setTexts([finalText, finalText]);
         }, totalDuration);
       } else {
-        // Si los textos son iguales, solo actualizamos la referencia
+
         isChangingRef.current = false;
       }
 
-      // Actualizar la referencia del idioma
+
       previousLanguageRef.current = i18n.language;
     }
   }, [i18n.language, t, translationKey, morphTime, cooldownTime]);
 
-  // Efecto para la limpieza al desmontar
+
   useEffect(() => {
     return () => {
       if (animationTimeoutRef.current) {
@@ -149,7 +148,7 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
     };
   }, []);
 
-  // Si los textos no están definidos aún, mostrar el texto actual directamente
+
   if (!texts[0] && !texts[1]) {
     const currentText = t(translationKey);
     return (
@@ -162,13 +161,7 @@ const LanguageMorphingTitle: React.FC<LanguageMorphingTitleProps> = ({
   return (
     <MorphContainer className={className} $shouldMorph={shouldMorph}>
       <SectionTitle>
-        <GooeyText
-          key={shouldMorph ? `morphing-${i18n.language}` : i18n.language}
-          texts={texts}
-          morphTime={shouldMorph ? morphTime : 0}
-          cooldownTime={shouldMorph ? cooldownTime : 0}
-          textClassName="font-bold"
-        />
+        {shouldMorph ? texts[1] : texts[0]}
       </SectionTitle>
     </MorphContainer>
   );

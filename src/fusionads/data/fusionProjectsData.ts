@@ -1,15 +1,15 @@
-import { MasonryItem } from '../components/MasonryFusion'; // Ajusta la ruta si es necesario
+import { MasonryItem } from '../components/MasonryFusion';
 
-// Thumbnails existentes y nuevos
-import fusionAppThumbnail from '../../assets/Proyectos Fusion/fusion-app.png'; // Para Template Gallery (fusion-gallery-video)
+
+import fusionAppThumbnail from '../../assets/Proyectos Fusion/fusion-app.png';
 import fusionDesignDirectionsThumbnail from '../../assets/Proyectos Fusion/fusion-design-directions.png';
 import fusionFirstStepThumbnail from '../../assets/Proyectos Fusion/fusion-first-step.png';
 import fusionPublishFlowThumbnail from '../../assets/Proyectos Fusion/fusion-publish-flow.png';
 import fusionCampaignTemplateGalleryThumbnail from '../../assets/Proyectos Fusion/fusion-campaign-template-gallery.png';
-import internalTemplatesThumbnail from '../../assets/Proyectos Fusion/internal templates.png'; // NUEVA IMPORTACIÓN
-import reactRouterThumbnail from '../../assets/Proyectos Fusion/react router.png'; // NUEVA IMPORTACIÓN
+import internalTemplatesThumbnail from '../../assets/Proyectos Fusion/internal templates.png';
+import reactRouterThumbnail from '../../assets/Proyectos Fusion/react router.png';
 
-// Videos
+
 import galleryVideo from '../../assets/Proyectos Fusion/Gallery.mp4';
 import designDirectionsVideo from '../../assets/Proyectos Fusion/Design Directions.mp4';
 import firstStepVideo from '../../assets/Proyectos Fusion/Primer step.mp4';
@@ -17,9 +17,9 @@ import publishVideo from '../../assets/Proyectos Fusion/Publicar.mp4';
 import campaignTemplateGalleryVideo from '../../assets/Proyectos Fusion/Template gallery campaña.mp4';
 
 export const fusionProjectsData: MasonryItem[] = [
-  { // 1. Template Gallery
+  {
     id: 'fusion-gallery-video',
-    image: fusionAppThumbnail, // Mantiene el thumbnail original
+    image: fusionAppThumbnail,
     video: galleryVideo,
     height: 400,
     title: {
@@ -31,7 +31,7 @@ export const fusionProjectsData: MasonryItem[] = [
       en: "I introduced a series of visual categories. Clicking on one would instantly change the template examples, showing only those related to that theme. These templates are displayed based on the industry configured for the account, making them personalized for each user. I developed a gallery that opened when a template was selected. Here, users could refine their search with options like industry type, design style, or season. With each choice, the list of templates updated automatically, always indicating the active filters. A key aspect is that all this information – available categories, filters, and the templates themselves – was dynamically consumed from the backend.",
     },
   },
-  { // 2. Primer Paso en la Creación -> Scrape y flujo de campaña
+  {
     id: 'fusion-first-step',
     image: fusionFirstStepThumbnail,
     video: firstStepVideo,
@@ -45,7 +45,7 @@ export const fusionProjectsData: MasonryItem[] = [
       en: "I integrated an automatic scraping functionality based on a URL to complete all form fields according to the scraped information, adding loadings and skeletons until the data was obtained. I listed all products or services and added an editing panel for their information, where previously we only had \"catalogs,\" and I implemented the separation of \"products\" from \"services\" working with legacy code. This modal is reused in other areas of the application, and the fields are dynamically rendered and are mandatory or not based on the type of data received. I applied a debounce to avoid visual bugs in the selection of multiple social networks where the publication would be made. Additionally, I created the stepper function that read each step and updated as the user progressed, unlocking new sections.",
     },
   },
-  { // 3. Galería de Plantillas de Campaña -> Template Gallery en campaña
+  {
     id: 'fusion-campaign-template-gallery',
     image: fusionCampaignTemplateGalleryThumbnail,
     video: campaignTemplateGalleryVideo,
@@ -59,7 +59,7 @@ export const fusionProjectsData: MasonryItem[] = [
       en: "Reusing the same modal as on the homepage, with the scraped campaign information, I made different templates display based on a score to better match the campaign type. As the information for each template was partially built via processcallback, I added a loading animation while the texts and images were completed until the final template reached 'generated' status. No incomplete template could be selected, and the 'generate designs' button is disabled if any of the selected ones are still in a pending state. For testing purposes, only in the staging environment, I added a button to easily copy execution IDs to debug failing templates.",
     },
   },
-  { // 4. Direcciones de Diseño
+  {
     id: 'fusion-design-directions',
     image: fusionDesignDirectionsThumbnail,
     video: designDirectionsVideo,
@@ -73,7 +73,7 @@ export const fusionProjectsData: MasonryItem[] = [
       en: "Upon moving to step 2, I integrated internal EPs that allowed generating a brief summary of the campaign. I applied skeletons to each section and designed a mock for the pre-loading of each design direction. Additionally, I integrated an auto-assign feature to the 'add design' button.",
     },
   },
-  { // 5. Flujo de Publicación -> Publicación e Integraciones
+  {
     id: 'fusion-publish-flow',
     image: fusionPublishFlowThumbnail,
     video: publishVideo,
@@ -87,10 +87,10 @@ export const fusionProjectsData: MasonryItem[] = [
       en: "When attempting to publish, I added a validation to check if the user was connected to the social networks previously selected in step 1. If not, a module allowing optional integration becomes visible. Then the integration can be saved, and the publication is made. Upon launching the campaign, I ensured that the information sent by the backend is clearly displayed to the user, so they know the status and how to act if something went wrong.",
     },
   },
-  { // NUEVO PROYECTO
+  {
     id: 'fusion-internal-templates-system',
     image: internalTemplatesThumbnail,
-    // video: undefined, // Opcional: si no hay video, se puede omitir esta línea o poner undefined
+
     height: 400,
     title: {
       es: "Sistema de Templates Internos",
@@ -101,7 +101,7 @@ export const fusionProjectsData: MasonryItem[] = [
       en: "I created an internal section for the team\'s designers where they could upload and configure the templates they created, saving them automatically and separated by folder, name, date, and industry within a Google Drive using its API. This allowed for the rapid uploading of new templates and making them available to all users once tested.",
     },
   },
-  { // NUEVO PROYECTO
+  {
     id: 'fusion-route-management',
     image: reactRouterThumbnail,
     height: 400,
@@ -114,5 +114,5 @@ export const fusionProjectsData: MasonryItem[] = [
       en: "I implemented navigation using react-router-dom with useRoutes, organizing routes based on the user\'s authentication status. I used UserContext and useEffect to dynamically redirect to pages like login, pending-verification, or dashboard, depending on whether the user had verified their account, had an active session, or if the token was expired. Additionally, I integrated modals like VerificationPopup with useDisclosure and configured conditions to display the DeviceNotSupported banner only once the user was logged in, ensuring it disappeared correctly upon logging out or clearing the cache.",
     },
   },
-  // Agregá más proyectos aquí...
-]; 
+
+];

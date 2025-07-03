@@ -133,7 +133,7 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Efecto para abrir automáticamente el modal del proyecto inicial
+  
   useEffect(() => {
     if (initialSelectedProject && data.length > 0) {
       const projectItem = data.find(item => 
@@ -385,7 +385,7 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
               )}
             </div>
 
-            {/* INICIO: Nueva sección de miniaturas */}
+    
             {data.length > 1 && !isMobile && (
               <div className="modal-thumbnail-strip">
                 {data.map((thumbItem, index) => (
@@ -403,29 +403,29 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
                     }}
                   >
                     <img
-                      src={thumbItem.image} // Usar la imagen principal del item como miniatura
+                      src={thumbItem.image}
                       alt={thumbItem.title ? thumbItem.title[language] : `Thumbnail ${index + 1}`}
                     />
                   </div>
                 ))}
               </div>
             )}
-            {/* FIN: Nueva sección de miniaturas */}
+    
 
-            {/* Dots solo en mobile */}
+    
             {data.length > 1 && isMobile && (
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  padding: '12px 0 0 0', // Ajustado para dar espacio a los dots
+                  padding: '12px 0 0 0',
                   gap: 8,
-                  position: 'absolute', // Posicionar absolutamente
-                  bottom: '10px',      // En la parte inferior
-                  left: '50%',         // Centrado horizontalmente
-                  transform: 'translateX(-50%)', // Ajuste fino para centrar
-                  zIndex: 1010,       // Asegurar que esté sobre el contenido pero debajo de botones de cierre si los hubiera fuera del strip
+                  position: 'absolute',
+                  bottom: '10px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  zIndex: 1010,
                 }}
               >
                 {data.map((_, idx) => (
@@ -440,7 +440,7 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
                       transition: 'background 0.3s ease',
                       cursor: 'pointer',
                     }}
-                    onClick={() => handleItemClick(data[idx], idx)} // Permitir clic en dots
+                    onClick={() => handleItemClick(data[idx], idx)}
                   />
                 ))}
               </div>

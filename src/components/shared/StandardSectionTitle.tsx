@@ -1,17 +1,17 @@
 import styled from 'styled-components';
-import { useTheme } from '../../context/ThemeContext'; // Ajusta la ruta si es necesario
-import React from 'react'; // Importar React para React.CSSProperties
+import { useTheme } from '../../context/ThemeContext';
+import React from 'react';
 
 interface StandardSectionTitleProps {
   children: React.ReactNode;
-  className?: string; // Para permitir clases adicionales si es necesario
-  as?: keyof JSX.IntrinsicElements | React.ComponentType<any>; // Para cambiar el tag HTML (h1, h2, etc.)
-  style?: React.CSSProperties; // Añadir style prop
+  className?: string;
+  as?: keyof JSX.IntrinsicElements | React.ComponentType<any>;
+  style?: React.CSSProperties;
 }
 
-const Title = styled.h2` // Por defecto es h2, pero se puede cambiar con la prop 'as'
+const Title = styled.h2`
   font-weight: 900;
-  font-size:1.6rem; /* Reducido desde 3rem */
+  font-size:1.6rem;
   text-transform: uppercase;
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: 1.5rem;
@@ -19,19 +19,16 @@ const Title = styled.h2` // Por defecto es h2, pero se puede cambiar con la prop
   text-align: center;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
-    font-size: 2rem; /* Reducido desde 2.5rem */
+    font-size: 2rem;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
-    font-size: 1.8rem; /* Reducido desde 2rem */
+    font-size: 1.8rem;
   }
 `;
 
 const StandardSectionTitle: React.FC<StandardSectionTitleProps> = ({ children, className, as, style }) => {
-  // El hook useTheme() aquí es para asegurar que el componente se re-renderice si el tema cambia,
-  // aunque el color ya se obtiene del theme prop en styled-components.
-  // Si tus styled-components ya están configurados con ThemeProvider globalmente,
-  // este hook aquí podría no ser estrictamente necesario solo para el color.
+
   const { themeMode } = useTheme(); 
 
   return (
@@ -41,4 +38,4 @@ const StandardSectionTitle: React.FC<StandardSectionTitleProps> = ({ children, c
   );
 };
 
-export default StandardSectionTitle; 
+export default StandardSectionTitle;

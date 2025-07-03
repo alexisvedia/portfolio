@@ -1,7 +1,7 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 
-// Definición de la estructura de datos que espera el componente
+
 export interface FrontendExperienceCardData {
   cardTitle: string;
   subtitle: string;
@@ -176,4 +176,4 @@ const FrontendDevelopmentExperienceFc: React.FC<FrontendDevelopmentExperiencePro
   );
 };
 
-export { FrontendDevelopmentExperienceFc as FrontendDevelopmentExperience }; 
+export { FrontendDevelopmentExperienceFc as FrontendDevelopmentExperience };

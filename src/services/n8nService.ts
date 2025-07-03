@@ -13,7 +13,7 @@ interface N8NResponse {
   data?: any;
 }
 
-// Variable para rastrear si el servidor ya ha sido inicializado y la promesa de inicialización
+
 let serverInitialized = false;
 let initializationPromise: Promise<boolean> | null = null;
 
@@ -32,9 +32,9 @@ const fetchWithRetry = async (
   let lastError: Error | null = null;
   const waitTime = 1500;
 
-  // Verificar si estamos en móvil para ajustar estrategia
+  
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-  const actualMaxRetries = isMobile ? 2 : maxRetries; // Menos reintentos en móvil
+  const actualMaxRetries = isMobile ? 2 : maxRetries;
 
   while (retries < actualMaxRetries) {
     try {
@@ -72,25 +72,21 @@ const fetchWithRetry = async (
   throw lastError || new Error(`Error de conexión después de ${actualMaxRetries} intentos`);
 };
 
-/**
- * Inicializa el servidor n8n enviando una petición de precalentamiento
- * Esta función debe ser llamada cuando se carga la aplicación
- */
 export const initializeN8NServer = async (): Promise<boolean> => {
-  // Si ya se ha inicializado, retornamos true inmediatamente
+
   if (serverInitialized) return true;
   
-  // Si ya hay una inicialización en curso, retornamos la promesa existente
+
   if (initializationPromise) return initializationPromise;
   
-  // Verificar si estamos en un dispositivo de baja potencia (priorizar rendimiento)
+
   const isLowPowerDevice = typeof navigator !== 'undefined' && 
                            navigator.hardwareConcurrency !== undefined && 
                            navigator.hardwareConcurrency <= 4;
 
-  // Crear una nueva promesa de inicialización
+
   initializationPromise = (async () => {
-    // Retrasamos un poco la inicialización en dispositivos móviles o de baja potencia
+
     if (isLowPowerDevice || (typeof window !== 'undefined' && window.innerWidth <= 768)) {
       await new Promise(resolve => setTimeout(resolve, 1500));
     }
@@ -109,9 +105,9 @@ export const initializeN8NServer = async (): Promise<boolean> => {
         }),
       };
 
-      // Usamos un timeout más corto para la inicialización
+  
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // Reducir el timeout
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
       
       try {
         const response = await fetch(N8N_WEBHOOK_URL, {
@@ -176,7 +172,7 @@ export const sendMessageToN8N = async (message: string): Promise<ChatMessage> =>
       isUser: false,
     };
   } catch (error) {
-    // Mantenemos el log de error para depuración pero lo hacemos más discreto
+
     const errorMessage =
       error instanceof Error
         ? error.message

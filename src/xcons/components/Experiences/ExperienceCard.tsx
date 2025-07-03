@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-// import { useTheme } from '../../../context/ThemeContext'; // Eliminado porque themeMode ya no se usa aquí
 
-// Tipos para los props del componente
+
+
 export interface ExperienceCardProps {
   title: string;
   period: string;
@@ -97,7 +97,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({
   results,
   language = 'es',
 }) => {
-  // const { themeMode } = useTheme(); // Eliminado
+  
 
   const translations = {
     tasks: {

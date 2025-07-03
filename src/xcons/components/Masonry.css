@@ -31,7 +31,7 @@
   transition: 0.3s ease;
 }
 
-/* Estilos para el Modal */
+
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -146,7 +146,7 @@
   transform: scale(1.1);
 }
 
-/* Estilo para el botón de abrir original */
+
 .modal-open-original-button {
   position: absolute;
   top: 15px;
@@ -172,7 +172,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Ajustes para modo oscuro si fuera necesario (opcional, si .dark-mode afecta al modal) */
+
 .modal-overlay.dark-mode .modal-open-original-button {
   background-color: rgba(40, 40, 40, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -182,7 +182,7 @@
   background-color: rgba(50, 50, 50, 0.8);
 }
 
-/* Estilos para Botones de Navegación del Modal */
+
 .modal-nav-button {
   position: absolute;
   top: 50%;
@@ -232,7 +232,7 @@
   right: 15px;
 }
 
-/* Estilos para el Pasador de Miniaturas */
+
 .modal-thumbnail-strip {
   position: absolute;
   bottom: 0;
@@ -293,7 +293,7 @@
   transform: scale(1.05);
 }
 
-/* Estilos para el scrollbar del contenedor de la imagen en el modal */
+
 .image-scroll-container {
   padding-top: 24px;
   padding-bottom: 90px;
@@ -444,7 +444,7 @@
   }
 }
 
-/* Dark Mode Styles for Modal */
+
 .modal-overlay.dark-mode {
   background-color: rgba(0, 0, 0, 0.92);
 }
@@ -520,9 +520,9 @@
   }
 }
 
-/* Los estilos de .zoom-controls y .zoom-button se eliminan */
 
-/* Ocultar overlays globales cuando el modal está abierto */
+
+
 body.modal-open .chatbot-assistant,
 body.modal-open .navbar,
 body.modal-open .theme-toggle,
@@ -530,5 +530,3 @@ body.modal-open .language-selector,
 body.modal-open .back-button {
   display: none !important;
 }
-
-/* ... (final del archivo) ... */

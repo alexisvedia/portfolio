@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import FlowingMenu from '@components/FlowingMenu';
 
-// Nuevas importaciones de imágenes
+
 import fusionadsLogo from '../../assets/images/projects/Fusionads.svg';
 import banditLogo from '../../assets/images/projects/Bandit.svg';
 import xconsLogo from '../../assets/images/projects/XCONS.svg';
@@ -14,7 +14,7 @@ const SectionContainer = styled.section`
   z-index: 5;
 `;
 
-// Contenedor para el título con un poco de margen superior
+
 const TitleContainer = styled.div`
   margin-top: 4rem;
   padding-top: 2rem;
@@ -41,10 +41,10 @@ const MenuContainer = styled.div`
 const ProjectsSection: React.FC = () => {
   const { t } = useTranslation();
 
-  // Definir los elementos del menú con los logos y colores de las empresas (REORDENADO)
+
   const companyItems = [
     {
-      link: '/xcons', // 1. XCONS
+      link: '/xcons',
       text: 'XCONS',
       image: xconsLogo,
       color: '#15814B',
@@ -54,7 +54,7 @@ const ProjectsSection: React.FC = () => {
       ),
     },
     {
-      link: '/fusionads', // 2. FusionAds
+      link: '/fusionads',
       text: 'FusionAds',
       image: fusionadsLogo,
       color: '#F7480B',
@@ -64,7 +64,7 @@ const ProjectsSection: React.FC = () => {
       ),
     },
     {
-      link: '/bandit', // 3. Bandit
+      link: '/bandit',
       text: 'Bandit',
       image: banditLogo,
       color: '#F70F43',
@@ -74,7 +74,7 @@ const ProjectsSection: React.FC = () => {
       ),
     },
     {
-      link: '/otros', // 4. Otros proyectos (antes Condamind)
+      link: '/otros',
       text: t('navbar.otros', 'Otros Proyectos'),
       color: '#262626',
       description: t(

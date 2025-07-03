@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-// @ts-ignore
-import { SplineScene } from '../xcons';
 
-// Nuevas importaciones de imágenes
+import { SplineScene } from '../xcons/index.jsx';
+
+
 import condamindLogo from '../assets/images/projects/Condamind.svg';
 import fusionadsLogo from '../assets/images/projects/Fusionads.svg';
 import banditLogo from '../assets/images/projects/Bandit.svg';
@@ -13,8 +13,7 @@ import xconsLogoProject from '../assets/images/projects/XCONS.svg';
 import webXconxImage from '../assets/images/web-xconx.png';
 import fallbackImage from '../assets/images/projects/fallback-image.jpg';
 
-// Importar el nuevo botón
-import BackButton from '../components/BackButton/BackButton';
+
 
 const ProjectContainer = styled.div`
   padding: 0 20px 40px;
@@ -23,7 +22,7 @@ const ProjectContainer = styled.div`
   color: ${({ theme }) => theme.colors.text};
 `;
 
-// Mejorando el banner con degradado para todos los proyectos
+
 const ProjectBanner = styled.div<{ $bgColor: string }>`
   background: linear-gradient(
     to bottom,
@@ -33,12 +32,12 @@ const ProjectBanner = styled.div<{ $bgColor: string }>`
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   margin-right: 0;
-  margin-top: -120px; /* Compensar cualquier padding del contenedor principal */
+  margin-top: -120px;
   padding: 250px 0 10px;
   display: flex;
   justify-content: center;
   align-items: center;
-  /* margin-bottom: 80px; */
+
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
   position: relative;
 
@@ -106,7 +105,7 @@ const ProjectContent = styled.div`
   margin-top: ${({ theme }) => theme.space.xl};
 `;
 
-// Nuevos componentes para la experiencia XCONS
+
 const RoleTitle = styled.h2`
   font-size: 32px;
   font-weight: 700;
@@ -188,7 +187,7 @@ const ProjectPage: React.FC = () => {
   const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
 
-  // Datos de ejemplo de proyectos - en una aplicación real, estos datos podrían venir de una API
+  
   const projectsData: Record<string, Project> = {
     condamind: {
       id: 'condamind',
@@ -238,7 +237,7 @@ const ProjectPage: React.FC = () => {
       if (foundProject) {
         setProject(foundProject);
       } else {
-        // Si no existe el proyecto, redirigimos a la página principal
+      
         navigate('/');
       }
     }
@@ -248,7 +247,7 @@ const ProjectPage: React.FC = () => {
     return <div>Cargando...</div>;
   }
 
-  // Renderizado condicional para XCONS
+
   const renderProjectContent = () => {
     if (project.id === 'xcons') {
       return (
@@ -416,7 +415,6 @@ const ProjectPage: React.FC = () => {
 
   return (
     <>
-      <BackButton />
       <ProjectBanner $bgColor={project.color}>
         <BannerContent>
           <BannerLeftContent>

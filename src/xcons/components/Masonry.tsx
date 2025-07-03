@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from 'react';
-import ReactDOM from 'react-dom'; // Importar ReactDOM para createPortal
+import ReactDOM from 'react-dom';
 import { useTransition, a } from '@react-spring/web';
-import styled from 'styled-components'; // Importar solo styled
-import { useTranslation } from 'react-i18next'; // Importar useTranslation
-import Tooltip from '../../components/Tooltip/Tooltip'; // Importar el componente Tooltip
+import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
-const SplineScene = lazy(() => import('../SplineScene')); // Importar SplineScene dinámicamente
+
+const SplineScene = lazy(() => import('../SplineScene'));
 
 import './Masonry.css';
 
 export interface MasonryItem {
   id: string | number;
   height: number;
-  image?: string; // Hacer opcional si es Spline
-  type: 'image' | 'spline'; // Nuevo campo para el tipo de contenido
-  splineSrc?: string; // Opcional, para la URL de la escena de Spline
-  thumbnail?: string; // Imagen para mostrar en la cuadrícula para Spline
-  title?: string; // Nuevo campo para el título
-  description?: string; // Nuevo campo para la descripción
-  documentLinks?: Array<{ name: string; url: string }>; // Nuevo campo para enlaces a documentos
+  image?: string;
+  type: 'image' | 'spline';
+  splineSrc?: string;
+  thumbnail?: string;
+  title?: string;
+  description?: string;
+  documentLinks?: Array<{ name: string; url: string }>;
   actionButton?: {
     url: string;
     labelES: string;
@@ -30,28 +30,28 @@ interface GridItem extends MasonryItem {
   x: number;
   y: number;
   width: number;
-  height: number; // This represents the scaled height
+  height: number;
 }
 
 interface MasonryProps {
   data: MasonryItem[];
-  themeMode?: 'light' | 'dark'; // Añadir themeMode a las props
-  initialSelectedProject?: string | null; // Proyecto inicial a abrir
-  onModalStateChange?: (isOpen: boolean, projectId?: string) => void; // Callback para cambios de estado del modal
+  themeMode?: 'light' | 'dark';
+  initialSelectedProject?: string | null;
+  onModalStateChange?: (isOpen: boolean, projectId?: string) => void;
 }
 
-// Nuevo componente estilizado para el título del modal
+
 const ModalInfoTitle = styled.h2`
   font-family: 'Inter', sans-serif;
-  font-weight: 500; // Coincide con el font-weight de Role
-  font-size: 1.2rem; // Ligeramente más grande para un título de modal, ajustable
+  font-weight: 500;
+  font-size: 1.2rem;
   color: ${({ theme }) =>
-    theme.isDark || theme.themeMode === 'dark' ? '#E0E0E0' : '#333333'}; // Ajustar color según tema
-  margin-bottom: 0.75rem; // Espaciado inferior
+    theme.isDark || theme.themeMode === 'dark' ? '#E0E0E0' : '#333333'};
+  margin-bottom: 0.75rem;
   line-height: 1.3;
 `;
 
-// Nuevo componente para los enlaces a documentos
+
 const DocumentLinksContainer = styled.div`
   margin-top: 1.5rem;
 `;
@@ -130,20 +130,19 @@ const AcrylicButton = styled.a<{ $isDark: boolean }>`
 `;
 
 const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProject, onModalStateChange }) => {
-  const { t, i18n } = useTranslation(); // Hook de traducción
+  const { t, i18n } = useTranslation();
   const [columns, setColumns] = useState<number>(2);
   const [selectedContent, setSelectedContent] = useState<MasonryItem | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+
 
   const ref = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState<number>(0);
 
   const isDark = themeMode === 'dark';
 
-  // --- NUEVO: Detectar si es mobile ---
+
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 767);
@@ -152,7 +151,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // --- NUEVO: Swipe handlers para mobile ---
+
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
@@ -177,7 +176,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     touchEndX.current = null;
   };
 
-  // Efecto para abrir automáticamente el modal del proyecto inicial
+
   useEffect(() => {
     if (initialSelectedProject && data.length > 0) {
       const projectItem = data.find(item => 
@@ -203,7 +202,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
       } else if (window.matchMedia('(min-width: 600px)').matches) {
         setColumns(3);
       } else {
-        setColumns(1); // Breakpoint for mobile devices
+        setColumns(1);
       }
     };
 
@@ -219,19 +218,19 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
       }
     };
 
-    handleResize(); // Set initial width
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const [heights, gridItems] = useMemo<[number[], GridItem[]]>(() => {
-    if (width === 0) { // Si el ancho no está listo, no calcular items.
+    if (width === 0) {
       return [[], []];
     }
     let newHeights = new Array(columns).fill(0);
     const newGridItems = data.map(child => {
       const column = newHeights.indexOf(Math.min(...newHeights));
-      const itemHeight = child.height / 2; // Usar la altura original para el cálculo de posición
+      const itemHeight = child.height / 2;
       const x = (width / columns) * column;
       const y = (newHeights[column] += itemHeight) - itemHeight;
       return {
@@ -239,7 +238,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
         x,
         y,
         width: width / columns,
-        height: itemHeight, // Usar la altura original para el grid item
+        height: itemHeight,
       };
     });
     return [newHeights, newGridItems];
@@ -284,7 +283,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     setCurrentIndex(prevIndex);
   };
 
-  // --- NUEVO: Navegación con teclado en el modal ---
+
   useEffect(() => {
     if (selectedContent === null || currentIndex === null) return;
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -309,26 +308,11 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     };
   }, [selectedContent, currentIndex, data.length]);
 
-  const handleShowTooltip = (e: React.MouseEvent) => {
-    setTooltipPosition({
-      x: e.clientX,
-      y: e.clientY,
-    });
-    setTooltipVisible(true);
-  };
 
-  const handleHideTooltip = () => {
-    setTooltipVisible(false);
-  };
 
   const ModalContent = (
     <div className={`modal-overlay ${isDark ? 'dark-mode' : ''}`} onClick={closeModal}>
-      {/* Tooltip global */}
-      <Tooltip
-        text={t('tooltip.viewOriginal')}
-        isVisible={tooltipVisible}
-        position={tooltipPosition}
-      />
+
 
       <div className="modal-content-wrapper" onClick={e => e.stopPropagation()}>
         {data.length > 1 && !isMobile && (
@@ -468,11 +452,10 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
         {/* Botón para abrir imagen en nueva pestaña */}
         {selectedContent?.type === 'image' && selectedContent.image && (
           <button
-            className="modal-open-original-button"
-            onClick={() => window.open(selectedContent.image, '_blank', 'noopener,noreferrer')}
-            onMouseEnter={handleShowTooltip}
-            onMouseLeave={handleHideTooltip}
-          >
+              className="modal-open-original-button"
+              onClick={() => window.open(selectedContent.image, '_blank', 'noopener,noreferrer')}
+              aria-label="Open original image in new tab"
+            >
             {t('viewOriginalButton', 'Ver Original')}
           </button>
         )}
@@ -535,7 +518,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     </div>
   );
 
-  // --- NUEVO: Manejar clase global para overlays y scroll del body ---
+
   useEffect(() => {
     if (selectedContent) {
       document.body.classList.add('modal-open');

@@ -2,15 +2,15 @@ import React from 'react';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import PageTransition from '@components/PageTransition/PageTransition';
-import { useTheme } from '../context/ThemeContext'; // Ruta corregida
-import maintenanceImage from '@/assets/images/matenimiento.png'; // Importar la imagen
+import { useTheme } from '../context/ThemeContext';
+import maintenanceImage from '@/assets/images/matenimiento.png';
 
 const MaintenanceContainer = styled.div< { $isDark: boolean } >`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 160px); // Ajusta según la altura de tu header/footer si es necesario
+  min-height: calc(100vh - 160px);
   padding: 2rem;
   text-align: center;
   background-color: ${({ theme }) => theme.colors.background};
@@ -18,23 +18,23 @@ const MaintenanceContainer = styled.div< { $isDark: boolean } >`
 `;
 
 const StyledImage = styled.img< { $isDark?: boolean } >`
-  width: 150px; // Ajusta el tamaño según necesites
+  width: 150px;
   height: auto;
-  margin-bottom: 2rem; // Espacio entre la imagen y el título
-  ${({ $isDark }) => !$isDark && `filter: invert(1);`} // Aplicar filtro en modo claro
+  margin-bottom: 2rem;
+  ${({ $isDark }) => !$isDark && `filter: invert(1);`}
 `;
 
 const Title = styled.h1< { $isDark: boolean } >`
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  color: ${({ $isDark }) => $isDark ? '#FFFFFF' : '#1D1F23'}; // Blanco en modo oscuro, oscuro en modo claro
+  color: ${({ $isDark }) => $isDark ? '#FFFFFF' : '#1D1F23'};
 `;
 
 const Message = styled.p`
   font-size: 1.2rem;
   line-height: 1.6;
   max-width: 600px;
-  // El color se hereda de MaintenanceContainer o se puede especificar aquí si es necesario
+  
 `;
 
 const MaintenancePage: React.FC = () => {
@@ -66,4 +66,4 @@ const MaintenancePage: React.FC = () => {
   );
 };
 
-export default MaintenancePage; 
+export default MaintenancePage;

@@ -2,7 +2,7 @@ import { ExperienceCardProps } from '../components/Experiences/ExperienceCard';
 
 type ExperienceData = Omit<ExperienceCardProps, 'language'>;
 
-// Datos para experiencias de Marketing
+
 export const marketingExperiences: {
   es: ExperienceData[];
   en: ExperienceData[];
@@ -71,7 +71,7 @@ export const marketingExperiences: {
   ],
 };
 
-// Datos para experiencias de Operaciones
+
 export const operationsExperiences: {
   es: ExperienceData[];
   en: ExperienceData[];

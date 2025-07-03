@@ -112,7 +112,7 @@ const LocationText = styled.span`
 
 const StyledSiteButton = styled.a`
   display: inline-block;
-  background-color: #15814b; /* Color principal XCONS */
+  background-color: #15814b;
   color: white;
   padding: 8px 16px;
   border-radius: 6px;
@@ -123,8 +123,8 @@ const StyledSiteButton = styled.a`
   transition: background-color 0.2s ease-in-out;
 
   &:hover {
-    background-color: #106a3c; /* Un tono más oscuro para el hover */
-    text-decoration: none; /* Asegurar que no haya subrayado en hover */
+    background-color: #106a3c;
+    text-decoration: none;
   }
 `;
 
@@ -149,23 +149,23 @@ const Summary = styled.div<{ $themeMode: ThemeMode }>`
   max-width: 100%;
 `;
 
-// Definición del glassEffect localmente si no se quiere importar o es simple
+
 const glassEffectForDescriptionBox = css`
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   will-change: backdrop-filter;
 `;
 
-// Nuevo título estilizado para dentro del DescriptionBox
+
 const SectionTitleInsideBox = styled.h3<{ $isDark: boolean }>`
   font-weight: 600;
   font-size: 1.6rem;
-  color: ${({ $isDark }) => ($isDark ? '#FFFFFF' : '#1D1F23')}; // Colores de texto del tema
+  color: ${({ $isDark }) => ($isDark ? '#FFFFFF' : '#1D1F23')};
   margin-bottom: 0.75rem;
   text-transform: uppercase;
 `;
 
-// Línea separadora (similar a la de Marketing/Operations Experiences)
+
 const DividerLine = styled.hr<{ $isDark?: boolean }>`
   width: 100%;
   border: none;
@@ -173,7 +173,7 @@ const DividerLine = styled.hr<{ $isDark?: boolean }>`
   background-color: ${({ $isDark }) =>
     $isDark
       ? 'rgba(255,255,255,0.2)'
-      : 'rgba(0,0,0,0.15)'}; // Mismos colores de borde que DescriptionBox/Inputs
+      : 'rgba(0,0,0,0.15)'};
   margin-top: 0.75rem;
   margin-bottom: 1.5rem;
 `;
@@ -184,7 +184,7 @@ const DescriptionBox = styled.div<{ $isDark: boolean }>`
   margin-top: 1rem;
   border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
   background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
-  ${glassEffectForDescriptionBox} // El color del texto de SummaryText se manejará directamente o se heredará.
+  ${glassEffectForDescriptionBox}
 
   @media (max-width: 767px) {
     padding: 0;
@@ -196,11 +196,11 @@ const DescriptionBox = styled.div<{ $isDark: boolean }>`
 `;
 
 const SummaryText = styled.p<{ $isDark: boolean }>`
-  // Pasar $isDark para consistencia si es necesario
+  
   font-size: 1rem;
   line-height: 1.8;
   margin-bottom: 0;
-  color: ${({ $isDark }) => ($isDark ? '#DDDDDD' : '#444444')}; // Restaurar color explícito
+  color: ${({ $isDark }) => ($isDark ? '#DDDDDD' : '#444444')};
 `;
 
 const ExperienceContainer = styled.div`
@@ -243,7 +243,7 @@ const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
   }
 `;
 
-// Textos para los elementos de la galería (Español e Inglés)
+
 const masonryItemText = {
   splineScene: {
     title: { es: 'Escena Interactiva 3D', en: 'Interactive 3D Scene' },
@@ -305,11 +305,11 @@ const masonryItemText = {
   },
 } as const;
 
-// Definir un tipo para las claves de masonryItemText
+
 type MasonryItemKey = keyof typeof masonryItemText;
 
-// Definición de datos base para los elementos de la galería
-// Aseguramos que los elementos base cumplan con parte de MasonryItem y añadan la key.
+
+
 const masonryItemDetails: Array<
   Omit<MasonryItem, 'title' | 'description' | 'id'> & { id: string | number; key: MasonryItemKey }
 > = [
@@ -419,17 +419,17 @@ const XConsExperiencePage: React.FC = () => {
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
   const isDark = themeMode === 'dark';
   
-  // Obtener el proyecto inicial de los query parameters
+
   const initialProject = searchParams.get('project');
 
-  // Generar masonryData con los textos traducidos
+
   const masonryData: MasonryItem[] = masonryItemDetails.map(item => {
     const texts = masonryItemText[item.key];
     return {
       ...item,
       title: texts.title[language],
       description: texts.description[language],
-    } as MasonryItem; // Asegurar que el objeto resultante sea del tipo MasonryItem
+    } as MasonryItem;
   });
 
   const translations = {

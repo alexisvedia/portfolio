@@ -25,7 +25,7 @@ const SectionContent = styled.div`
   width: 100%;
   margin-bottom: 2rem;
 
-  /* Estilos para párrafos dentro del contenido */
+  
   p {
     color: rgba(255, 255, 255, 0.8);
     line-height: 1.8;

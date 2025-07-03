@@ -1,19 +1,19 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
 import { useSearchParams } from 'react-router-dom';
-import { useTheme, ThemeMode } from '../context/ThemeContext'; // Importar ThemeMode
+import { useTheme, ThemeMode } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import PageTransition from '@components/PageTransition/PageTransition'; // Asumiendo alias correcto
-import fusionAdsFondo from '../assets/Proyectos Fusion/Fusion-fondo.png'; // Importación imagen de fondo
-import fusionAdsLogo from '../assets/Proyectos Fusion/Logo-color-fusion.png'; // Ruta actualizada del logo
-import fusionAdsAppImage from '../assets/Proyectos Fusion/fusion-app.png'; // Importación para la imagen derecha
-// import fusionAdsIlustracion from '../assets/images/projects/fusionads-ilustracion.png'; // Placeholder para ilustración
+import PageTransition from '@components/PageTransition/PageTransition';
+import fusionAdsFondo from '../assets/Proyectos Fusion/Fusion-fondo.png';
+import fusionAdsLogo from '../assets/Proyectos Fusion/Logo-color-fusion.png';
+import fusionAdsAppImage from '../assets/Proyectos Fusion/fusion-app.png';
+
 import { FrontendDevelopmentExperience } from './components/FrontendDevelopmentExperience';
 import type { FrontendExperienceCardData } from './components/FrontendDevelopmentExperience';
 import { frontendDevelopmentExperienceData } from './data/experiencesData';
-import StandardSectionTitle from '../components/shared/StandardSectionTitle'; // Ajustar ruta si es necesario
-import { MasonryFusion } from './components/MasonryFusion'; // Nueva importación
-import { fusionProjectsData } from './data/fusionProjectsData'; // Nueva importación
+import StandardSectionTitle from '../components/shared/StandardSectionTitle';
+import { MasonryFusion } from './components/MasonryFusion';
+import { fusionProjectsData } from './data/fusionProjectsData';
 
 const PageContainer = styled.div`
   max-width: 1000px;
@@ -25,7 +25,7 @@ const PageContainer = styled.div`
 const FusionAdsBanner = styled.div`
   position: relative;
   width: 100%;
-  background-color: white; /* Considerar tema */
+  background-color: white;
   display: flex;
   align-items: center;
   padding: 20px;
@@ -33,7 +33,7 @@ const FusionAdsBanner = styled.div`
   border-radius: 12px;
   margin-bottom: 3rem;
   overflow: hidden;
-  min-height: 180px; /* Añadida altura mínima para consistencia */
+  min-height: 180px;
 `;
 
 const BannerBackground = styled.div`
@@ -44,28 +44,28 @@ const BannerBackground = styled.div`
   height: 100%;
   z-index: 1;
   overflow: hidden;
-  background-image: url(${fusionAdsFondo}); /* Usar la imagen de fondo importada */
-  /* background-color: #f0f0f0; */ /* Eliminar color de fondo temporal */
+  background-image: url(${fusionAdsFondo});
+
   background-repeat: no-repeat;
-  background-position: center center; /* Ajustar posición si es necesario */
-  background-size: 600px auto; /* Ejemplo: ancho 400px, alto automático */
-  opacity: 0.5; /* Opacidad aumentada para mayor visibilidad */
+  background-position: center center;
+  background-size: 600px auto;
+  opacity: 0.5;
 `;
 
 const BannerContent = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Ajustado para separar contenido */
+  justify-content: space-between;
   gap: 50px;
   width: 100%;
   position: relative;
   z-index: 2;
-  padding: 10px 30px; /* Añadido padding horizontal */
+  padding: 10px 30px;
 
   @media (max-width: 992px) {
     flex-direction: column;
     gap: 20px;
-    text-align: center; /* Centrar texto en móvil */
+    text-align: center;
   }
 `;
 
@@ -88,13 +88,13 @@ const LogoImage = styled.img`
 
 const BannerText = styled.p`
   font-size: 1rem;
-  color: #333; /* Considerar tema */
-  max-width: 500px; /* Ajustado */
+  color: #333;
+  max-width: 500px;
   line-height: 1.6;
-  margin-bottom: 10px; /* Mantenemos este margen inferior */
+  margin-bottom: 10px;
 
   a {
-    color: #007bff; /* Color de enlace estándar, ajustar según diseño */
+    color: #007bff;
     text-decoration: underline;
     &:hover {
       text-decoration: none;
@@ -103,15 +103,15 @@ const BannerText = styled.p`
 `;
 
 const LocationText = styled.span`
-  color: #666; /* Considerar tema */
+  color: #666;
   font-size: 0.9rem;
-  font-weight: 500; /* Añadido peso */
-  margin-bottom: 8px; /* Añadido margen inferior para separar del botón */
+  font-weight: 500;
+  margin-bottom: 8px;
 `;
 
 const StyledSiteButton = styled.a`
   display: inline-block;
-  background-color: #F7480B; /* Color naranja FusionAds */
+  background-color: #F7480B;
   color: white;
   padding: 8px 16px;
   border-radius: 6px;
@@ -122,29 +122,29 @@ const StyledSiteButton = styled.a`
   transition: background-color 0.2s ease-in-out;
 
   &:hover {
-    background-color: #D9400A; /* Naranja FusionAds más oscuro para hover */
-    text-decoration: none; /* Asegurar que no haya subrayado en hover */
+    background-color: #D9400A;
+    text-decoration: none;
   }
 `;
 
 const RightContent = styled.div`
-  max-width: 35%; // Ajustado
+  max-width: 35%;
 
   @media (max-width: 992px) {
     max-width: 70%;
-    margin-top: 20px; // Espacio en móvil
+    margin-top: 20px;
   }
 
   img {
     max-width: 100%;
     height: auto;
-    border-radius: 8px; // Ajustado
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); // Sombra sutil
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     display: block;
   }
 `;
 
-// Definiciones copiadas de XConsExperiencePage.tsx (o adaptadas)
+
 const Summary = styled.div<{ $themeMode: ThemeMode }>`
   margin: 3rem auto;
   max-width: 100%;
@@ -200,7 +200,7 @@ const SummaryText = styled.p<{ $isDark: boolean }>`
   color: ${({ $isDark }) => ($isDark ? '#DDDDDD' : '#444444')};
 `;
 
-// Contenedor para las secciones de experiencia (similar al de XCONS)
+
 const ExperienceContainer = styled.div`
   display: flex; 
   flex-direction: column;
@@ -208,7 +208,7 @@ const ExperienceContainer = styled.div`
   margin-top: 3rem; 
 `;
 
-// Nuevo styled component para el wrapper del Masonry, similar a XConsExperiencePage
+
 const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
   margin-top: 4rem;
   margin-bottom: 2rem;
@@ -216,11 +216,11 @@ const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
   padding: 2.5rem;
   border: 1px solid ${({ $isDark }) => ($isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)')};
   background: ${({ $isDark }) => ($isDark ? 'rgba(40, 40, 45, 0.7)' : 'rgba(245, 245, 250, 0.75)')};
-  ${glassEffectForDescriptionBox} // Asumiendo que glassEffectForDescriptionBox está definido arriba
+  ${glassEffectForDescriptionBox}
   color: ${({ theme }) => theme.colors.text};
 
   & > *:first-child {
-    margin-bottom: 0.75rem; // Espacio para el título StandardSectionTitle
+    margin-bottom: 0.75rem;
   }
 
   @media (max-width: 767px) {
@@ -234,12 +234,12 @@ const MasonryWrapper = styled.div<{ $isDark?: boolean }>`
 
 const FusionAdsPage: React.FC = () => {
   const { themeMode } = useTheme();
-  const { t, i18n } = useTranslation('fusionads'); // Asegurarse que 'fusionads' es el namespace correcto
+  const { t, i18n } = useTranslation('fusionads');
   const [searchParams, setSearchParams] = useSearchParams();
   const language = i18n.language.startsWith('en') ? 'en' : 'es';
   const isDark = themeMode === 'dark';
   
-  // Obtener el proyecto inicial de los query parameters
+
   const initialProject = searchParams.get('project');
 
   const bannerUrl = "https://backoffice.fusionos.ai";
@@ -259,7 +259,7 @@ const FusionAdsPage: React.FC = () => {
     }
   };
 
-  // Textos para la nueva sección "Resumen de Rol"
+
   const roleSummaryTexts = {
     title: {
       es: "Resumen de Rol",
@@ -271,7 +271,7 @@ const FusionAdsPage: React.FC = () => {
     }
   };
 
-  // Obtener los datos de la experiencia para el idioma actual
+
   const currentExperienceData = frontendDevelopmentExperienceData[language] as FrontendExperienceCardData;
   const experienceSectionTitleText = frontendDevelopmentExperienceData[language].sectionTitle;
 
@@ -297,7 +297,7 @@ const FusionAdsPage: React.FC = () => {
           </BannerContent>
         </FusionAdsBanner>
 
-        {/* Nueva sección de Resumen de Rol */}
+
         <Summary $themeMode={themeMode}>
           <DescriptionBox $isDark={isDark}>
             <SectionTitleInsideBox $isDark={isDark}>
@@ -310,7 +310,7 @@ const FusionAdsPage: React.FC = () => {
           </DescriptionBox>
         </Summary>
 
-        {/* Nueva sección de Experiencia Front-End */}
+
         <ExperienceContainer>
           <FrontendDevelopmentExperience
             title={<StandardSectionTitle>{experienceSectionTitleText}</StandardSectionTitle>}
@@ -319,7 +319,7 @@ const FusionAdsPage: React.FC = () => {
           />
         </ExperienceContainer>
 
-        {/* Nueva sección de Proyectos Destacados */}
+
         <MasonryWrapper $isDark={isDark}>
           <StandardSectionTitle style={{ textAlign: 'left' }}>
             {language === 'en' ? 'Featured Projects' : 'Proyectos Destacados'}

@@ -6,7 +6,7 @@ import TechSlider from '@components/TechSlider';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Nueva importación de imagen
+
 import alexisImage from '../../assets/images/projects/alexis.png';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -110,8 +110,7 @@ const BioSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLDivElement>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
-  
-  // Obtener los textos completos
+
   const bioPart1 = t('about.bio.part1');
   const bioPart2 = t('about.bio.part2');
   
@@ -122,7 +121,7 @@ const BioSection: React.FC = () => {
     
     if (!imageElement || !titleElement || !sectionRef.current || !sliderElement) return;
     
-    // Configuración inicial de la imagen y título
+
     gsap.set([imageElement, titleElement], { 
       opacity: 0,
       y: 30,
@@ -130,13 +129,13 @@ const BioSection: React.FC = () => {
       filter: 'blur(10px)'
     });
     
-    // Configuración inicial del slider
+
     gsap.set(sliderElement, {
       opacity: 0,
       y: 20
     });
     
-    // Animación de la imagen
+
     gsap.to(imageElement, {
       opacity: 1,
       y: 0,
@@ -153,7 +152,7 @@ const BioSection: React.FC = () => {
       }
     });
     
-    // Animación del título
+
     gsap.to(titleElement, {
       opacity: 1,
       y: 0,
@@ -169,7 +168,7 @@ const BioSection: React.FC = () => {
       }
     });
     
-    // Animación del slider
+
     gsap.to(sliderElement, {
       opacity: 1,
       y: 0,

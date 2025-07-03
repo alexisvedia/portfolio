@@ -1,17 +1,16 @@
 import { createGlobalStyle } from 'styled-components';
-import './fonts.css'; // Archivo para @font-face, actualmente vacío.
+import './fonts.css';
 
-// --- Importar Google Fonts ---
-// Guardar las URLs en constantes para claridad
+
 const latoFontsUrl =
   'https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap';
 const openSansFontsUrl =
-  'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap'; // Añadir Open Sans (Regular 400, Bold 700)
+  'https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap';
 
-// Función para añadir un link de fuente al head
+
 const addFontLink = (url: string) => {
   if (!document.querySelector(`link[href="${url}"]`)) {
-    // Evitar añadir duplicados
+  
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = url;
@@ -19,10 +18,10 @@ const addFontLink = (url: string) => {
   }
 };
 
-// Añadir las fuentes
+
 addFontLink(latoFontsUrl);
 addFontLink(openSansFontsUrl);
-// --- Fin Importar Google Fonts ---
+
 
 export const GlobalStyles = createGlobalStyle`
   *,
@@ -36,29 +35,29 @@ export const GlobalStyles = createGlobalStyle`
   html {
     scroll-behavior: smooth;
     height: 100%;
-    font-size: 16px; // Base font size
+    font-size: 16px;
   }
 
   body {
     background-color: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
-    font-family: ${({ theme }) => theme.fonts.body}; /* 'Inter' es el principal aquí */
+    font-family: ${({ theme }) => theme.fonts.body};
     line-height: 1.6;
     min-height: 100%;
     overflow-x: hidden; 
     transition: background-color 0.3s ease, color 0.3s ease; 
   }
 
-  /* Estilos globales para párrafos */
+
   p {
-    font-family: ${({ theme }) => theme.fonts.body}; /* Aplicar la fuente del tema para el cuerpo */
-    font-size: 16px; /* Tamaño estándar */
-    color: inherit; /* Heredar color para respetar temas */
-    margin-bottom: 1rem; /* Espaciado inferior estándar para párrafos */
+    font-family: ${({ theme }) => theme.fonts.body};
+    font-size: 16px;
+    color: inherit;
+    margin-bottom: 1rem;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: ${({ theme }) => theme.fonts.heading}; /* Usa Morganite y luego Inter */
+    font-family: ${({ theme }) => theme.fonts.heading};
     color: ${({ theme }) => theme.colors.text};
     line-height: 1.2;
     margin: 0 0 1rem 0;

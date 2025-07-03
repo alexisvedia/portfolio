@@ -3,9 +3,7 @@ import styled, { css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import emailjs from '@emailjs/browser';
-import Toast, { ToastType } from '../Toast/Toast';
 import confetti from 'canvas-confetti';
-import Tooltip from '../Tooltip/Tooltip';
 
 const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space['2xl']} 0;
@@ -48,7 +46,7 @@ const ContactText = styled.p`
   }
 `;
 
-// Estilo glass unificado y reforzado que mantiene consistencia
+
 const glassEffect = css`
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
@@ -207,7 +205,7 @@ const SubmitButton = styled.button<{ $isDark: boolean }>`
   }
 `;
 
-// Definir props para ContactSection, incluyendo id
+
 interface ContactSectionProps {
   id?: string;
 }
@@ -219,11 +217,6 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
   const formRef = useRef<HTMLFormElement>(null);
   const emailRef = useRef<HTMLAnchorElement>(null);
 
-  // Estados para el tooltip
-  const [tooltipVisible, setTooltipVisible] = useState(false);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [tooltipText, setTooltipText] = useState(t('tooltip.copyEmail'));
-
   const [formData, setFormData] = useState({
     name: '',
     title: '',
@@ -231,17 +224,7 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
     message: '',
   });
 
-  // Reemplazamos el estado de status con estados para el Toast
   const [isLoading, setIsLoading] = useState(false);
-  const [toast, setToast] = useState<{
-    visible: boolean;
-    message: string;
-    type: ToastType;
-  }>({
-    visible: false,
-    message: '',
-    type: 'success',
-  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -250,49 +233,14 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
 
   const copyEmailToClipboard = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    
     const email = 'alexisleonelvedia@gmail.com';
-    
-    // Actualizar posición del tooltip
-    if (emailRef.current) {
-      const rect = emailRef.current.getBoundingClientRect();
-      setTooltipPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top
-      });
-    }
-    
     navigator.clipboard.writeText(email)
       .then(() => {
-        // Mostrar mensaje de copiado exitoso
-        setTooltipText(t('tooltip.copied'));
-        setTooltipVisible(true);
-        
-        // Ocultar el tooltip después de 1.5 segundos
-        setTimeout(() => {
-          setTooltipVisible(false);
-        }, 1500);
+        // Email copiado al portapapeles
       })
       .catch(err => {
         console.error('No se pudo copiar al portapapeles', err);
       });
-  };
-
-  // Función para mostrar el tooltip con la instrucción
-  const handleEmailMouseEnter = () => {
-    if (emailRef.current) {
-      const rect = emailRef.current.getBoundingClientRect();
-      setTooltipPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top
-      });
-    }
-    setTooltipText(t('tooltip.copyEmail'));
-    setTooltipVisible(true);
-  };
-
-  const handleEmailMouseLeave = () => {
-    setTooltipVisible(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -301,12 +249,12 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
     try {
       setIsLoading(true);
 
-      // Credenciales de EmailJS proporcionadas por el usuario
+  
       const serviceId = 'service_srdurzn';
       const templateId = 'template_efoo7fz';
       const publicKey = 'CoI3CL1-8DQHvdStw';
 
-      // Preparar los datos para enviar
+  
       const templateParams = {
         name: formData.name,
         email: formData.email,
@@ -315,44 +263,28 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
         time: new Date().toLocaleString(),
       };
 
-      // Enviar el correo usando el método send
-      const result = await emailjs.send(serviceId, templateId, templateParams, publicKey);
+  
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
 
-      console.log('SUCCESS!', result.text);
+      // Mensaje enviado exitosamente
       setIsLoading(false);
       setFormData({ name: '', title: '', email: '', message: '' });
 
-      // Mostrar Toast de éxito
-      setToast({
-        visible: true,
-        message: t('messageSent'),
-        type: 'success',
-      });
 
-      // ¡Lanzar confeti!
       confetti({
-        particleCount: 150, // Más partículas
-        spread: 90, // Mayor dispersión
-        origin: { y: 0.6 }, // Origen un poco más abajo de la mitad
-        colors: ['#bb0000', '#ffffff', '#00ff00'], // Colores (puedes personalizar)
+        particleCount: 150,
+        spread: 90,
+        origin: { y: 0.6 },
+        colors: ['#bb0000', '#ffffff', '#00ff00'],
       });
     } catch (error) {
       console.error('FAILED...', error);
       setIsLoading(false);
-
-      // Mostrar Toast de error
-      setToast({
-        visible: true,
-        message: t('messageError'),
-        type: 'error',
-      });
+      // Error al enviar mensaje
     }
   };
 
-  // Función para cerrar el Toast
-  const closeToast = () => {
-    setToast(prev => ({ ...prev, visible: false }));
-  };
+
 
   return (
     <SectionContainer ref={ref} id={id}>
@@ -369,8 +301,6 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
                       ref={emailRef}
                       href="#"
                       onClick={copyEmailToClipboard}
-                      onMouseEnter={handleEmailMouseEnter}
-                      onMouseLeave={handleEmailMouseLeave}
                       style={{ cursor: 'pointer' }}
                     >
                       alexisleonelvedia@gmail.com
@@ -441,21 +371,7 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
         </Form>
       </ContactContent>
 
-      {/* Componente Toast */}
-      <Toast
-        message={toast.message}
-        type={toast.type}
-        isVisible={toast.visible}
-        onClose={closeToast}
-        duration={5000}
-      />
 
-      {/* Tooltip para la copia del email */}
-      <Tooltip 
-        text={tooltipText}
-        isVisible={tooltipVisible}
-        position={tooltipPosition}
-      />
     </SectionContainer>
   );
 });

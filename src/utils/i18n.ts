@@ -9,7 +9,7 @@ const resources = {
       selectLanguage: 'Select language',
       english: 'English',
       spanish: 'Spanish',
-      // Hero
+  
       heroTitle: 'UX/UI Designer and Frontend Developer',
       heroSubtitle:
         'Artificial Intelligence • User Experience • E-commerce • WordPress • Chatbots • Interface Design • Mobile App Design • Automations',
@@ -18,7 +18,7 @@ const resources = {
 
 
 
-      // Chat translations
+  
       'AI Portfolio Assistant': 'AI Portfolio Assistant',
       '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?':
         "Hello! I'm your AI Portfolio Assistant. How can I help you today?",
@@ -26,15 +26,15 @@ const resources = {
       'Limpiar chat': 'Clean chat',
       'Cerrar chat': 'Close chat',
 
-      // Navigation
+  
       home: 'Home',
       projects: 'Projects',
       experience: 'Projects',
       skills: 'Skills',
       contact: 'Contact',
-      // Projects section
-      // Skills section
-      // Contact section
+  
+  
+  
       contactText: 'Want to work together? Have a project in mind? Feel free to contact me at alexisleonelvedia@gmail.com or using the form!',
       name: 'Name',
       email: 'Email',
@@ -44,15 +44,15 @@ const resources = {
       sending: 'Sending...',
       messageSent: 'Message sent successfully! I will get back to you soon.',
       messageError: 'There was an error sending your message. Please try again.',
-      // Placeholders
+  
       namePlaceholder: 'E.g: Steve Jobs',
       emailPlaceholder: 'example@example.com',
       messagePlaceholder: 'Write a message...',
       subjectPlaceholder: 'E.g: I need help improving Siri',
-      // Footer
+  
       yourName: 'Your Name',
       allRightsReserved: 'All Rights Reserved',
-      // Navegación
+  
       navbar: {
         home: 'Home',
         about: 'About Me',
@@ -63,7 +63,7 @@ const resources = {
         bandit: 'Bandit',
         otros: 'Other Projects'
       },
-      // Tooltips for Sidebar Controls
+  
       tooltip: {
         github: 'Visit GitHub Profile',
         linkedin: 'Visit LinkedIn Profile',
@@ -73,9 +73,9 @@ const resources = {
         copyEmail: 'Copy email to clipboard',
         copied: 'Copied!',
       },
-      // Document links
+  
       documentLinksTitle: 'Proposal Defense',
-      // About page
+  
       about: {
         professionalProfile: 'Professional Profile',
         professionalExperience: 'Professional Experience',
@@ -124,7 +124,7 @@ const resources = {
           tools: 'Tools',
         },
       },
-      // Testimonials Section Title
+  
       testimonialsTitle: 'Testimonials',
       testimonials: {
         jorge:
@@ -152,7 +152,7 @@ const resources = {
       selectLanguage: 'Seleccionar idioma',
       english: 'Inglés',
       spanish: 'Español',
-      // Hero
+
       heroTitle: 'Diseñador UX/UI y Desarrollador Frontend',
       heroSubtitle:
         'Inteligencia Artificial • Experiencia de usuario • E-commerce • Wordpress • Chatbots • Diseño de interfaces • Diseño de aplicaciones móviles • Automatizaciones',
@@ -161,7 +161,7 @@ const resources = {
 
 
 
-      // Chat translations
+
       'AI Portfolio Assistant': 'AI Portfolio Assistant',
       '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?':
         '¡Hola! Soy tu AI Portfolio Assistant. ¿En qué puedo ayudarte hoy?',
@@ -169,15 +169,15 @@ const resources = {
       'Limpiar chat': 'Limpiar chat',
       'Cerrar chat': 'Cerrar chat',
 
-      // Navigation
+
       home: 'Inicio',
       projects: 'Proyectos',
       experience: 'Proyectos',
       skills: 'Habilidades',
       contact: 'Contacto',
-      // Projects section
-      // Skills section
-      // Contact section
+
+
+
       contactText:
         '¿Quieres trabajar juntos? ¿Tienes un proyecto en mente? ¡No dudes en contactarme a alexisleonelvedia@gmail.com o usando el formulario!',
       name: 'Nombre',
@@ -188,15 +188,15 @@ const resources = {
       sending: 'Enviando...',
       messageSent: '¡Mensaje enviado con éxito! Te responderé pronto.',
       messageError: 'Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo.',
-      // Placeholders
+
       namePlaceholder: 'Ej: Steve Jobs',
       emailPlaceholder: 'ejemplo@ejemplo.com',
       messagePlaceholder: 'Escribe un mensaje...',
       subjectPlaceholder: 'Ej: Necesito ayuda para mejorar Siri',
-      // Footer
+
       yourName: 'Tu Nombre',
       allRightsReserved: 'Todos los Derechos Reservados',
-      // Navegación
+
       navbar: {
         home: 'Inicio',
         about: 'Sobre Mí',
@@ -207,7 +207,7 @@ const resources = {
         bandit: 'Bandit',
         otros: 'Otros Proyectos'
       },
-      // Tooltips para Controles de Sidebar
+
       tooltip: {
         github: 'Visitar Perfil de GitHub',
         linkedin: 'Visitar Perfil de LinkedIn',
@@ -217,9 +217,9 @@ const resources = {
         copyEmail: 'Copiar correo al portapapeles',
         copied: '¡Copiado!',
       },
-      // Enlaces a documentos
+
       documentLinksTitle: 'Defensa de la propuesta',
-      // Página Sobre Mí
+
       about: {
         professionalProfile: 'Perfil Profesional',
         professionalExperience: 'Experiencia Profesional',
@@ -268,7 +268,7 @@ const resources = {
           tools: 'Herramientas',
         },
       },
-      // Título Sección Testimonios
+
       testimonialsTitle: 'Testimonios',
       testimonials: {
         jorge:
@@ -292,14 +292,14 @@ const resources = {
   },
 };
 
-// Obtener el idioma guardado en localStorage o usar el idioma del navegador
+
 const getDefaultLanguage = () => {
   const savedLanguage = localStorage.getItem('i18nextLng');
   if (savedLanguage && (savedLanguage.startsWith('es') || savedLanguage.startsWith('en'))) {
     return savedLanguage.startsWith('es') ? 'es' : 'en';
   }
 
-  // Si no hay un idioma guardado, intentar detectar el idioma del navegador
+
   const browserLang = navigator.language;
   return browserLang && browserLang.startsWith('es') ? 'es' : 'en';
 };
@@ -310,7 +310,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    lng: getDefaultLanguage(), // Establecer el idioma inicial explícitamente
+    lng: getDefaultLanguage(),
     interpolation: {
       escapeValue: false,
     },
@@ -321,7 +321,7 @@ i18n
     },
   });
 
-// Asegurarse de que el idioma seleccionado se guarde correctamente en localStorage
+
 i18n.on('languageChanged', lng => {
   localStorage.setItem('i18nextLng', lng);
 });

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTheme } from '../../context/ThemeContext';
 
-// Importaciones de logos
+
 import figmaIcon from '../../assets/images/Logos/figma-icon-one-color.svg';
 import mongoDbIcon from '../../assets/images/Logos/mongodb-svgrepo-com.svg';
 import n8nIcon from '../../assets/images/Logos/n8n.io.svg';
@@ -16,7 +16,7 @@ interface TechSliderProps {
   className?: string;
 }
 
-// Definimos el componente Tooltip con estilo Glass
+
 const Tooltip = styled.div<{ $isVisible: boolean; $isDarkMode: boolean }>`
   position: absolute;
   top: -35px;
@@ -136,7 +136,7 @@ const TechSlider: React.FC<TechSliderProps> = ({ className }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState<string | null>(null);
 
-  // Lista de tecnologías con sus iconos actualizados
+  
   const technologies = [
     { name: 'Figma', src: figmaIcon },
     { name: 'MongoDB', src: mongoDbIcon },
@@ -153,7 +153,7 @@ const TechSlider: React.FC<TechSliderProps> = ({ className }) => {
       setIsMobile(window.innerWidth <= 768);
     };
 
-    // Comprobar al cargar y cuando se redimensiona la ventana
+  
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
 

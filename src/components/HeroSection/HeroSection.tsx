@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import SimpleBlurText from '../SimpleBlurText';
-import { useTheme } from '../../context/ThemeContext';
+
+
 
 const HeroContainer = styled.section`
   display: flex;
@@ -24,7 +24,7 @@ const CenteringWrapper = styled.div`
   margin-bottom: auto;
 `;
 
-// Nuevo componente para el rol profesional
+
 const RoleLabel = styled.div`
   font-size: 1.2rem;
   font-weight: 600;
@@ -44,13 +44,16 @@ const RoleLabel = styled.div`
   }
 `;
 
-const Title = styled.h1`
+const Title = styled.h1<{ $visible: boolean }>`
   font-weight: 900;
   color: ${({ theme }) => theme.colors.text};
   line-height: 0.9;
   text-transform: uppercase;
   width: 100%;
   user-select: none;
+  opacity: ${props => props.$visible ? 1 : 0};
+  transform: ${props => props.$visible ? 'translateY(0)' : 'translateY(30px)'};
+  transition: opacity 1s ease-out, transform 1s ease-out;
   
   @media (max-width: ${({ theme }) => theme.breakpoints.md}) {
     font-size: 75px;
@@ -99,13 +102,13 @@ const fadeOut = keyframes`
   }
 `;
 
-// Contenedor con efecto parallax
+
 const ParallaxTitle = styled.div`
   position: relative;
   will-change: transform, filter, opacity;
 `;
 
-// Contenedor para el subtítulo con efecto parallax
+
 const ParallaxSubtitle = styled.div`
   position: relative;
   will-change: transform, filter, opacity;
@@ -117,7 +120,7 @@ const ParallaxSubtitle = styled.div`
   }
 `;
 
-// Subtítulo con animación de aparición original
+
 const Subtitle = styled.h2<{ $visible: boolean; $fadeOut: boolean }>`
   font-size: 1rem;
   font-weight: 400;
@@ -147,21 +150,33 @@ interface HeroSectionProps {
   fontsLoaded?: boolean;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoaded = false }) => {
+const HeroSection: React.FC<HeroSectionProps> = () => {
   const { t, i18n } = useTranslation();
-  const { themeMode } = useTheme();
-  const [titleKey, setTitleKey] = useState(`title-${themeMode}`);
+
   const [isMobile, setIsMobile] = useState(false);
+  const [titleVisible, setTitleVisible] = useState(false);
   const [subtitleVisible, setSubtitleVisible] = useState(false);
   const [subtitleFadeOut, setSubtitleFadeOut] = useState(false);
   const [currentSubtitleText, setCurrentSubtitleText] = useState('');
-  const [startAnimations, setStartAnimations] = useState(false);
+
   const titleRef = useRef<HTMLDivElement>(null);
   const subtitleRef = useRef<HTMLDivElement>(null);
   const prevLangRef = useRef(i18n.language);
   
   useEffect(() => {
     setCurrentSubtitleText(t('heroSubtitle'));
+
+    const titleTimer = setTimeout(() => {
+      setTitleVisible(true);
+    }, 200);
+
+    const subtitleTimer = setTimeout(() => {
+      setSubtitleVisible(true);
+    }, 700);
+    return () => {
+      clearTimeout(titleTimer);
+      clearTimeout(subtitleTimer);
+    };
   }, []);
   
   useEffect(() => {
@@ -174,22 +189,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoa
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  useEffect(() => {
-    setTitleKey(`title-${themeMode}`);
-  }, [themeMode]);
+
   
-  useEffect(() => {
-    if (fontsLoaded) {
-      if (localStorage.getItem('hasVisitedBefore')) {
-        setStartAnimations(true);
-      } else {
-        const timer = setTimeout(() => {
-          setStartAnimations(true);
-        }, 1000);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [fontsLoaded]);
+
   
   useEffect(() => {
     if (i18n.language !== prevLangRef.current) {
@@ -247,46 +249,25 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onAnimationComplete, fontsLoa
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleTitleAnimationComplete = () => {
-    setCurrentSubtitleText(t('heroSubtitle'));
-    setSubtitleVisible(true);
-    if (onAnimationComplete) {
-      onAnimationComplete();
-    }
-  };
+
   
   return (
     <HeroContainer>
       <CenteringWrapper>
         <ParallaxTitle ref={titleRef}>
           <RoleLabel>UX/UI Developer</RoleLabel>
-          <Title>
+          <Title $visible={titleVisible}>
             {isMobile ? (
               <>
                 <StyledAlexis>
-                  <SimpleBlurText
-                    key={`${titleKey}-1`}
-                    text="ALEXIS"
-                    onAnimationComplete={undefined}
-                    delayStart={!startAnimations}
-                  />
+                  ALEXIS
                 </StyledAlexis>
                 <StyledVedia>
-                  <SimpleBlurText
-                    key={`${titleKey}-2`}
-                    text="VEDIA"
-                    onAnimationComplete={handleTitleAnimationComplete}
-                    delayStart={!startAnimations}
-                  />
+                  VEDIA
                 </StyledVedia>
               </>
             ) : (
-              <SimpleBlurText
-                key={titleKey}
-                text="ALEXIS VEDIA"
-                onAnimationComplete={handleTitleAnimationComplete}
-                delayStart={!startAnimations}
-              />
+              "ALEXIS VEDIA"
             )}
           </Title>
         </ParallaxTitle>

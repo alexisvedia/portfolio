@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled, { keyframes } from 'styled-components';
 
-// Animación del electrocardiograma
+
 const dash = keyframes`
   72.5% {
     opacity: 0;
@@ -12,7 +12,7 @@ const dash = keyframes`
   }
 `;
 
-// Animación de fade-out
+
 const fadeOut = keyframes`
   0% { opacity: 1; visibility: visible; }
   99% { opacity: 0; visibility: visible; }
@@ -72,14 +72,14 @@ const FontLoader: React.FC<FontLoaderProps> = ({ onLoaded }) => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Comprobar si el documento ya está cargado
+
     if (document.readyState === 'complete') {
       handleFontsLoaded();
     } else {
       window.addEventListener('load', handleFontsLoaded);
     }
 
-    // Asegurar que las fuentes estén cargadas
+
     document.fonts.ready.then(handleFontsLoaded);
 
     return () => {
@@ -88,11 +88,11 @@ const FontLoader: React.FC<FontLoaderProps> = ({ onLoaded }) => {
   }, []);
 
   const handleFontsLoaded = () => {
-    // Pequeño retraso para asegurar que todo esté realmente cargado
+    
     setTimeout(() => {
       setIsLoaded(true);
       if (onLoaded) {
-        // Dar tiempo a la animación de fadeOut antes de llamar a onLoaded
+
         setTimeout(onLoaded, 600);
       }
     }, 500);
@@ -110,4 +110,4 @@ const FontLoader: React.FC<FontLoaderProps> = ({ onLoaded }) => {
   );
 };
 
-export default FontLoader; 
+export default FontLoader;

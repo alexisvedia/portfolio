@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import LanguageSelector from '../LanguageSelector/LanguageSelector';
-import Tooltip from '../Tooltip/Tooltip';
 import {
   Menu,
   Home as HomeIcon,
@@ -33,11 +32,7 @@ interface SidebarProps {
   isMobile: boolean;
 }
 
-interface TooltipState {
-  visible: boolean;
-  text: string;
-  position: { x: number; y: number };
-}
+
 
 const SidebarOverlay = styled.div<{ $isOpen: boolean }>`
   position: fixed;
@@ -328,21 +323,17 @@ const MobileMenuButton = styled.button<{ $isMobile: boolean; $isOpen: boolean }>
 `;
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
-  const [tooltip, setTooltip] = useState<TooltipState>({ 
-    visible: false, 
-    text: '', 
-    position: { x: 0, y: 0 } 
-  });
+
   const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
   const [activeLink, setActiveLink] = useState<string>("#home");
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const [isFirstRender, setIsFirstRender] = useState(true);
 
-  // Efecto para controlar el scroll del body cuando el sidebar está abierto en móvil
+
   useEffect(() => {
     const body = document.body;
     if (isMobile && isOpen) {
@@ -351,7 +342,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
       body.style.overflow = 'auto';
     }
 
-    // Cleanup: restaurar el scroll del body si el componente se desmonta
+
     return () => {
       body.style.overflow = 'auto';
     };
@@ -517,23 +508,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
   };
 
 
-
-  const showTooltip = (textKey: string, e: React.MouseEvent<HTMLElement>, displayText?: { es: string; en: string }) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    setTooltip({
-      visible: true,
-      text: displayText ? (i18n.language === 'es' ? displayText.es : displayText.en) : t(textKey),
-      position: {
-        x: rect.left + rect.width / 2,
-        y: rect.top,
-      }
-    });
-  };
-
-  const hideTooltip = () => {
-    setTooltip(prev => ({ ...prev, visible: false }));
-  };
-
   useEffect(() => {
     if (isFirstRender) {
       setIsFirstRender(false);
@@ -542,11 +516,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
 
   return (
     <>
-      <Tooltip 
-        text={tooltip.text} 
-        isVisible={tooltip.visible} 
-        position={tooltip.position} 
-      />
+
       
       {isMobile && (
         <MobileMenuButton 
@@ -624,8 +594,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
             target="_blank" 
             rel="noopener noreferrer" 
             aria-label="GitHub"
-            onMouseEnter={(e) => showTooltip('tooltip.github', e)}
-            onMouseLeave={hideTooltip}
           >
             <FaGithub />
           </SocialMediaButton>
@@ -634,14 +602,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
             target="_blank" 
             rel="noopener noreferrer" 
             aria-label="LinkedIn"
-            onMouseEnter={(e) => showTooltip('tooltip.linkedin', e)}
-            onMouseLeave={hideTooltip}
           >
             <FaLinkedin />
           </SocialMediaButton>
           <div 
-             onMouseEnter={(e) => showTooltip('tooltip.toggleTheme', e)} 
-             onMouseLeave={hideTooltip} 
              style={{ lineHeight: 1 }}
           >
             <ThemeToggleWrapper>
@@ -649,8 +613,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, isMobile }) =>
             </ThemeToggleWrapper>
           </div>
           <div 
-             onMouseEnter={(e) => showTooltip('tooltip.selectLanguage', e)} 
-             onMouseLeave={hideTooltip}
              style={{ lineHeight: 1 }}
           >
             <LanguageSelector />
