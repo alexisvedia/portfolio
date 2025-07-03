@@ -84,7 +84,7 @@ const Footer: React.FC = () => {
       <FooterContent>
         
         <SocialLinks>
-          <SocialLink href="https://github.com/AxSRockS/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <SocialLink href="https://github.com/alexisvedia/" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
             <i className="fab fa-github"></i>
           </SocialLink>
           <SocialLink href="https://www.linkedin.com/in/alexis-vedia-80b936190/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
