@@ -10,6 +10,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import FontLoader from '@components/FontLoader/FontLoader';
 import GrainOverlay from '@components/GrainOverlay';
 import Sidebar from '@components/Sidebar/Sidebar';
+import LoadingSpinner from '@components/LoadingSpinner';
 
 
 const ChatbotAssistant = React.lazy(
@@ -242,7 +243,7 @@ const AppContent = () => {
 
         <Container>
           <ScrollRestoration />
-          <React.Suspense fallback={<div>Loading...</div>}>
+          <React.Suspense fallback={<LoadingSpinner />}>
             <Outlet context={{ handleAnimationComplete, fontsLoaded, setIsContactSectionInView }} />
           </React.Suspense>
         </Container>

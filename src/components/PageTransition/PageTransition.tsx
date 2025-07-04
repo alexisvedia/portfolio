@@ -8,7 +8,7 @@ interface PageTransitionProps {
 }
 
 const PageContainer = styled(motion.div)`
-  position: absolute;
+  position: relative;
   width: 100%;
   min-height: 100vh;
   display: flex;

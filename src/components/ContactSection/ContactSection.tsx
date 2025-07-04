@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import emailjs from '@emailjs/browser';
 import confetti from 'canvas-confetti';
+import Tooltip from '../Tooltip';
 
 const SectionContainer = styled.section`
   padding: ${({ theme }) => theme.space['2xl']} 0;
@@ -231,12 +232,15 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const [emailCopied, setEmailCopied] = useState(false);
+
   const copyEmailToClipboard = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     const email = 'alexisleonelvedia@gmail.com';
     navigator.clipboard.writeText(email)
       .then(() => {
-        // Email copiado al portapapeles
+        setEmailCopied(true);
+        setTimeout(() => setEmailCopied(false), 2000);
       })
       .catch(err => {
         console.error('No se pudo copiar al portapapeles', err);
@@ -297,14 +301,16 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
                 return (
                   <React.Fragment key={i}>
                     {part}
-                    <a
-                      ref={emailRef}
-                      href="#"
-                      onClick={copyEmailToClipboard}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      alexisleonelvedia@gmail.com
-                    </a>
+                    <Tooltip content={emailCopied ? t('tooltip.copied') : t('tooltip.copyEmail')}>
+                      <a
+                        ref={emailRef}
+                        href="#"
+                        onClick={copyEmailToClipboard}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        alexisleonelvedia@gmail.com
+                      </a>
+                    </Tooltip>
                   </React.Fragment>
                 );
               }
