@@ -178,7 +178,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
 
 
   useEffect(() => {
-    if (initialSelectedProject && data.length > 0) {
+    if (initialSelectedProject && data.length > 0 && !selectedContent) {
       const projectItem = data.find(item => 
         item.id.toString() === initialSelectedProject ||
         (item.title && item.title.toLowerCase().replace(/\s+/g, '').includes(initialSelectedProject.toLowerCase().replace(/\s+/g, '')))
@@ -190,8 +190,11 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
         setCurrentIndex(index);
         onModalStateChange?.(true, initialSelectedProject);
       }
+    } else if (!initialSelectedProject && selectedContent) {
+      setSelectedContent(null);
+      setCurrentIndex(null);
     }
-  }, [initialSelectedProject, data, onModalStateChange]);
+  }, [initialSelectedProject, data, onModalStateChange, selectedContent]);
 
   useEffect(() => {
     const updateColumns = () => {
@@ -274,14 +277,16 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     const nextIndex = currentIndex + 1;
     setSelectedContent(data[nextIndex]);
     setCurrentIndex(nextIndex);
-  }, [currentIndex, data]);
+    onModalStateChange?.(true, data[nextIndex].id.toString());
+  }, [currentIndex, data, onModalStateChange]);
 
   const goToPrevious = useCallback(() => {
     if (currentIndex === null || currentIndex <= 0) return;
     const prevIndex = currentIndex - 1;
     setSelectedContent(data[prevIndex]);
     setCurrentIndex(prevIndex);
-  }, [currentIndex, data]);
+    onModalStateChange?.(true, data[prevIndex].id.toString());
+  }, [currentIndex, data, onModalStateChange]);
 
 
   useEffect(() => {
@@ -319,7 +324,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
           <>
             <button
               className="modal-nav-button prev"
-              onClick={goToPrevious}
+              onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
               disabled={currentIndex === 0}
               aria-label="Previous item"
             >
@@ -333,7 +338,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
             </button>
             <button
               className="modal-nav-button next"
-              onClick={goToNext}
+              onClick={(e) => { e.stopPropagation(); goToNext(); }}
               disabled={currentIndex === data.length - 1}
               aria-label="Next item"
             >
@@ -445,7 +450,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
           </div>
         )}
 
-        <button className="modal-close-button" onClick={closeModal} aria-label="Close modal">
+        <button className="modal-close-button" onClick={(e) => { e.stopPropagation(); closeModal(); }} aria-label="Close modal">
           &times;
         </button>
 
@@ -453,7 +458,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
         {selectedContent?.type === 'image' && selectedContent.image && (
           <button
               className="modal-open-original-button"
-              onClick={() => window.open(selectedContent.image, '_blank', 'noopener,noreferrer')}
+              onClick={(e) => { e.stopPropagation(); window.open(selectedContent.image, '_blank', 'noopener,noreferrer'); }}
               aria-label="Open original image in new tab"
             >
             {t('viewOriginalButton', 'Ver Original')}
@@ -466,12 +471,13 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
               <div
                 key={`thumb-${thumbItem.id}`}
                 className={`thumbnail-item ${index === currentIndex ? 'active' : ''}`}
-                onClick={() => handleItemClick(thumbItem, index)}
+                onClick={(e) => { e.stopPropagation(); handleItemClick(thumbItem, index); }}
                 role="button"
                 tabIndex={0}
                 aria-label={`View item ${index + 1}${thumbItem.title ? ': ' + thumbItem.title : ''}`}
                 onKeyDown={e => {
                   if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
                     handleItemClick(thumbItem, index);
                   }
                 }}

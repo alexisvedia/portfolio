@@ -242,7 +242,12 @@ const AppContent = () => {
         )}
 
         <Container>
-          <ScrollRestoration />
+          <ScrollRestoration 
+            getKey={(location) => {
+              // No hacer scroll restoration si solo cambian los query params
+              return location.pathname;
+            }}
+          />
           <React.Suspense fallback={<LoadingSpinner />}>
             <Outlet context={{ handleAnimationComplete, fontsLoaded, setIsContactSectionInView }} />
           </React.Suspense>
