@@ -25,6 +25,10 @@
     "campaignTemplateGallery": {
       "title": "Galería de Plantillas de Campaña",
       "description": "Presentación de la galería de plantillas específicas para campañas, facilitando la selección y personalización rápida."
+    },
+    "customProposal": {
+      "title": "Propuesta personalizada",
+      "description": "Para conseguir el puesto, envié un mail con esta propuesta personalizada para demostrar mis conocimientos en UX/UI"
     }
   }
-} 
+}

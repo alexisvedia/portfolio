@@ -25,6 +25,10 @@
     "campaignTemplateGallery": {
       "title": "Campaign Template Gallery",
       "description": "Showcase of the campaign-specific template gallery, facilitating quick selection and customization."
+    },
+    "customProposal": {
+      "title": "Custom Proposal",
+      "description": "To get the position, I sent an email with this custom proposal to demonstrate my UX/UI knowledge"
     }
   }
-} 
+}

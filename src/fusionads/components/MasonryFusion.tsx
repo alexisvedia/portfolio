@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useTransition, a } from '@react-spring/web';
 import styled from 'styled-components';
@@ -135,7 +135,7 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
 
   
   useEffect(() => {
-    if (initialSelectedProject && data.length > 0) {
+    if (initialSelectedProject && data.length > 0 && !selectedContent) {
       const projectItem = data.find(item => 
         item.id.toString() === initialSelectedProject ||
         (item.title && (item.title.es.toLowerCase().replace(/\s+/g, '').includes(initialSelectedProject.toLowerCase().replace(/\s+/g, '')) ||
@@ -148,8 +148,12 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
         setCurrentIndex(index);
         onModalStateChange?.(true, initialSelectedProject);
       }
+    } else if (!initialSelectedProject && selectedContent) {
+      // Si no hay proyecto inicial pero hay contenido seleccionado, cerrar el modal
+      setSelectedContent(null);
+      setCurrentIndex(null);
     }
-  }, [initialSelectedProject, data, onModalStateChange]);
+  }, [initialSelectedProject, data, onModalStateChange, selectedContent]);
 
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
@@ -250,37 +254,51 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
     onModalStateChange?.(true, item.id.toString());
   };
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setSelectedContent(null);
     setCurrentIndex(null);
     onModalStateChange?.(false);
-  };
+  }, [onModalStateChange]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     if (currentIndex === null || currentIndex >= data.length - 1) return;
     const nextIndex = currentIndex + 1;
     setSelectedContent(data[nextIndex]);
     setCurrentIndex(nextIndex);
-  };
+    onModalStateChange?.(true, data[nextIndex].id.toString());
+  }, [currentIndex, data, onModalStateChange]);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     if (currentIndex === null || currentIndex <= 0) return;
     const prevIndex = currentIndex - 1;
     setSelectedContent(data[prevIndex]);
     setCurrentIndex(prevIndex);
-  };
+    onModalStateChange?.(true, data[prevIndex].id.toString());
+  }, [currentIndex, data, onModalStateChange]);
 
   useEffect(() => {
+    if (selectedContent === null || currentIndex === null) return;
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (!selectedContent) return;
-      if (event.key === 'Escape') closeModal();
-      if (event.key === 'ArrowRight') goToNext();
-      if (event.key === 'ArrowLeft') goToPrevious();
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        if (currentIndex > 0) {
+          goToPrevious();
+        }
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        if (currentIndex < data.length - 1) {
+          goToNext();
+        }
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeModal();
+      }
     };
-
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedContent, currentIndex, data, goToNext, goToPrevious, closeModal]);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedContent, currentIndex, data.length, goToPrevious, goToNext, closeModal]);
 
   useEffect(() => {
     if (selectedContent) {
@@ -332,7 +350,10 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
               <>
                 <button
                   className="modal-nav-button prev"
-                  onClick={goToPrevious}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToPrevious();
+                  }}
                   disabled={currentIndex === 0}
                   aria-label={t('masonry.previousItemAria', 'Elemento anterior')}
                 >
@@ -346,7 +367,10 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
                 </button>
                 <button
                   className="modal-nav-button next"
-                  onClick={goToNext}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToNext();
+                  }}
                   disabled={currentIndex === data.length - 1}
                   aria-label={t('masonry.nextItemAria', 'Siguiente elemento')}
                 >
@@ -509,7 +533,10 @@ export const MasonryFusion: React.FC<MasonryProps> = ({ data, initialSelectedPro
 
             <button
               className="modal-close-button"
-              onClick={closeModal}
+              onClick={(e) => {
+                e.stopPropagation();
+                closeModal();
+              }}
               aria-label={t('masonry.closeModalAria', 'Cerrar modal')}
             >
               &times;

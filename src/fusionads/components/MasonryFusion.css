@@ -149,7 +149,11 @@
   text-align: center;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
-  z-index: 1020;
+  z-index: 9999;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-close-button:hover {
@@ -175,11 +179,12 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 1010;
+  z-index: 1030;
   transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
   opacity: 0.85;
+  pointer-events: auto;
 }
 
 .modal-nav-button svg {

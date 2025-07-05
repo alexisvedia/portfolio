@@ -8,6 +8,7 @@ import fusionPublishFlowThumbnail from '../../assets/Proyectos Fusion/fusion-pub
 import fusionCampaignTemplateGalleryThumbnail from '../../assets/Proyectos Fusion/fusion-campaign-template-gallery.png';
 import internalTemplatesThumbnail from '../../assets/Proyectos Fusion/internal templates.png';
 import reactRouterThumbnail from '../../assets/Proyectos Fusion/react router.png';
+import fusionPropuestaThumbnail from '../../assets/Proyectos Fusion/fusion-propuesta.png';
 
 
 import galleryVideo from '../../assets/Proyectos Fusion/Gallery.mp4';
@@ -113,6 +114,25 @@ export const fusionProjectsData: MasonryItem[] = [
       es: "Implementé la navegación usando react-router-dom con useRoutes, organizando las rutas según el estado de autenticación del usuario. Usé UserContext y useEffect para redirigir dinámicamente a páginas como login, pending-verification o dashboard, dependiendo de si el usuario había verificado su cuenta, tenía sesión activa o si el token estaba expirado. Además, integré modales como VerificationPopup con useDisclosure y configuré condiciones para mostrar el cartel DeviceNotSupported únicamente una vez logueado el usuario, y que desaparezca correctamente al cerrar sesión o limpiar la cache.",
       en: "I implemented navigation using react-router-dom with useRoutes, organizing routes based on the user\'s authentication status. I used UserContext and useEffect to dynamically redirect to pages like login, pending-verification, or dashboard, depending on whether the user had verified their account, had an active session, or if the token was expired. Additionally, I integrated modals like VerificationPopup with useDisclosure and configured conditions to display the DeviceNotSupported banner only once the user was logged in, ensuring it disappeared correctly upon logging out or clearing the cache.",
     },
+  },
+  {
+    id: 'fusion-custom-proposal',
+    image: fusionPropuestaThumbnail,
+    height: 400,
+    title: {
+      es: "Propuesta personalizada",
+      en: "Custom Proposal",
+    },
+    description: {
+      es: "Para conseguir el puesto, envié un mail con esta propuesta personalizada para demostrar mis conocimientos en UX/UI",
+      en: "To get the position, I sent an email with this custom proposal to demonstrate my UX/UI knowledge",
+    },
+    documentLinks: [
+      {
+        name: "FusionOS.pdf",
+        url: "/assets/FusionOS.pdf"
+      }
+    ]
   },
 
 ];

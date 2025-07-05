@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useMemo, useRef, Suspense, lazy, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { useTransition, a } from '@react-spring/web';
 import styled from 'styled-components';
@@ -263,25 +263,25 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     onModalStateChange?.(true, item.id.toString());
   };
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
     setSelectedContent(null);
     setCurrentIndex(null);
     onModalStateChange?.(false);
-  };
+  }, [onModalStateChange]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     if (currentIndex === null || currentIndex >= data.length - 1) return;
     const nextIndex = currentIndex + 1;
     setSelectedContent(data[nextIndex]);
     setCurrentIndex(nextIndex);
-  };
+  }, [currentIndex, data]);
 
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     if (currentIndex === null || currentIndex <= 0) return;
     const prevIndex = currentIndex - 1;
     setSelectedContent(data[prevIndex]);
     setCurrentIndex(prevIndex);
-  };
+  }, [currentIndex, data]);
 
 
   useEffect(() => {
@@ -306,7 +306,7 @@ const Masonry: React.FC<MasonryProps> = ({ data, themeMode, initialSelectedProje
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [selectedContent, currentIndex, data.length]);
+  }, [selectedContent, currentIndex, data.length, goToPrevious, goToNext, closeModal]);
 
 
 
