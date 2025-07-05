@@ -244,7 +244,6 @@ const AppContent = () => {
         <Container>
           <ScrollRestoration 
             getKey={(location) => {
-              // No hacer scroll restoration si solo cambian los query params
               return location.pathname;
             }}
           />
@@ -258,7 +257,6 @@ const AppContent = () => {
 };
 
 function App() {
-  // Definir las rutas para el router
   const router = createBrowserRouter([
     {
       path: "/",
