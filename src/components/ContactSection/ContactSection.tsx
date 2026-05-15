@@ -361,11 +361,9 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
     try {
       setIsLoading(true);
 
-      const webhookUrl =
-        import.meta.env.VITE_N8N_WEBHOOK_URL ||
-        'https://n8n-fly-misty-resonance-9294.fly.dev/webhook/contact-form';
-
-      const response = await fetch(webhookUrl, {
+      const response = await fetch(
+        'https://n8n-fly-misty-resonance-9294.fly.dev/webhook/contact-form',
+        {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -376,7 +374,8 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
           subject: formData.title,
           message: formData.message,
         }),
-      });
+      },
+      );
 
       if (!response.ok) {
         throw new Error(`Webhook responded ${response.status}`);
