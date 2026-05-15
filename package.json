@@ -27,7 +27,6 @@
     ]
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@react-spring/web": "^9.7.5",
     "@reduxjs/toolkit": "^2.2.1",
     "@splinetool/react-spline": "^4.0.0",

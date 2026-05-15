@@ -2,7 +2,6 @@ import React, { useState, useRef, forwardRef } from 'react';
 import styled, { css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
-import emailjs from '@emailjs/browser';
 import confetti from 'canvas-confetti';
 import Tooltip from '../Tooltip';
 
@@ -362,27 +361,29 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
     try {
       setIsLoading(true);
 
-  
-      const serviceId = 'service_srdurzn';
-      const templateId = 'template_efoo7fz';
-      const publicKey = 'CoI3CL1-8DQHvdStw';
+      const webhookUrl =
+        import.meta.env.VITE_N8N_WEBHOOK_URL ||
+        'https://n8n-fly-misty-resonance-9294.fly.dev/webhook/contact-form';
 
-  
-      const templateParams = {
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
-        title: formData.title,
-        time: new Date().toLocaleString(),
-      };
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          subject: formData.title,
+          message: formData.message,
+        }),
+      });
 
-  
-      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+      if (!response.ok) {
+        throw new Error(`Webhook responded ${response.status}`);
+      }
 
-      // Mensaje enviado exitosamente
       setIsLoading(false);
       setFormData({ name: '', title: '', email: '', message: '' });
-
 
       confetti({
         particleCount: 150,
@@ -393,7 +394,6 @@ const ContactSection = forwardRef<HTMLDivElement, ContactSectionProps>(({ id }, 
     } catch (error) {
       console.error('FAILED...', error);
       setIsLoading(false);
-      // Error al enviar mensaje
     }
   };
 
