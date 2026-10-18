@@ -17,7 +17,7 @@
     "test": "jest"
   },
   "engines": {
-    "node": "20.x",
+    "node": "24.x",
     "npm": ">=9 <11"
   },
   "lint-staged": {
