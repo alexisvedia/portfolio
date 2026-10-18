@@ -17,7 +17,6 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   html {
-    scroll-behavior: smooth;
     height: 100%;
     font-size: 16px;
     overflow-x: hidden;

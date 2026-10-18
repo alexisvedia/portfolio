@@ -1,31 +1,12 @@
 import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import PageTransition from '@components/PageTransition/PageTransition';
-import HeroSection from '@components/HeroSection/HeroSection';
-import BioSection from '@components/BioSection';
-import ServicesSection from '@components/ServicesSection';
-import ProjectsSection from '@components/ProjectsSection/ProjectsSection';
-import ContactSection from '@components/ContactSection/ContactSection';
 import SEOContent from '@components/SEOContent';
+import Landing from '@/features/landing';
 
 const HomeContainer = styled.div`
   position: relative;
   z-index: 1;
-`;
-
-const ContentWrapper = styled.div`
-  margin: 0 auto;
-  padding: 0 1rem;
-  width: 100%;
-  box-sizing: border-box;
-  
-  @media (max-width: 768px) {
-    padding: 0 0.75rem;
-  }
-  
-  @media (max-width: 480px) {
-    padding: 0 0.5rem;
-  }
 `;
 
 interface HomeProps {
@@ -34,8 +15,12 @@ interface HomeProps {
   onContactSectionViewChange: (isInView: boolean) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded, onContactSectionViewChange }) => {
-  const contactSectionRef = useRef<HTMLDivElement>(null);
+const Home: React.FC<HomeProps> = ({ onAnimationComplete, onContactSectionViewChange }) => {
+  const contactSectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    onAnimationComplete?.();
+  }, [onAnimationComplete]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,23 +49,10 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, fontsLoaded, onContact
     <PageTransition>
       <HomeContainer id="home">
         <SEOContent />
-        {/* Removed abstract 3D background experiment */}
-        <ContentWrapper>
-          <HeroSection onAnimationComplete={onAnimationComplete} fontsLoaded={fontsLoaded} />
-          <BioSection />
-        </ContentWrapper>
-        <ContentWrapper id="services">
-          <ServicesSection />
-        </ContentWrapper>
-        <ContentWrapper>
-          <ProjectsSection />
-        </ContentWrapper>
-        <ContentWrapper>
-          <ContactSection ref={contactSectionRef} id="contact" />
-        </ContentWrapper>
+        <Landing ref={contactSectionRef} />
       </HomeContainer>
     </PageTransition>
   );
 };
 
-export default Home;
+export default Home;
