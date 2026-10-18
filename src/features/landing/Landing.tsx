@@ -1,5 +1,5 @@
 import React, { forwardRef, useLayoutEffect, useRef, useState } from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import gsap from 'gsap';
@@ -72,9 +72,15 @@ const Root = styled.div`
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 
-  /* body keeps a side gutter on small screens; the landing goes edge to edge. */
+`;
+
+/* body keeps a side gutter on small screens; the landing goes edge to edge. */
+const EdgeToEdge = createGlobalStyle`
   @media (max-width: 1023px) {
-    margin: 0 calc(50% - 50vw);
+    body {
+      padding-left: 0;
+      padding-right: 0;
+    }
   }
 `;
 
@@ -936,6 +942,7 @@ const Landing = forwardRef<HTMLElement>((_, contactRef) => {
 
   return (
     <Root ref={root}>
+      <EdgeToEdge />
       <Hero id="home" data-a="hero">
         <Topo data-a="topo" aria-hidden="true" />
         <TitleBlock data-a="title">
