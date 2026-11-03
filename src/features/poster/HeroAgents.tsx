@@ -8,6 +8,10 @@ import HiloMark from './HiloMark';
 
 /* Mismo corte que el hero mobile de PosterHome: abajo de este ancho los agentes van solo con el ícono. */
 const MOBILE = '(max-width: 860px)';
+/* En mobile el agente es solo la pastilla del ícono (TAG px), corrida TAG_AT de la punta del cursor (estilos de Tag). */
+const TAG = 25;
+const TAG_AT = { x: 14, y: 20 };
+const ROW_SCALE = 0.85;
 
 /* Caja de selección de un agente: borde punteado, cuatro manijas y la medida en vivo. */
 const Frame: React.FC<{ id: string; color: string; ink: string; children?: React.ReactNode }> = ({ id, color, ink, children }) => (
@@ -70,10 +74,11 @@ const ZERO: Rect = { x: 0, y: 0, w: 0, h: 0 };
  * Entrada del hero. Arranca el logo Hilo en el centro y aparecen los siete agentes alrededor.
  * GLM se lleva el trazo del logo a la nav y DeepSeek arrastra el anillo hasta el círculo de la foto y lo traza.
  * Claude escribe el nombre, Gemini traza la grilla, ChatGPT sube la foto, Qwen suelta el texto y Grok los botones.
- * Al terminar, cada agente se estaciona en un lugar libre del hero y queda flotando.
+ * Al terminar, cada agente se estaciona en un lugar libre del hero y queda flotando. En mobile quedan en fila sobre la foto.
  * Las posiciones se miden al arrancar (con las fuentes ya cargadas), relativas al hero.
  */
-export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
+/** `still`: con movimiento reducido los agentes quedan estacionados, sin flotar. */
+export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = false) => {
   const q = gsap.utils.selector(hero);
   const name = q('[data-hero-name]')[0] as HTMLElement;
   const figure = q('[data-hero-portrait]')[0] as HTMLElement;
@@ -165,9 +170,20 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
     const aw = mobile ? 44 : 130;
     const ah = mobile ? 46 : 50;
     const pad = 14;
+    // En mobile no hay lugar al costado: quedan en fila, chicos, abajo en la foto.
+    if (mobile) {
+      const size = TAG * ROW_SCALE;
+      const gap = 6;
+      const x0 = box.figure.x + box.figure.w / 2 - (AI_AGENTS.length * size + (AI_AGENTS.length - 1) * gap) / 2;
+      // En mobile el texto del hero se monta sobre el pie de la foto: la fila va justo arriba del texto.
+      const y = Math.min(box.figure.y + box.figure.h, box.text.y) - size - 16;
+      // La posición del agente es la punta del cursor: el ícono está corrido TAG_AT dentro, escalado desde la esquina.
+      parked = Object.fromEntries(AI_AGENTS.map(({ id }, i) => [id, { x: x0 + i * (size + gap) - TAG_AT.x * ROW_SCALE, y: y - TAG_AT.y * ROW_SCALE }])) as Record<Id, Point>;
+      return parked;
+    }
     const top = box.nav.y + box.nav.h + pad;
-    // El input del chat queda fijo abajo al centro de la pantalla (ChatbotAssistant): esa franja tampoco sirve.
-    const chat = { x: W / 2 - 220, y: Math.min(H, window.innerHeight) - 90, w: 440, h: 90 };
+    // El botón del chat queda fijo abajo a la derecha de la pantalla (ChatbotAssistant): ese rincón tampoco sirve.
+    const chat = { x: W - 90, y: Math.min(H, window.innerHeight) - 90, w: 90, h: 90 };
     const no = [box.name, box.text, box.ring, box.nav, chat].map(r => ({ x: r.x - pad, y: r.y - pad, w: r.w + 2 * pad, h: r.h + 2 * pad }));
     const free = (p: Point) => !no.some(r => p.x < r.x + r.w && p.x + aw > r.x && p.y < r.y + r.h && p.y + ah > r.y);
     const cand: Point[] = [];
@@ -230,7 +246,12 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
     tl
       .set(pulse[id], { x: () => Number(gsap.getProperty(agent[id], 'x')), y: () => Number(gsap.getProperty(agent[id], 'y')) }, t)
       .fromTo(pulse[id], { scale: 0.2, autoAlpha: 1 }, { scale: 1.6, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, t);
-  const park = (id: Id, t: number) => tl.to(agent[id], { x: () => spots()[id].x, y: () => spots()[id].y, duration: 0.6, ease: 'power3.inOut' }, t);
+  // En mobile, al estacionar se achican y sueltan el cursor: queda solo el ícono.
+  const arrow = (id: Id) => agent[id].querySelector(':scope > svg');
+  const park = (id: Id, t: number) =>
+    tl
+      .to(agent[id], { x: () => spots()[id].x, y: () => spots()[id].y, scale: () => (mobile ? ROW_SCALE : 1), transformOrigin: '0 0', duration: 0.6, ease: 'power3.inOut' }, t)
+      .to(arrow(id), { autoAlpha: () => (mobile ? 0 : 1), duration: 0.3 }, t + 0.3);
 
   const typing = { i: 0 };
   const orbit = { p: 0 };
@@ -259,7 +280,7 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
   tl.to(agent.glm, { ...at('logo', 0.3, 0.55), duration: 0.25 }, 0.8)
     .to(logo, { ...place('mark'), duration: 0.5 }, 1.05)
     .to(agent.glm, { ...at('mark', 1, 1), duration: 0.5 }, 1.05);
-  if (nav) tl.from(nav, { autoAlpha: 0, duration: 0.25, ease: 'none' }, 1.45);
+  if (nav && !still) tl.from(nav, { autoAlpha: 0, duration: 0.25, ease: 'none' }, 1.45);
   tl.to(logo, { autoAlpha: 0, duration: 0.15 }, 1.6);
   park('glm', 1.7);
 
@@ -367,10 +388,17 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
 
   // Ya estacionados, flotan con un vaivén lento. Fuera de pantalla se pausan; al cambiar el tamaño se vuelven a ubicar.
   const floats: gsap.core.Tween[] = [];
+  // En mobile la fila no flota: el vaivén la desarmaría.
+  const rest = (active: boolean) => {
+    floats.forEach(f => f.paused(mobile || !active));
+    if (mobile) gsap.set(Object.values(agent), { xPercent: 0, yPercent: 0, rotation: 0 });
+  };
+  let made = false;
   tl.call(
     () => {
-      if (floats.length) return;
-      AI_AGENTS.forEach(({ id }, i) =>
+      if (made) return;
+      made = true;
+      if (!still) AI_AGENTS.forEach(({ id }, i) =>
         floats.push(
           gsap.to(agent[id], {
             xPercent: i % 2 ? 25 : -25,
@@ -387,14 +415,18 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
         trigger: hero,
         start: 'top bottom',
         end: 'bottom top',
-        onToggle: self => floats.forEach(f => f.paused(!self.isActive)),
-        onRefresh: () => {
+        onToggle: self => rest(self.isActive),
+        onRefresh: self => {
           measure();
           const p = spots();
-          AI_AGENTS.forEach(({ id }) => gsap.set(agent[id], p[id]));
+          AI_AGENTS.forEach(({ id }) => {
+            gsap.set(agent[id], { ...p[id], scale: mobile ? ROW_SCALE : 1, transformOrigin: '0 0' });
+            gsap.set(arrow(id), { autoAlpha: mobile ? 0 : 1 });
+          });
+          rest(self.isActive);
         },
       });
-      if (!st.isActive) floats.forEach(f => f.pause());
+      rest(st.isActive);
     },
     [],
     O + 3.4

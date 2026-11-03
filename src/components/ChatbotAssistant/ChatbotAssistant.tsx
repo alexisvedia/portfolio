@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { sendMessageToN8N } from '../../services/n8nService';
 import { useTheme } from '../../context/ThemeContext';
 import TypewriterText from '../TypewriterText';
+import { LuSparkles } from 'react-icons/lu';
+import { flushSync } from 'react-dom';
 
 // Animaciones
 const pulse = keyframes`
@@ -60,7 +61,7 @@ const FloatingInputContainer = styled.div<{
   $isSidebarPresent?: boolean;
   $isSidebarCollapsed?: boolean;
   $hasText: boolean;
-  $hideOnMobile?: boolean;
+  $collapsed: boolean;
 }>`
   position: fixed;
   bottom: 14px;
@@ -72,7 +73,7 @@ const FloatingInputContainer = styled.div<{
   transform: translateX(-50%);
   z-index: 10000;
   width: ${({ $isExpanded, $hasText }) => ($isExpanded || $hasText ? '450px' : '275px')};
-  transition: transform 0.22s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, visibility 0.25s;
+  transition: transform 0.22s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, visibility 0s, scale 0.25s ease;
   pointer-events: auto;
 
   @media (max-width: 768px) {
@@ -81,14 +82,15 @@ const FloatingInputContainer = styled.div<{
     transform: none;
   }
 
-  /* Mismo corte que el hero mobile de PosterHome. */
-  @media (max-width: 860px) {
-    ${({ $hideOnMobile }) => $hideOnMobile && css`
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-    `}
-  }
+  /* Cerrado y sin texto, la barra se guarda en el botón redondo (Launcher). */
+  ${({ $collapsed }) => $collapsed && css`
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    scale: 0.92;
+    /* Visible al instante al abrir (el foco del toque lo necesita); se oculta recién al terminar el fundido. */
+    transition-delay: 0s, 0s, 0s, 0.25s, 0s;
+  `}
   
   /* Subtle lift when closed and hovered */
   ${({ $isExpanded, $hasText }) => (!$isExpanded && !$hasText) && css`
@@ -98,6 +100,43 @@ const FloatingInputContainer = styled.div<{
     @media (max-width: 768px) {
       &:hover { transform: translateY(-4px); }
     }
+  `}
+`;
+
+// Botón redondo con el símbolo de IA: abre la barra del chat. Se esconde mientras el chat está abierto o tiene texto.
+const Launcher = styled.button<{ $hidden: boolean }>`
+  position: fixed;
+  right: 16px;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 2px solid #0d0c0b;
+  border-radius: 50%;
+  background: #e63b3f;
+  color: #efe6c8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: opacity 0.25s ease, visibility 0.25s, scale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), translate 0.22s ease;
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+  &:hover {
+    translate: 0 -3px;
+  }
+  &:focus-visible {
+    outline: 2px solid #efe6c8;
+    outline-offset: 3px;
+  }
+  ${({ $hidden }) => $hidden && css`
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    scale: 0.6;
   `}
 `;
 
@@ -906,24 +945,6 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({
   const [bottomInset, setBottomInset] = useState<number>(14);
   const [isTyping, setIsTyping] = useState(false);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
-  // En mobile el input tapa el copy y los botones del hero: se esconde mientras ese texto está en pantalla.
-  const [overHeroText, setOverHeroText] = useState(false);
-  // El chat vive fuera del Outlet: el observer se rearma en cada ruta. Mientras el Manifiesto tapa el hero fijado, el chat vuelve.
-  const { pathname } = useLocation();
-  useEffect(() => {
-    const target = document.querySelector('[data-hero-text]');
-    if (!target) return;
-    const cover = document.querySelector('[data-overlap]');
-    let inView = false;
-    let covered = false;
-    const sync = () => setOverHeroText(inView && !covered);
-    const io = new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); });
-    const coverIo = new IntersectionObserver(([e]) => { covered = e.isIntersecting; sync(); }, { rootMargin: '0px 0px -80px 0px' });
-    io.observe(target);
-    if (cover) coverIo.observe(cover);
-    return () => { io.disconnect(); coverIo.disconnect(); setOverHeroText(false); };
-  }, [pathname]);
-
   // Lock page scroll when chat is expanded
   useEffect(() => {
     const htmlEl = document.documentElement;
@@ -945,6 +966,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [completedIndexes, setCompletedIndexes] = useState<Set<number>>(() => new Set());
   const isEn = (i18n?.language || 'es').toLowerCase().startsWith('en');
+  const collapsed = !isExpanded && !inputValue.trim() && !inputFocused;
   const copyLabel = t('tooltip.copy', isEn ? 'Copy' : 'Copiar');
   const copiedLabel = t('tooltip.copied', isEn ? 'Copied' : 'Copiado');
 
@@ -1431,6 +1453,21 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({
         </FloatingMessagesScrollContainer>
       </FloatingMessagesContainer>
       
+      <Launcher
+        type="button"
+        $hidden={!collapsed}
+        style={{ bottom: `${bottomInset}px` }}
+        onClick={() => {
+          // Foco dentro del gesto del toque: iOS solo levanta el teclado así.
+          flushSync(handleInputClick);
+          inputRef.current?.focus();
+        }}
+        aria-label={isEn ? 'Open the AI chat' : 'Abrir el chat con IA'}
+        aria-expanded={!collapsed}
+      >
+        <LuSparkles aria-hidden="true" />
+      </Launcher>
+
       <FloatingInputContainer 
         ref={containerRef}
         $isExpanded={isExpanded} 
@@ -1438,7 +1475,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({
         $isSidebarPresent={isSidebarPresent}
         $isSidebarCollapsed={isSidebarCollapsed}
         $hasText={!!inputValue.trim()}
-        $hideOnMobile={overHeroText && !isExpanded && !inputValue.trim()}
+        $collapsed={collapsed}
         style={{ bottom: `${bottomInset}px` }}
       >
         {/* Input Bar */}

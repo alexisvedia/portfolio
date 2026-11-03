@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { AI_STACK, FONT, INK } from './content';
 import { AI_AGENTS } from './aiAgents';
+import StatusLine from './StatusLine';
 
 /* Colores de sombra de cada bloque, en el orden de AI_STACK.blocks. */
 const SHADOW = [INK.red, INK.blue, INK.lime, INK.violet, INK.teal, INK.orange];
@@ -43,6 +44,8 @@ const AiStack: React.FC = () => (
         </Block>
       ))}
     </Grid>
+
+    <StatusLine />
 
     <Case data-reveal="">
       <small>Caso</small>

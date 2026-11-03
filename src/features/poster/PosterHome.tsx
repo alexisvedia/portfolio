@@ -65,6 +65,12 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>) => {
     if (!scope) return;
     const mm = gsap.matchMedia(scope);
 
+    // Movimiento reducido: sin intro ni flotado, los agentes quedan estacionados en el hero desde el principio.
+    mm.add('(prefers-reduced-motion: reduce)', () => {
+      const q = gsap.utils.selector(scope);
+      heroIntro(q('[data-hero]')[0] as HTMLElement, q('[data-nav]')[0] as HTMLElement, true).progress(1);
+    });
+
     mm.add(MOTION, ctx => {
       let alive = true;
       const q = gsap.utils.selector(scope);
