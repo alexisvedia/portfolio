@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useLayoutEffect, useRef } from 'react';
 import styled, { css } from 'styled-components';
 import PosterGlobalOnce from './PosterGlobal';
 import { Link } from 'react-router-dom';
@@ -16,8 +16,9 @@ import ServiceDeck, { CARD_H, CUBE, cubeTop } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
 import CubiqStory from './CubiqStory';
 import TeamVoice from './TeamVoice';
+import AiStack from './AiStack';
 import { ContactForm } from '@/features/landing/Landing';
-import { CONTACT, CUBIQ, FONT, HERO, INK, NAV, OTHERS, ROUTE_LEAD, STUDY, VOICES } from './content';
+import { AI_STACK, CONTACT, CUBIQ, FONT, HERO, INK, NAV, OTHERS, ROUTE_LEAD, STUDY, VOICES } from './content';
 import jorge from '@/assets/images/testimonials/Jorge.jpeg';
 import mauro from '@/assets/images/testimonials/Mauro.jpeg';
 import milena from '@/assets/images/testimonials/Milena.jpeg';
@@ -37,7 +38,6 @@ const VOICE_SKIN = [
   { '--q-bg': INK.teal, '--q-fg': INK.cream },
 ];
 const MOTION = '(prefers-reduced-motion: no-preference)';
-const LOADER_KEY = 'poster-loader-seen';
 const DISPLAY = FONT.display;
 const TEXT = FONT.text;
 
@@ -56,39 +56,9 @@ const scrollToId = (id: string) => (e: React.MouseEvent) => {
   history.replaceState(history.state, '', `#${id}`);
 };
 
-/* ---------- loader ---------- */
-
-const Loader: React.FC<{ onDone: () => void }> = ({ onDone }) => {
-  const ref = useRef<HTMLDivElement>(null);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ onComplete: onDone });
-      tl.fromTo(
-        '[data-stroke]',
-        { drawSVG: '0% 0%', autoAlpha: 0 },
-        { drawSVG: '0% 100%', autoAlpha: 1, duration: 0.6, ease: 'power2.inOut', stagger: 0.09 }
-      ).to(el, { clipPath: 'circle(0% at 50% 50%)', duration: 0.6, ease: 'power3.inOut' }, '+=0.12');
-    }, el);
-    return () => ctx.revert();
-  }, [onDone]);
-
-  return (
-    <LoaderVeil ref={ref} aria-hidden="true">
-      <HiloMark ink={INK.cream} accent={INK.red} />
-    </LoaderVeil>
-  );
-};
-
 /* ---------- motion ---------- */
 
-const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) => {
-  const hero = useRef<gsap.core.Timeline | null>(null);
-  // Si reduced motion cambia en la sesión, mm.add vuelve a correr después de que el loader terminó.
-  const readyRef = useRef(ready);
-  readyRef.current = ready;
+const usePosterMotion = (root: React.RefObject<HTMLDivElement>) => {
 
   useLayoutEffect(() => {
     const scope = root.current;
@@ -99,14 +69,14 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
       let alive = true;
       const q = gsap.utils.selector(scope);
 
-      // Entrada del hero: tres agentes la arman en orquesta (HeroAgents); la nav entra a la par.
+      // Entrada del hero: arranca el logo y los siete agentes arman el hero (HeroAgents); GLM se lleva el logo a la nav.
       const heroRoot = q('[data-hero]')[0] as HTMLElement;
-      const tl = heroIntro(heroRoot).from(q('[data-nav]'), { autoAlpha: 0, y: -16, duration: 0.5, ease: 'power3.out' }, 0.3);
-      hero.current = tl;
+      const tl = heroIntro(heroRoot, q('[data-nav]')[0] as HTMLElement);
       // QA cuadro por cuadro: en dev la timeline queda en window.__heroIntro.
       if (import.meta.env.DEV) (window as unknown as { __heroIntro?: gsap.core.Timeline }).__heroIntro = tl;
       // Se mide al arrancar: sin Morganite cargada el nombre mide el doble y los cursores apuntan mal.
-      if (readyRef.current) document.fonts.ready.then(() => { if (hero.current === tl) tl.play(); });
+      // Con hash (/#contact) el hero no está en pantalla: la intro salta al final y la nav queda usable.
+      (document.fonts?.ready ?? Promise.resolve()).then(() => { if (!alive) return; if (location.hash) tl.progress(1); else tl.play(); });
 
       // Manifiesto: el texto se ilumina palabra por palabra.
       // SplitText instancia Intl.Segmenter al cargar: se importa aparte para que sin él no caiga todo el sitio.
@@ -165,7 +135,6 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
 
       return () => {
         alive = false;
-        hero.current = null;
       };
     });
 
@@ -196,12 +165,6 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
     document.fonts?.ready.then(() => ScrollTrigger.refresh());
     return () => mm.revert();
   }, [root]);
-
-  useEffect(() => {
-    if (!ready) return;
-    document.fonts.ready.then(() => { hero.current?.play(); });
-    ScrollTrigger.refresh();
-  }, [ready]);
 };
 
 /* ---------- secciones ---------- */
@@ -262,16 +225,7 @@ Poster.displayName = 'Poster';
 
 const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
   const root = useRef<HTMLDivElement>(null);
-  const [showLoader] = useState(
-    () => window.matchMedia(MOTION).matches && !sessionStorage.getItem(LOADER_KEY) && !window.location.hash
-  );
-  const [ready, setReady] = useState(!showLoader);
-  const onLoaderDone = useRef(() => {
-    sessionStorage.setItem(LOADER_KEY, '1');
-    setReady(true);
-  }).current;
-
-  usePosterMotion(root, ready);
+  usePosterMotion(root);
 
   // Al llegar desde un caso con `/#casos` o `/#contact`, el router no scrollea: se espera a las fuentes y a los pines.
   useEffect(() => {
@@ -295,7 +249,6 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
   return (
     <Page ref={root}>
       <PosterGlobalOnce />
-      {showLoader && !ready && <Loader onDone={onLoaderDone} />}
 
       <Nav data-nav="" aria-label="Secciones">
         <Mark href="#home" onClick={scrollToId('home')} aria-label="Alexis Vedia, inicio">
@@ -331,7 +284,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
             <HeroText data-hero-text="">
               <HeroRole>{HERO.role}</HeroRole>
               <p>{HERO.line}</p>
-              <Ctas>
+              <Ctas data-hero-ctas="">
                 <Button href="#contact" onClick={scrollToId('contact')}>
                   {HERO.ctaPrimary}
                 </Button>
@@ -365,6 +318,12 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           <Intro data-reveal="">{CUBIQ.intro}</Intro>
           <CubiqStory />
           <Small data-reveal="">{CUBIQ.note}</Small>
+        </Poster>
+
+        <Poster id="stack" label="Stack de IA" word="IA" cols={2} ink={INK.teal} accent={INK.lime}>
+          <Intro data-reveal="">{AI_STACK.intro}</Intro>
+          <AiStack />
+          <Small data-reveal="">{AI_STACK.note}</Small>
         </Poster>
 
         <Portal to={INK.cream} />
@@ -459,20 +418,6 @@ const Page = styled.div`
     outline: 3px solid var(--focus, ${INK.lime});
     outline-offset: 4px;
     border-radius: 4px;
-  }
-`;
-
-const LoaderVeil = styled.div`
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: grid;
-  place-items: center;
-  background: ${INK.ground};
-  clip-path: circle(75% at 50% 50%);
-
-  svg {
-    width: clamp(6rem, 18vmin, 10rem);
   }
 `;
 

@@ -22,6 +22,7 @@ export const NAV = [
   { id: 'about', label: 'Manifiesto' },
   { id: 'experience', label: 'Trayectoria' },
   { id: 'cubiq', label: 'Cubiq' },
+  { id: 'stack', label: 'Stack de IA' },
   { id: 'services', label: 'Servicios' },
   { id: 'contact', label: 'Contacto' },
 ];
@@ -154,6 +155,58 @@ export const TEAM_VOICE = {
     { emoji: '🙌', count: 3 },
   ],
 } as const;
+
+/* Stack de IA: lo que tengo armado para trabajar con agentes. Cifras contadas en una sola máquina. */
+export const AI_STACK = {
+  intro:
+    'No uso un chat de IA: armé el entorno donde trabajan los agentes. Varios modelos, las mismas reglas para todos, memoria que no se pierde entre sesiones y tres máquinas conectadas.',
+  blocks: [
+    {
+      title: 'Agentes de código',
+      text: 'Claude Code, Codex, OpenCode y pi. Claude Code, Codex y pi leen el mismo archivo de reglas: lo que aprende uno lo saben todos.',
+      tools: ['Claude Code', 'Codex', 'OpenCode', 'pi'],
+    },
+    {
+      title: 'Harness',
+      text: 'El agente no arranca de cero. Hooks que frenan comandos peligrosos y afirmaciones sin respaldo, skills que cargan el método de cada tarea y sub-agentes para el trabajo en paralelo.',
+      stats: [
+        { value: '40', label: 'hooks en 12 eventos del ciclo de vida' },
+        { value: '75', label: 'skills instaladas' },
+        { value: '10', label: 'sub-agentes especializados' },
+      ],
+    },
+    {
+      title: 'MCPs y herramientas',
+      text: 'El agente opera lo mismo que yo: navegador de QA, diseño en Figma, workflows de n8n, analítica, documentación de librerías y las otras máquinas por SSH.',
+      stats: [
+        { value: '14', label: 'servidores MCP conectados' },
+        { value: '15', label: 'plugins, 3 hechos por mí' },
+      ],
+    },
+    {
+      title: 'Memoria permanente',
+      text: 'Un vault de Obsidian como memoria compartida entre agentes y máquinas, con búsqueda semántica por embeddings. Cada regla nace de un error real y vuelve sola al contexto cuando el tema aparece.',
+      stats: [
+        { value: '105', label: 'documentos de reglas y procedimientos' },
+      ],
+    },
+    {
+      title: 'Contexto y caché',
+      text: 'La ventana de contexto se administra: un reloj del caché del prompt en la barra de estado (tiempo hasta que se enfría, aciertos y fallos), compactación guiada que conserva lo literal y un proxy que recorta la salida de los comandos antes de que entre al contexto.',
+    },
+    {
+      title: 'Tres máquinas',
+      text: 'Dos Windows y un servidor Linux conectados por Tailscale. herdr abre y sigue las sesiones de agentes en cualquiera de las tres, y las reglas, docs y skills se sincronizan entre todas.',
+      tools: ['herdr', 'Tailscale', 'SSH'],
+    },
+  ],
+  skills: ['RAG', 'Embeddings', 'PGVector', 'Búsqueda semántica', 'Agentes con herramientas', 'MCP', 'Multi-agente', 'Prompt caching', 'Compactación de contexto', 'Evals', 'n8n'],
+  case: {
+    title: 'Chat de soporte con RAG',
+    text: 'Para una plataforma SaaS de retail: ingiere la documentación del equipo, la guarda como embeddings en PGVector y responde con la captura del paso que explica.',
+  },
+  note: 'Cifras contadas el 2026-11-03 en una de las tres máquinas.',
+};
 
 export const CONTACT = {
   lead: 'Si tenés un producto para diseñar, un proceso para automatizar o un equipo que necesita IA que funcione, escribime.',

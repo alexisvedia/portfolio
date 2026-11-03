@@ -1,15 +1,13 @@
 import React from 'react';
 import styled from 'styled-components';
 import gsap from 'gsap';
-import { SiClaude, SiGooglegemini, SiOpenai } from 'react-icons/si';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FONT, INK } from './content';
+import { AI_AGENTS } from './aiAgents';
+import HiloMark from './HiloMark';
 
-/* Agentes que arman el hero en la entrada: cada uno con su cursor de color y su etiqueta con el ícono en un solo tono. */
-const AGENTS = [
-  { id: 'claude', name: 'Claude', color: INK.red, ink: INK.cream, Icon: SiClaude },
-  { id: 'gemini', name: 'Gemini', color: INK.blue, ink: INK.cream, Icon: SiGooglegemini },
-  { id: 'openai', name: 'ChatGPT', color: INK.lime, ink: INK.ground, Icon: SiOpenai },
-] as const;
+/* Mismo corte que el hero mobile de PosterHome: abajo de este ancho los agentes van solo con el ícono. */
+const MOBILE = '(max-width: 860px)';
 
 /* Caja de selección de un agente: borde punteado, cuatro manijas y la medida en vivo. */
 const Frame: React.FC<{ id: string; color: string; ink: string; children?: React.ReactNode }> = ({ id, color, ink, children }) => (
@@ -25,8 +23,18 @@ const Frame: React.FC<{ id: string; color: string; ink: string; children?: React
 
 const HeroAgents: React.FC = () => (
   <Layer aria-hidden="true">
+    {/* El logo arranca en el centro: los agentes se llevan el trazo a la nav y el anillo al hero. */}
+    <IntroLogo data-intro-logo="">
+      <HiloMark ink={INK.cream} accent="transparent" />
+    </IntroLogo>
+    <IntroRing data-intro-ring="">
+      <svg viewBox="193 18 44 44">
+        <path fill={INK.red} fillRule="evenodd" d="M215 18a22 22 0 1 1 0 44a22 22 0 1 1 0-44zm0 14a8 8 0 1 0 0 16a8 8 0 1 0 0-16z" />
+      </svg>
+    </IntroRing>
     <Frame id="claude-name" color={INK.red} ink={INK.cream} />
-    <Frame id="claude-text" color={INK.red} ink={INK.cream} />
+    <Frame id="qwen-text" color={INK.violet} ink={INK.cream} />
+    <Frame id="grok-cta" color={INK.cream} ink={INK.ground} />
     <Frame id="openai" color={INK.lime} ink={INK.ground}>
       <Upload data-upload="">
         <span>retrato.webp</span>
@@ -36,16 +44,17 @@ const HeroAgents: React.FC = () => (
       </Upload>
     </Frame>
     <Caret data-caret="" />
-    <Pulse data-pulse="gemini" style={{ borderColor: INK.blue }} />
-    <Pulse data-pulse="openai" style={{ borderColor: INK.lime }} />
-    {AGENTS.map(({ id, name, color, ink, Icon }) => (
+    {AI_AGENTS.map(({ id, color }) => (
+      <Pulse key={id} data-pulse={id} style={{ borderColor: color }} />
+    ))}
+    {AI_AGENTS.map(({ id, name, color, ink, Icon }) => (
       <Agent key={id} data-agent={id}>
         <svg viewBox="0 0 16 22" width={18} height={24}>
           <path d="M1 1v17l4.6-4.4 3.3 7.2 3.1-1.4-3.2-7h6.4z" fill={color} stroke={INK.ground} strokeWidth={1.4} strokeLinejoin="round" />
         </svg>
         <Tag style={{ background: color, color: ink }}>
           <Icon aria-hidden="true" />
-          {name}
+          <span>{name}</span>
         </Tag>
       </Agent>
     ))}
@@ -53,49 +62,70 @@ const HeroAgents: React.FC = () => (
 );
 
 type Rect = { x: number; y: number; w: number; h: number };
+type Point = { x: number; y: number };
+type Id = (typeof AI_AGENTS)[number]['id'];
 const ZERO: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
 /**
- * Entrada del hero: cada agente arma su parte a la vista.
- * Claude arrastra una caja sobre el nombre y lo escribe letra por letra; después marca el texto y lo suelta.
- * Gemini traza la grilla línea por línea y dibuja el círculo con el cursor sobre el trazo.
- * ChatGPT marca el cuadro de la foto, la sube con una barra de carga y la suelta con un clic.
+ * Entrada del hero. Arranca el logo Hilo en el centro y aparecen los siete agentes alrededor.
+ * GLM se lleva el trazo del logo a la nav y DeepSeek arrastra el anillo hasta el círculo de la foto y lo traza.
+ * Claude escribe el nombre, Gemini traza la grilla, ChatGPT sube la foto, Qwen suelta el texto y Grok los botones.
+ * Al terminar, cada agente se estaciona en un lugar libre del hero y queda flotando.
  * Las posiciones se miden al arrancar (con las fuentes ya cargadas), relativas al hero.
  */
-export const heroIntro = (hero: HTMLElement) => {
+export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
   const q = gsap.utils.selector(hero);
   const name = q('[data-hero-name]')[0] as HTMLElement;
   const figure = q('[data-hero-portrait]')[0] as HTMLElement;
   const img = figure.querySelector('img') as HTMLElement;
   const text = q('[data-hero-text]')[0] as HTMLElement;
+  const ctas = q('[data-hero-ctas]')[0] as HTMLElement;
   const vLines = q('[data-guide-v]');
   const hLines = q('[data-guide-h]');
   const ring = q('[data-guide-circle]')[0];
   const dot = q('[data-guide-dot]')[0];
-  const [claude, gemini, openai] = ['claude', 'gemini', 'openai'].map(id => q(`[data-agent="${id}"]`)[0]);
-  const [nameBox, textBox, photoBox] = ['claude-name', 'claude-text', 'openai'].map(id => q(`[data-frame="${id}"]`)[0] as HTMLElement);
+  const logo = q('[data-intro-logo]')[0] as HTMLElement;
+  const logoRing = q('[data-intro-ring]')[0] as HTMLElement;
+  const mark = nav?.querySelector('svg') ?? null;
+  const agent = Object.fromEntries(AI_AGENTS.map(a => [a.id, q(`[data-agent="${a.id}"]`)[0]])) as Record<Id, HTMLElement>;
+  const pulse = Object.fromEntries(AI_AGENTS.map(a => [a.id, q(`[data-pulse="${a.id}"]`)[0]])) as Record<Id, HTMLElement>;
+  const frame = (id: string) => q(`[data-frame="${id}"]`)[0] as HTMLElement;
+  const [nameBox, textBox, ctaBox, photoBox] = ['claude-name', 'qwen-text', 'grok-cta', 'openai'].map(frame);
   const caret = q('[data-caret]')[0];
   const bar = q('[data-upload-bar]')[0];
-  const [geminiPulse, openaiPulse] = ['gemini', 'openai'].map(id => q(`[data-pulse="${id}"]`)[0]);
 
-  const box = { hero: ZERO, name: ZERO, h1: ZERO, figure: ZERO, text: ZERO, ring: ZERO };
+  const box = { hero: ZERO, name: ZERO, h1: ZERO, figure: ZERO, text: ZERO, cta: ZERO, ring: ZERO, nav: ZERO, mark: ZERO, logo: ZERO, logoRing: ZERO };
+  let mobile = false;
   // Después de cada letra: borde derecho y línea (en mobile el nombre ocupa dos). Coordenadas del h1.
   let steps: { x: number; line: number }[] = [];
   let lineH = 0;
   let lines = 1;
   let capH = 0;
   let capTops: number[] = [];
+  let parked: Record<Id, Point> | null = null;
   const measure = () => {
     const h = hero.getBoundingClientRect();
-    const rel = (r: DOMRect): Rect => ({ x: r.left - h.left, y: r.top - h.top, w: r.width, h: r.height });
+    // Medidas en px del hero sin escalar: el scrub del Manifiesto lo achica, y la nav es fixed (no se corre con el scroll).
+    const k = h.width / hero.offsetWidth || 1;
+    const rel = (r: DOMRect): Rect => ({ x: (r.left - h.left) / k, y: (r.top - h.top) / k, w: r.width / k, h: r.height / k });
+    const fixed = (r: DOMRect): Rect => ({ x: r.left, y: r.top, w: r.width, h: r.height });
+    mobile = window.matchMedia(MOBILE).matches;
+    parked = null;
     const range = document.createRange();
     range.selectNodeContents(name);
     box.name = rel(range.getBoundingClientRect());
     box.h1 = rel(name.getBoundingClientRect());
     box.figure = rel(figure.getBoundingClientRect());
     box.text = rel(text.getBoundingClientRect());
+    box.cta = rel(ctas.getBoundingClientRect());
     box.ring = rel(ring.getBoundingClientRect());
-    box.hero = { x: 0, y: 0, w: h.width, h: h.height };
+    box.nav = nav ? fixed(nav.getBoundingClientRect()) : ZERO;
+    box.mark = mark ? fixed(mark.getBoundingClientRect()) : ZERO;
+    box.hero = { x: 0, y: 0, w: hero.offsetWidth, h: hero.offsetHeight };
+    // El logo ocupa el centro; el anillo está en (215, 40) con radio 22 dentro del viewBox de 256.
+    const s = Math.min(box.hero.w * 0.3, box.hero.h * 0.3, 220);
+    box.logo = { x: box.hero.w / 2 - s / 2, y: box.hero.h / 2 - s / 2, w: s, h: s };
+    box.logoRing = { x: box.logo.x + (193 / 256) * s, y: box.logo.y + (18 / 256) * s, w: (44 / 256) * s, h: (44 / 256) * s };
     const node = name.firstChild;
     const chars: { x: number; top: number; space: boolean }[] = [];
     if (node?.nodeType === Node.TEXT_NODE) {
@@ -104,7 +134,7 @@ export const heroIntro = (hero: HTMLElement) => {
         range.setStart(node, i);
         range.setEnd(node, i + 1);
         const r = range.getBoundingClientRect();
-        chars.push({ x: r.right - h.left - box.h1.x, top: r.top, space: !str[i].trim() });
+        chars.push({ x: (r.right - h.left) / k - box.h1.x, top: r.top, space: !str[i].trim() });
       }
     }
     const tops = [...new Set(chars.filter(c => !c.space).map(c => Math.round(c.top)))].sort((a, b) => a - b);
@@ -117,7 +147,7 @@ export const heroIntro = (hero: HTMLElement) => {
     const m = ctx?.measureText('A');
     capH = m ? m.actualBoundingBoxAscent : lineH;
     const capOff = m && Number.isFinite(m.fontBoundingBoxAscent) ? m.fontBoundingBoxAscent - m.actualBoundingBoxAscent : 0;
-    capTops = tops.length ? tops.map(t => t - h.top + capOff) : [box.h1.y];
+    capTops = tops.length ? tops.map(t => (t - h.top) / k + capOff) : [box.h1.y];
     box.name = { ...box.name, y: capTops[0], h: capTops[capTops.length - 1] + capH - capTops[0] };
     const lineOf = (top: number) => Math.max(0, tops.findIndex(v => Math.abs(v - top) < lineH / 2));
     const first = chars.find(c => !c.space);
@@ -126,6 +156,49 @@ export const heroIntro = (hero: HTMLElement) => {
     chars.forEach(c => steps.push(c.space ? { ...steps[steps.length - 1] } : { x: c.x, line: lineOf(c.top) }));
     if (!first) steps.push({ x: box.name.x + box.name.w - box.h1.x, line: 0 });
   };
+
+  /* Lugares donde quedan flotando: una grilla de candidatos que no pisan el nombre, el texto, el anillo ni la nav,
+     repartidos lejos entre sí. Cada agente se queda con el libre más cercano a la parte que armó. */
+  const spots = (): Record<Id, Point> => {
+    if (parked) return parked;
+    const { w: W, h: H } = box.hero;
+    const aw = mobile ? 44 : 130;
+    const ah = mobile ? 46 : 50;
+    const pad = 14;
+    const top = box.nav.y + box.nav.h + pad;
+    // El input del chat queda fijo abajo al centro de la pantalla (ChatbotAssistant): esa franja tampoco sirve.
+    const chat = { x: W / 2 - 220, y: Math.min(H, window.innerHeight) - 90, w: 440, h: 90 };
+    const no = [box.name, box.text, box.ring, box.nav, chat].map(r => ({ x: r.x - pad, y: r.y - pad, w: r.w + 2 * pad, h: r.h + 2 * pad }));
+    const free = (p: Point) => !no.some(r => p.x < r.x + r.w && p.x + aw > r.x && p.y < r.y + r.h && p.y + ah > r.y);
+    const cand: Point[] = [];
+    for (let gx = 0; gx <= 12; gx++)
+      for (let gy = 0; gy <= 10; gy++) {
+        const p = { x: pad + ((W - aw - 2 * pad) * gx) / 12, y: top + ((H - top - ah - pad) * gy) / 10 };
+        if (free(p)) cand.push(p);
+      }
+    const picked: Point[] = [];
+    while (picked.length < AI_AGENTS.length && cand.length) {
+      let best = 0;
+      let far = -1;
+      cand.forEach((c, i) => {
+        const d = picked.length ? Math.min(...picked.map(p => Math.hypot(p.x - c.x, p.y - c.y))) : Math.hypot(c.x, c.y - H);
+        if (d > far) [far, best] = [d, i];
+      });
+      picked.push(cand.splice(best, 1)[0]);
+    }
+    // Si no alcanza el lugar libre (pantallas muy bajas), los que faltan van en fila sobre el borde izquierdo.
+    while (picked.length < AI_AGENTS.length) picked.push({ x: pad, y: top + picked.length * ah });
+    const home: Record<Id, Rect> = { claude: box.name, gemini: box.figure, openai: box.figure, deepseek: box.ring, qwen: box.text, grok: box.cta, glm: box.nav };
+    const out = {} as Record<Id, Point>;
+    AI_AGENTS.forEach(({ id }) => {
+      const c = { x: home[id].x + home[id].w / 2, y: home[id].y + home[id].h / 2 };
+      const i = picked.reduce((b, p, k) => (Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(picked[b].x - c.x, picked[b].y - c.y) ? k : b), 0);
+      out[id] = picked.splice(i, 1)[0];
+    });
+    parked = out;
+    return out;
+  };
+
   /* Muestra las líneas de arriba enteras y la actual hasta x. La primera se abre hacia arriba y la última hacia abajo. */
   const clip = ({ x, line }: { x: number; line: number }) => {
     // Corta justo arriba de las mayúsculas de cada línea: con line-height 0.8 sobresalen del renglón.
@@ -136,46 +209,98 @@ export const heroIntro = (hero: HTMLElement) => {
     return `polygon(-1000px -1000px, ${w}px -1000px, ${w}px ${top}px, ${x}px ${top}px, ${x}px ${bot}px, -1000px ${bot}px)`;
   };
   const caretAt = (s: { x: number; line: number }) => ({ x: box.h1.x + s.x, y: capTops[s.line] ?? box.h1.y });
-  // La etiqueta mide unos 100 px: el cursor no pasa de ahí para que no se corte contra el borde.
-  const clampX = (x: number) => Math.min(x, box.hero.w - 110);
+  // La etiqueta mide unos 100 px (30 en mobile): el cursor no pasa de ahí para que no se corte contra el borde.
+  const clampX = (x: number) => Math.min(x, box.hero.w - (mobile ? 40 : 110));
   const at = (k: keyof typeof box, fx: number, fy: number) => ({
     x: () => clampX(box[k].x + box[k].w * fx),
     y: () => box[k].y + box[k].h * fy,
   });
+  const place = (k: keyof typeof box) => ({ x: () => box[k].x, y: () => box[k].y, width: () => box[k].w, height: () => box[k].h });
   const frameAt = (k: keyof typeof box) => ({ x: () => box[k].x, y: () => box[k].y, width: 0, height: 0, autoAlpha: 1 });
-  const grow = (k: keyof typeof box, frame: HTMLElement) => ({
+  const grow = (k: keyof typeof box, el: HTMLElement) => ({
     width: () => box[k].w,
     height: () => box[k].h,
     onUpdate: () => {
-      const label = frame.querySelector('[data-size]');
-      if (label) label.textContent = `${Math.round(frame.offsetWidth)} × ${Math.round(frame.offsetHeight)}`;
+      const label = el.querySelector('[data-size]');
+      if (label) label.textContent = `${Math.round(el.offsetWidth)} × ${Math.round(el.offsetHeight)}`;
     },
   });
   // Pulso de clic en la punta del cursor.
-  const click = (pulse: Element, agent: Element, t: number) =>
-    tl.fromTo(
-      pulse,
-      { x: () => Number(gsap.getProperty(agent, 'x')), y: () => Number(gsap.getProperty(agent, 'y')), scale: 0.2, autoAlpha: 1 },
-      { scale: 1.6, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false },
-      t
-    );
+  const click = (id: Id, t: number) =>
+    tl
+      .set(pulse[id], { x: () => Number(gsap.getProperty(agent[id], 'x')), y: () => Number(gsap.getProperty(agent[id], 'y')) }, t)
+      .fromTo(pulse[id], { scale: 0.2, autoAlpha: 1 }, { scale: 1.6, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, t);
+  const park = (id: Id, t: number) => tl.to(agent[id], { x: () => spots()[id].x, y: () => spots()[id].y, duration: 0.6, ease: 'power3.inOut' }, t);
 
   const typing = { i: 0 };
   const orbit = { p: 0 };
   const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.inOut' } }).timeScale(1.3);
-  tl.set(name, { clipPath: 'inset(0% 100% 0% 0%)' }, 0)
+
+  // Logo: se dibuja en el centro y los siete agentes aparecen a su alrededor.
+  const around = (i: number) => {
+    const a = -Math.PI / 2 + (i * Math.PI * 2) / AI_AGENTS.length;
+    const r = box.logo.w * 0.95;
+    return { x: box.logo.x + box.logo.w / 2 + r * Math.cos(a) - (mobile ? 14 : 50), y: box.logo.y + box.logo.h / 2 + r * Math.sin(a) - 16 };
+  };
+  tl.set(name, { clipPath: 'inset(0% 100% 0% 0%)', immediateRender: true }, 0)
     .call(measure, [], 0)
-    // Cada cursor entra desde un borde distinto. Sin immediateRender: las posiciones se leen después de medir.
-    .fromTo(claude, { x: () => -60, y: () => box.hero.h * 0.2, autoAlpha: 0 }, { ...at('name', 0, 0), autoAlpha: 1, duration: 0.5, immediateRender: false }, 0)
-    .fromTo(gemini, { x: () => box.hero.w + 40, y: () => box.hero.h * 0.1, autoAlpha: 0 }, { ...at('figure', 0, 0), autoAlpha: 1, duration: 0.55, immediateRender: false }, 0.1)
-    .fromTo(openai, { x: () => box.hero.w * 0.7, y: () => box.hero.h + 40, autoAlpha: 0 }, { ...at('figure', 0.02, 0.04), autoAlpha: 1, duration: 0.55, immediateRender: false }, 0.15);
+    .set(logo, { ...place('logo'), autoAlpha: 1 }, 0)
+    .set(logoRing, { ...place('logoRing'), scale: 0, autoAlpha: 1 }, 0)
+    .fromTo(q('[data-intro-logo] [data-stroke]'), { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.5, ease: 'power2.inOut', stagger: 0.12 }, 0)
+    .to(logoRing, { scale: 1, duration: 0.35, ease: 'back.out(2.5)' }, 0.45);
+  // En fromTo, lo que no está en el destino no se aplica: la posición va en un set aparte.
+  AI_AGENTS.forEach(({ id }, i) =>
+    tl
+      .set(agent[id], { x: () => around(i).x, y: () => around(i).y }, 0.3 + i * 0.05)
+      .fromTo(agent[id], { scale: 0.4, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.35, ease: 'back.out(2)', immediateRender: false }, 0.3 + i * 0.05)
+  );
+
+  // GLM toma el trazo y lo lleva a la nav, que aparece cuando llega.
+  tl.to(agent.glm, { ...at('logo', 0.3, 0.55), duration: 0.25 }, 0.8)
+    .to(logo, { ...place('mark'), duration: 0.5 }, 1.05)
+    .to(agent.glm, { ...at('mark', 1, 1), duration: 0.5 }, 1.05);
+  if (nav) tl.from(nav, { autoAlpha: 0, duration: 0.25, ease: 'none' }, 1.45);
+  tl.to(logo, { autoAlpha: 0, duration: 0.15 }, 1.6);
+  park('glm', 1.7);
+
+  // DeepSeek arrastra el anillo hasta el círculo de la foto, lo traza dando la vuelta y marca el centro.
+  tl.to(agent.deepseek, { ...at('logoRing', 0.5, 0.5), duration: 0.25 }, 0.8)
+    .to(logoRing, { ...place('ring'), duration: 0.5 }, 1.05)
+    .to(agent.deepseek, { ...at('ring', 0.5, 0.5), duration: 0.5 }, 1.05)
+    .to(agent.deepseek, { ...at('ring', 1, 0.5), duration: 0.2 }, 1.55)
+    .fromTo(ring, { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.8, ease: 'power1.inOut' }, 1.75)
+    .to(logoRing, { autoAlpha: 0, duration: 0.5 }, 1.75)
+    .fromTo(
+      orbit,
+      { p: 0 },
+      {
+        p: 1,
+        duration: 0.8,
+        ease: 'power1.inOut',
+        immediateRender: false,
+        onUpdate: () => {
+          const r = box.ring.w / 2;
+          const a = orbit.p * Math.PI * 2;
+          gsap.set(agent.deepseek, { x: box.ring.x + r + r * Math.cos(a), y: box.ring.y + r + r * Math.sin(a) });
+        },
+      },
+      1.75
+    )
+    .to(agent.deepseek, { ...at('ring', 0.5, 0.5), duration: 0.3 }, 2.6)
+    .fromTo(dot, { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.3, ease: 'back.out(3)' }, 2.9);
+  click('deepseek', 2.9);
+  park('deepseek', 3.2);
+
+  // Desde acá trabajan los otros cinco, en paralelo.
+  const O = 1;
 
   // Claude: arrastra la caja del nombre, escribe letra por letra con el cursor de texto y suelta la caja.
-  tl.set(nameBox, frameAt('name'), 0.5)
-    .to(nameBox, { ...grow('name', nameBox), duration: 0.45 }, 0.5)
-    .to(claude, { ...at('name', 1, 1), duration: 0.45 }, 0.5)
-    .set(caret, { x: () => caretAt(steps[0]).x, y: () => caretAt(steps[0]).y, height: () => capH, autoAlpha: 1 }, 0.95)
-    .to(claude, { x: () => clampX(caretAt(steps[0]).x + 8), y: () => caretAt(steps[0]).y + capH * 0.7, duration: 0.2 }, 0.95)
+  tl.to(agent.claude, { ...at('name', 0, 0), duration: 0.5 }, O)
+    .set(nameBox, frameAt('name'), O + 0.5)
+    .to(nameBox, { ...grow('name', nameBox), duration: 0.45 }, O + 0.5)
+    .to(agent.claude, { ...at('name', 1, 1), duration: 0.45 }, O + 0.5)
+    .set(caret, { x: () => caretAt(steps[0]).x, y: () => caretAt(steps[0]).y, height: () => capH, autoAlpha: 1 }, O + 0.95)
+    .to(agent.claude, { x: () => clampX(caretAt(steps[0]).x + 8), y: () => caretAt(steps[0]).y + capH * 0.7, duration: 0.2 }, O + 0.95)
     .fromTo(
       typing,
       { i: 0 },
@@ -189,64 +314,91 @@ export const heroIntro = (hero: HTMLElement) => {
           const c = caretAt(s);
           gsap.set(name, { clipPath: clip(s) });
           gsap.set(caret, c);
-          gsap.set(claude, { x: clampX(c.x + 8), y: c.y + capH * 0.7 });
+          gsap.set(agent.claude, { x: clampX(c.x + 8), y: c.y + capH * 0.7 });
         },
       },
-      1.15
+      O + 1.15
     )
-    .set(name, { clearProps: 'clipPath' }, 2.16)
-    .to([nameBox, caret], { autoAlpha: 0, duration: 0.2 }, 2.2)
+    .set(name, { clearProps: 'clipPath' }, O + 2.16)
+    .to([nameBox, caret], { autoAlpha: 0, duration: 0.2 }, O + 2.2);
+  park('claude', O + 2.3);
 
-    // Claude: marca la caja del texto y lo suelta línea por línea adentro.
-    .to(claude, { ...at('text', 0, 0), duration: 0.4 }, 2.2)
-    .set(textBox, frameAt('text'), 2.6)
-    .to(textBox, { ...grow('text', textBox), duration: 0.4 }, 2.6)
-    .to(claude, { ...at('text', 1, 1), duration: 0.4 }, 2.6)
-    .from(text.children, { autoAlpha: 0, y: 14, duration: 0.4, ease: 'power3.out', stagger: 0.07 }, 2.95)
-    .to(textBox, { autoAlpha: 0, duration: 0.25 }, 3.4);
+  // Qwen: marca la caja del texto y lo suelta línea por línea adentro.
+  tl.to(agent.qwen, { ...at('text', 0, 0), duration: 0.5 }, O + 0.6)
+    .set(textBox, frameAt('text'), O + 1.1)
+    .to(textBox, { ...grow('text', textBox), duration: 0.4 }, O + 1.1)
+    .to(agent.qwen, { ...at('text', 1, 0.4), duration: 0.4 }, O + 1.1)
+    .from([...text.children].filter(c => c !== ctas), { autoAlpha: 0, y: 14, duration: 0.4, ease: 'power3.out', stagger: 0.09 }, O + 1.45)
+    .to(textBox, { autoAlpha: 0, duration: 0.25 }, O + 2);
+  park('qwen', O + 2.05);
 
-  // Gemini: baja las verticales recorriendo el borde de arriba, cruza las horizontales bajando por la izquierda,
-  // dibuja el círculo con el cursor sobre el trazo y marca el centro con un clic.
-  tl.fromTo(vLines, { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.35, ease: 'power2.out', stagger: 0.05 }, 0.65)
-    .to(gemini, { ...at('figure', 0.95, 0), duration: 0.5, ease: 'none' }, 0.65)
-    .fromTo(hLines, { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.35, ease: 'power2.out', stagger: 0.04 }, 1.2)
-    .to(gemini, { ...at('figure', 0, 0.75), duration: 0.5, ease: 'none' }, 1.2)
-    .to(gemini, { ...at('ring', 1, 0.5), duration: 0.35 }, 1.75)
-    .fromTo(ring, { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.8, ease: 'power1.inOut' }, 2.1)
-    .fromTo(
-      orbit,
-      { p: 0 },
-      {
-        p: 1,
-        duration: 0.8,
-        ease: 'power1.inOut',
-        immediateRender: false,
-        onUpdate: () => {
-          const r = box.ring.w / 2;
-          const a = orbit.p * Math.PI * 2;
-          gsap.set(gemini, { x: box.ring.x + r + r * Math.cos(a), y: box.ring.y + r + r * Math.sin(a) });
-        },
-      },
-      2.1
-    )
-    .to(gemini, { ...at('ring', 0.5, 0.5), duration: 0.3 }, 2.95)
-    .fromTo(dot, { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.3, ease: 'back.out(3)' }, 3.25);
-  click(geminiPulse, gemini, 3.25);
+  // Grok: marca los botones, los suelta y hace clic en el principal.
+  tl.to(agent.grok, { ...at('cta', 0, 0), duration: 0.5 }, O + 0.9)
+    .set(ctaBox, frameAt('cta'), O + 1.4)
+    .to(ctaBox, { ...grow('cta', ctaBox), duration: 0.35 }, O + 1.4)
+    .to(agent.grok, { ...at('cta', 1, 1), duration: 0.35 }, O + 1.4)
+    .from(ctas.children, { autoAlpha: 0, y: 10, scale: 0.94, duration: 0.35, ease: 'back.out(2)', stagger: 0.1 }, O + 1.75)
+    .to(agent.grok, { ...at('cta', 0.2, 0.6), duration: 0.3 }, O + 1.85);
+  click('grok', O + 2.15);
+  tl.to(ctaBox, { autoAlpha: 0, duration: 0.25 }, O + 2.25);
+  park('grok', O + 2.35);
+
+  // Gemini: baja las verticales recorriendo el borde de arriba y cruza las horizontales bajando por la izquierda.
+  tl.to(agent.gemini, { ...at('figure', 0, 0), duration: 0.5 }, O)
+    .fromTo(vLines, { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.35, ease: 'power2.out', stagger: 0.05 }, O + 0.65)
+    .to(agent.gemini, { ...at('figure', 0.95, 0), duration: 0.5, ease: 'none' }, O + 0.65)
+    .fromTo(hLines, { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 0.35, ease: 'power2.out', stagger: 0.04 }, O + 1.2)
+    .to(agent.gemini, { ...at('figure', 0, 0.75), duration: 0.5, ease: 'none' }, O + 1.2);
+  park('gemini', O + 1.8);
 
   // ChatGPT: marca el cuadro de la foto, la sube con una barra de carga y la suelta con un clic.
-  tl.set(photoBox, frameAt('figure'), 0.7)
-    .to(photoBox, { ...grow('figure', photoBox), duration: 0.6 }, 0.7)
-    .to(openai, { ...at('figure', 1, 1), duration: 0.6 }, 0.7)
-    .to(openai, { ...at('figure', 0.5, 0.92), duration: 0.35 }, 1.35)
-    .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: 'power1.inOut', immediateRender: false }, 1.4)
-    .fromTo(img, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.8, ease: 'power2.inOut', clearProps: 'clipPath' }, 2.1)
-    .to(openai, { ...at('figure', 0.5, 0.5), duration: 0.4 }, 2.1)
-    .to(q('[data-upload]'), { autoAlpha: 0, duration: 0.2 }, 2.15);
-  click(openaiPulse, openai, 2.6);
-  tl.to(photoBox, { autoAlpha: 0, duration: 0.3 }, 2.75);
+  tl.to(agent.openai, { ...at('figure', 0.02, 0.04), duration: 0.5 }, O)
+    .set(photoBox, frameAt('figure'), O + 0.7)
+    .to(photoBox, { ...grow('figure', photoBox), duration: 0.6 }, O + 0.7)
+    .to(agent.openai, { ...at('figure', 1, 1), duration: 0.6 }, O + 0.7)
+    .to(agent.openai, { ...at('figure', 0.5, 0.92), duration: 0.35 }, O + 1.35)
+    .fromTo(bar, { scaleX: 0 }, { scaleX: 1, duration: 0.7, ease: 'power1.inOut', immediateRender: false }, O + 1.4)
+    .fromTo(img, { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.8, ease: 'power2.inOut', clearProps: 'clipPath' }, O + 2.1)
+    .to(agent.openai, { ...at('figure', 0.5, 0.5), duration: 0.4 }, O + 2.1)
+    .to(q('[data-upload]'), { autoAlpha: 0, duration: 0.2 }, O + 2.15);
+  click('openai', O + 2.6);
+  tl.to(photoBox, { autoAlpha: 0, duration: 0.3 }, O + 2.75);
+  park('openai', O + 2.75);
 
-  // Terminan y se van, cada uno por su lado.
-  tl.to([openai, gemini, claude], { x: '+=28', y: '+=18', autoAlpha: 0, duration: 0.4, ease: 'power2.in', stagger: 0.15 }, 3.3);
+  // Ya estacionados, flotan con un vaivén lento. Fuera de pantalla se pausan; al cambiar el tamaño se vuelven a ubicar.
+  const floats: gsap.core.Tween[] = [];
+  tl.call(
+    () => {
+      if (floats.length) return;
+      AI_AGENTS.forEach(({ id }, i) =>
+        floats.push(
+          gsap.to(agent[id], {
+            xPercent: i % 2 ? 25 : -25,
+            yPercent: i % 3 ? -40 : 40,
+            rotation: i % 2 ? 4 : -4,
+            duration: 1.7 + i * 0.23,
+            ease: 'sine.inOut',
+            yoyo: true,
+            repeat: -1,
+          })
+        )
+      );
+      const st = ScrollTrigger.create({
+        trigger: hero,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: self => floats.forEach(f => f.paused(!self.isActive)),
+        onRefresh: () => {
+          measure();
+          const p = spots();
+          AI_AGENTS.forEach(({ id }) => gsap.set(agent[id], p[id]));
+        },
+      });
+      if (!st.isActive) floats.forEach(f => f.pause());
+    },
+    [],
+    O + 3.4
+  );
 
   return tl;
 };
@@ -258,6 +410,21 @@ const Layer = styled.div`
   pointer-events: none;
   overflow: clip;
 `;
+
+const IntroLogo = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+
+  svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const IntroRing = styled(IntroLogo)``;
 
 const Agent = styled.div`
   position: absolute;
@@ -292,6 +459,15 @@ const Tag = styled.span`
     width: 0.95rem;
     height: 0.95rem;
     filter: none;
+  }
+
+  /* En mobile, solo el ícono: el nombre ocuparía el hero entero. */
+  @media ${MOBILE} {
+    padding: 0.32rem;
+
+    span {
+      display: none;
+    }
   }
 `;
 
