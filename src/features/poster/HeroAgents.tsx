@@ -8,7 +8,7 @@ import HiloMark from './HiloMark';
 
 /* Mismo corte que el hero mobile de PosterHome: abajo de este ancho los agentes van solo con el ícono. */
 const MOBILE = '(max-width: 860px)';
-/* En mobile el agente es solo la pastilla del ícono (TAG px), corrida TAG_AT de la punta del cursor (estilos de Tag). */
+/* Estacionado, el agente es solo el ícono (TAG px), corrido TAG_AT de la punta del cursor (estilos de Tag). */
 const TAG = 25;
 const TAG_AT = { x: 14, y: 20 };
 const ROW_SCALE = 0.85;
@@ -74,10 +74,10 @@ const ZERO: Rect = { x: 0, y: 0, w: 0, h: 0 };
  * Entrada del hero. Arranca el logo Hilo en el centro y aparecen los siete agentes alrededor.
  * GLM se lleva el trazo del logo a la nav y DeepSeek arrastra el anillo hasta el círculo de la foto y lo traza.
  * Claude escribe el nombre, Gemini traza la grilla, ChatGPT sube la foto, Qwen suelta el texto y Grok los botones.
- * Al terminar, cada agente se estaciona en un lugar libre del hero y queda flotando. En mobile quedan en fila sobre la foto.
+ * Al terminar se estacionan en fila debajo del texto, solo con el ícono en blanco.
  * Las posiciones se miden al arrancar (con las fuentes ya cargadas), relativas al hero.
  */
-/** `still`: con movimiento reducido los agentes quedan estacionados, sin flotar. */
+/** `still`: con movimiento reducido no se anima la nav. */
 export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = false) => {
   const q = gsap.utils.selector(hero);
   const name = q('[data-hero-name]')[0] as HTMLElement;
@@ -99,7 +99,7 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
   const caret = q('[data-caret]')[0];
   const bar = q('[data-upload-bar]')[0];
 
-  const box = { hero: ZERO, name: ZERO, h1: ZERO, figure: ZERO, text: ZERO, cta: ZERO, ring: ZERO, nav: ZERO, mark: ZERO, logo: ZERO, logoRing: ZERO };
+  const box = { hero: ZERO, name: ZERO, h1: ZERO, figure: ZERO, text: ZERO, cta: ZERO, ring: ZERO, mark: ZERO, logo: ZERO, logoRing: ZERO };
   let mobile = false;
   // Después de cada letra: borde derecho y línea (en mobile el nombre ocupa dos). Coordenadas del h1.
   let steps: { x: number; line: number }[] = [];
@@ -124,7 +124,6 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
     box.text = rel(text.getBoundingClientRect());
     box.cta = rel(ctas.getBoundingClientRect());
     box.ring = rel(ring.getBoundingClientRect());
-    box.nav = nav ? fixed(nav.getBoundingClientRect()) : ZERO;
     box.mark = mark ? fixed(mark.getBoundingClientRect()) : ZERO;
     box.hero = { x: 0, y: 0, w: hero.offsetWidth, h: hero.offsetHeight };
     // El logo ocupa el centro; el anillo está en (215, 40) con radio 22 dentro del viewBox de 256.
@@ -162,57 +161,17 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
     if (!first) steps.push({ x: box.name.x + box.name.w - box.h1.x, line: 0 });
   };
 
-  /* Lugares donde quedan flotando: una grilla de candidatos que no pisan el nombre, el texto, el anillo ni la nav,
-     repartidos lejos entre sí. Cada agente se queda con el libre más cercano a la parte que armó. */
+  /* Al terminar quedan en fila, chicos y solo con el ícono, debajo del texto y alineados a su borde izquierdo:
+     arriba taparían la cara y a la derecha está el botón del chat. */
   const spots = (): Record<Id, Point> => {
     if (parked) return parked;
-    const { w: W, h: H } = box.hero;
-    const aw = mobile ? 44 : 130;
-    const ah = mobile ? 46 : 50;
-    const pad = 14;
-    // En mobile no hay lugar al costado: quedan en fila, chicos, abajo en la foto.
-    if (mobile) {
-      const size = TAG * ROW_SCALE;
-      const gap = 6;
-      // Debajo del texto, alineada a su borde izquierdo: arriba taparía la cara y a la derecha está el botón del chat.
-      const x0 = box.text.x;
-      const y = box.text.y + box.text.h + 10;
-      // La posición del agente es la punta del cursor: el ícono está corrido TAG_AT dentro, escalado desde la esquina.
-      parked = Object.fromEntries(AI_AGENTS.map(({ id }, i) => [id, { x: x0 + i * (size + gap) - TAG_AT.x * ROW_SCALE, y: y - TAG_AT.y * ROW_SCALE }])) as Record<Id, Point>;
-      return parked;
-    }
-    const top = box.nav.y + box.nav.h + pad;
-    // El botón del chat queda fijo abajo a la derecha de la pantalla (ChatbotAssistant): ese rincón tampoco sirve.
-    const chat = { x: W - 90, y: Math.min(H, window.innerHeight) - 90, w: 90, h: 90 };
-    const no = [box.name, box.text, box.ring, box.nav, chat].map(r => ({ x: r.x - pad, y: r.y - pad, w: r.w + 2 * pad, h: r.h + 2 * pad }));
-    const free = (p: Point) => !no.some(r => p.x < r.x + r.w && p.x + aw > r.x && p.y < r.y + r.h && p.y + ah > r.y);
-    const cand: Point[] = [];
-    for (let gx = 0; gx <= 12; gx++)
-      for (let gy = 0; gy <= 10; gy++) {
-        const p = { x: pad + ((W - aw - 2 * pad) * gx) / 12, y: top + ((H - top - ah - pad) * gy) / 10 };
-        if (free(p)) cand.push(p);
-      }
-    const picked: Point[] = [];
-    while (picked.length < AI_AGENTS.length && cand.length) {
-      let best = 0;
-      let far = -1;
-      cand.forEach((c, i) => {
-        const d = picked.length ? Math.min(...picked.map(p => Math.hypot(p.x - c.x, p.y - c.y))) : Math.hypot(c.x, c.y - H);
-        if (d > far) [far, best] = [d, i];
-      });
-      picked.push(cand.splice(best, 1)[0]);
-    }
-    // Si no alcanza el lugar libre (pantallas muy bajas), los que faltan van en fila sobre el borde izquierdo.
-    while (picked.length < AI_AGENTS.length) picked.push({ x: pad, y: top + picked.length * ah });
-    const home: Record<Id, Rect> = { claude: box.name, gemini: box.figure, openai: box.figure, deepseek: box.ring, qwen: box.text, grok: box.cta, glm: box.nav };
-    const out = {} as Record<Id, Point>;
-    AI_AGENTS.forEach(({ id }) => {
-      const c = { x: home[id].x + home[id].w / 2, y: home[id].y + home[id].h / 2 };
-      const i = picked.reduce((b, p, k) => (Math.hypot(p.x - c.x, p.y - c.y) < Math.hypot(picked[b].x - c.x, picked[b].y - c.y) ? k : b), 0);
-      out[id] = picked.splice(i, 1)[0];
-    });
-    parked = out;
-    return out;
+    const size = TAG * ROW_SCALE;
+    const gap = 6;
+    const x0 = box.text.x;
+    const y = box.text.y + box.text.h + 10;
+    // La posición del agente es la punta del cursor: el ícono está corrido TAG_AT dentro, escalado desde la esquina.
+    parked = Object.fromEntries(AI_AGENTS.map(({ id }, i) => [id, { x: x0 + i * (size + gap) - TAG_AT.x * ROW_SCALE, y: y - TAG_AT.y * ROW_SCALE }])) as Record<Id, Point>;
+    return parked;
   };
 
   /* Muestra las líneas de arriba enteras y la actual hasta x. La primera se abre hacia arriba y la última hacia abajo. */
@@ -246,12 +205,13 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
     tl
       .set(pulse[id], { x: () => Number(gsap.getProperty(agent[id], 'x')), y: () => Number(gsap.getProperty(agent[id], 'y')) }, t)
       .fromTo(pulse[id], { scale: 0.2, autoAlpha: 1 }, { scale: 1.6, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, t);
-  // En mobile, al estacionar se achican y sueltan el cursor: queda solo el ícono.
+  // Al estacionar se achican, sueltan el cursor y la etiqueta pasa a ícono blanco (data-parked, estilos de Agent).
   const arrow = (id: Id) => agent[id].querySelector(':scope > svg');
   const park = (id: Id, t: number) =>
     tl
-      .to(agent[id], { x: () => spots()[id].x, y: () => spots()[id].y, scale: () => (mobile ? ROW_SCALE : 1), transformOrigin: '0 0', duration: 0.6, ease: 'power3.inOut' }, t)
-      .to(arrow(id), { autoAlpha: () => (mobile ? 0 : 1), duration: 0.3 }, t + 0.3);
+      .to(agent[id], { x: () => spots()[id].x, y: () => spots()[id].y, scale: ROW_SCALE, transformOrigin: '0 0', duration: 0.6, ease: 'power3.inOut' }, t)
+      .to(arrow(id), { autoAlpha: 0, duration: 0.3 }, t + 0.3)
+      .set(agent[id], { attr: { 'data-parked': 1 } }, t + 0.3);
 
   const typing = { i: 0 };
   const orbit = { p: 0 };
@@ -386,47 +346,23 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
   tl.to(photoBox, { autoAlpha: 0, duration: 0.3 }, O + 2.75);
   park('openai', O + 2.75);
 
-  // Ya estacionados, flotan con un vaivén lento. Fuera de pantalla se pausan; al cambiar el tamaño se vuelven a ubicar.
-  const floats: gsap.core.Tween[] = [];
-  // En mobile la fila no flota: el vaivén la desarmaría.
-  const rest = (active: boolean) => {
-    floats.forEach(f => f.paused(mobile || !active));
-    if (mobile) gsap.set(Object.values(agent), { xPercent: 0, yPercent: 0, rotation: 0 });
-  };
+  // Al cambiar el tamaño se vuelven a ubicar.
   let made = false;
   tl.call(
     () => {
       if (made) return;
       made = true;
-      if (!still) AI_AGENTS.forEach(({ id }, i) =>
-        floats.push(
-          gsap.to(agent[id], {
-            xPercent: i % 2 ? 25 : -25,
-            yPercent: i % 3 ? -40 : 40,
-            rotation: i % 2 ? 4 : -4,
-            duration: 1.7 + i * 0.23,
-            ease: 'sine.inOut',
-            yoyo: true,
-            repeat: -1,
-          })
-        )
-      );
-      const st = ScrollTrigger.create({
+      ScrollTrigger.create({
         trigger: hero,
-        start: 'top bottom',
-        end: 'bottom top',
-        onToggle: self => rest(self.isActive),
-        onRefresh: self => {
+        onRefresh: () => {
           measure();
           const p = spots();
           AI_AGENTS.forEach(({ id }) => {
-            gsap.set(agent[id], { ...p[id], scale: mobile ? ROW_SCALE : 1, transformOrigin: '0 0' });
-            gsap.set(arrow(id), { autoAlpha: mobile ? 0 : 1 });
+            gsap.set(agent[id], { ...p[id], scale: ROW_SCALE, transformOrigin: '0 0', attr: { 'data-parked': 1 } });
+            gsap.set(arrow(id), { autoAlpha: 0 });
           });
-          rest(self.isActive);
         },
       });
-      rest(st.isActive);
     },
     [],
     O + 3.4
@@ -468,6 +404,18 @@ const Agent = styled.div`
   svg {
     display: block;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
+  }
+
+  /* Estacionado: solo el ícono, en blanco. Los colores de la etiqueta van inline, por eso el !important. */
+  &[data-parked='1'] > span {
+    padding: 0.32rem;
+    background: transparent !important;
+    color: ${INK.cream} !important;
+    box-shadow: none;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  &[data-parked='1'] > span > span {
+    display: none;
   }
 `;
 
