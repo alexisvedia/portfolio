@@ -569,6 +569,8 @@ const Hero = styled.section`
   @media (max-width: 860px) {
     padding-top: 5.5rem;
     align-content: end;
+    /* Nombre en mobile, dos líneas. En pantallas muy bajas no baja de 4.5rem: el hero crece (ver HeroCopy). */
+    --name-m: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37), 27svh, max(calc((100svh - 30rem) / 1.6), 4.5rem));
   }
 `;
 
@@ -595,7 +597,7 @@ const HeroName = styled.h1`
     white-space: normal;
     width: min-content;
     margin-inline: auto;
-    font-size: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37), 27svh, calc((100svh - 26.5rem) / 1.6));
+    font-size: var(--name-m);
   }
 `;
 
@@ -621,7 +623,7 @@ const HeroFigure = styled.div`
     left: 50%;
     translate: -43.5% 0;
     /* Anclada abajo; puede tapar parte del nombre (Alexis, 2026-11-03: no importa si la foto pisa el título). */
-    height: min(72svh, 125vw);
+    height: min(64svh, 112vw);
     /* El copy se apoya sobre el torso: la foto se funde en el fondo. */
     -webkit-mask-image: linear-gradient(#000 38%, transparent 80%);
     mask-image: linear-gradient(#000 38%, transparent 80%);
@@ -646,9 +648,11 @@ const HeroCopy = styled.div`
   margin-top: calc(var(--name-top) + 0.8 * var(--name-size) - 6.5rem + 2rem);
 
   @media (max-width: 860px) {
-    margin-top: 0;
-    /* Despeja el botón redondo del chat (56 px a 16 px del borde). */
-    padding-bottom: 4.75rem;
+    /* Reserva las dos líneas del nombre (line-height 0.8) más 1rem: en pantallas bajas el copy no se monta sobre "VEDIA". */
+    margin-top: calc(var(--name-top) - 5.5rem + 1.6 * var(--name-m) + 1rem);
+    /* Despeja la fila de agentes (HeroAgents la pone 10 px debajo del texto) y el botón del chat. Chrome Android con la
+       barra abajo tapa unos 60 px del primer pantallazo (captura de Alexis, 2026-11-03): la reserva los incluye. */
+    padding-bottom: 7.5rem;
   }
 `;
 

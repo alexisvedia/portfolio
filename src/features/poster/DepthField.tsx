@@ -80,6 +80,7 @@ const DepthField: React.FC = () => {
         <Bit
           key={i}
           data-depth={p.depth}
+          data-low={parseFloat(p.top) > 60 || undefined}
           style={{ top: p.top, left: p.left, width: p.size, transform: `rotate(${p.rotate}deg)` }}
           $depth={p.depth}
         >
@@ -111,6 +112,10 @@ const Bit = styled.div<{ $depth: number }>`
 
   @media (max-width: 860px) {
     opacity: ${({ $depth }) => ($depth === 1 ? 0.25 : 0.5)};
+    /* Las piezas de abajo caen sobre el copy del hero. */
+    &[data-low] {
+      display: none;
+    }
   }
 `;
 
