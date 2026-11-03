@@ -22,7 +22,7 @@ const MOBILE = '(max-width: 860px)';
 const STACK = '(min-width: 861px) and (min-height: 601px)';
 const FINE = '(hover: hover) and (pointer: fine)';
 /* Desktop con movimiento: las cuatro cards son las caras de un cubo que gira con el scroll. */
-const CUBE = `${STACK} and ${MOTION}`;
+export const CUBE = `${STACK} and ${MOTION}`;
 /* Alto de la card pegada: 6rem de nav y aire abajo. */
 const CARD_H = 'min(calc(100svh - 9.5rem), 46rem)';
 /* Mismo margen lateral que las secciones de PosterHome (no se importa: PosterHome importa este archivo). */

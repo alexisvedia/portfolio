@@ -1,10 +1,11 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import { INK } from './content';
+import { PIN } from './WorkGallery';
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, MotionPathPlugin);
 
@@ -18,13 +19,25 @@ const FROM_RAIL = PATH.replace('M150 0C150 80 118 122 200 140', 'M0 0C-40 0 -40 
 interface Props {
   color?: string;
   flip?: boolean;
-  /** Hilo crema de 3px y aro rojo chico, alineado al final del rail de WorkGallery. Se usa con flip. */
+  /** Nace en el extremo derecho del rail de WorkGallery, a su altura. Se usa con flip. */
   fromRail?: boolean;
 }
 
-const Stitch: React.FC<Props> = ({ color = INK.cream, flip, fromRail }) => {
+const Stitch: React.FC<Props> = ({ color = INK.cream, flip, fromRail: wantsRail }) => {
+  // El rail solo existe con la galería pineada: sin él, el hilo vuelve a su forma original.
+  const [railShown, setRailShown] = useState(() => !!wantsRail && window.matchMedia(PIN).matches);
+  useLayoutEffect(() => {
+    if (!wantsRail) return;
+    const mq = window.matchMedia(PIN);
+    const sync = () => setRailShown(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, [wantsRail]);
+  const fromRail = wantsRail && railShown;
   const d = fromRail ? FROM_RAIL : PATH;
-  const bead = fromRail ? INK.red : color;
+  // fromRail dibuja a 1320px en vez de 1152 (72rem): se compensa la escala para que trazo y aro midan lo mismo.
+  const k = fromRail ? 1152 / 1320 : 1;
   const ref = useRef<SVGSVGElement>(null);
 
   useLayoutEffect(() => {
@@ -43,7 +56,7 @@ const Stitch: React.FC<Props> = ({ color = INK.cream, flip, fromRail }) => {
       );
     });
     return () => mm.revert();
-  }, []);
+  }, [fromRail]);
 
   return (
     <Wrap aria-hidden="true" data-from-rail={fromRail ? '' : undefined}>
@@ -54,14 +67,13 @@ const Stitch: React.FC<Props> = ({ color = INK.cream, flip, fromRail }) => {
           d={d}
           fill="none"
           stroke={color}
-          strokeWidth={fromRail ? 3 : 7}
-          vectorEffect={fromRail ? 'non-scaling-stroke' : undefined}
+          strokeWidth={7 * k}
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <g data-bead="" transform="translate(850 300)">
-          <circle r={fromRail ? 7 : 15} fill={bead} />
-          <circle r={fromRail ? 2.3 : 5.5} fill="var(--poster-ground, #0d0c0b)" />
+          <circle r={15 * k} fill={color} />
+          <circle r={5.5 * k} fill="var(--poster-ground, #0d0c0b)" />
         </g>
       </svg>
     </Wrap>
@@ -81,8 +93,7 @@ const Wrap = styled.div`
     overflow: visible;
   }
 
-  /* Mismo ancho que el rail: el hilo arranca justo en su extremo derecho. */
-  /* El margen de arriba replica el bottom del rail (y media altura de su línea de 3px): el hilo nace a su altura. */
+  /* Mismo ancho que el rail (el hilo arranca en su extremo derecho). El margen de arriba replica el bottom del rail (y media altura de su línea de 3px): el hilo nace a su altura. */
   &[data-from-rail] {
     margin-top: calc(-1 * clamp(1.25rem, 4vh, 2.5rem) - 1.5px);
   }

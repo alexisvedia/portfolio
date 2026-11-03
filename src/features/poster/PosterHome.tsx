@@ -11,7 +11,7 @@ import Portal from './Portal';
 import DepthField from './DepthField';
 import HalftonePortrait from './HalftonePortrait';
 import Stitch from './Stitch';
-import ServiceDeck from './ServiceDeck';
+import ServiceDeck, { CUBE } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
 import CubiqStory from './CubiqStory';
 import TeamVoice from './TeamVoice';
@@ -208,11 +208,13 @@ interface PosterProps {
   overlap?: boolean;
   /** Ilustración debajo de la palabra (solo desktop). */
   art?: string;
+  /** La palabra se centra en el alto bajo la nav, a la par de un bloque pineado centrado. */
+  centerWord?: boolean;
   children: React.ReactNode;
 }
 
 const Poster = forwardRef<HTMLElement, PosterProps>(
-  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, children }, ref) => (
+  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, children }, ref) => (
     <Section
       id={id}
       ref={ref}
@@ -223,7 +225,7 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
       style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
     >
       <Grid $flip={flip}>
-        <WordCol>
+        <WordCol $center={centerWord}>
           <WordWrap data-word="">
             <ConstructedWord word={word} cols={cols} ink={ink} accent={accent} accentGlyphs={accentGlyphs} guides />
           </WordWrap>
@@ -340,7 +342,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
 
         <Stitch color={INK.blue} />
         <WorkGallery />
-        <Stitch color={INK.cream} flip fromRail />
+        <Stitch color={INK.red} flip fromRail />
 
         <Poster id="cubiq" label="Cubiq Digital" word="NODO" cols={2} ink={INK.red} accent={INK.cream} flip>
           <Intro data-reveal="">{CUBIQ.intro}</Intro>
@@ -350,7 +352,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
 
         <Portal to={INK.cream} />
 
-        <Poster id="services" label="Servicios" word="OFICIO" cols={2} ink={INK.ground} accent={INK.red} bg={INK.cream} fg={INK.ground}>
+        <Poster id="services" label="Servicios" word="OFICIO" cols={2} ink={INK.ground} accent={INK.red} bg={INK.cream} fg={INK.ground} centerWord>
           <ServiceDeck />
         </Poster>
 
@@ -749,9 +751,21 @@ const Grid = styled.div<{ $flip?: boolean }>`
   }
 `;
 
-const WordCol = styled.div`
+const WordCol = styled.div<{ $center?: boolean }>`
   position: sticky;
   top: 6rem;
+
+  ${({ $center }) =>
+    $center &&
+    css`
+      /* Misma condición que el cubo de ServiceDeck: sin cubo, las cards quedan arriba y la palabra también. */
+      @media ${CUBE} {
+        height: calc(100svh - 6rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+    `}
 
   @media (max-width: 860px) {
     position: static;
