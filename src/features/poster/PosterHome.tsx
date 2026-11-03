@@ -1,15 +1,20 @@
 import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import styled, { createGlobalStyle, css, keyframes } from 'styled-components';
+import styled, { createGlobalStyle, css } from 'styled-components';
 import { Link } from 'react-router-dom';
 import i18n from 'i18next';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import ConstructedWord from './ConstructedWord';
-import RingPassage from './RingPassage';
-import LandingVideo from '@/features/landing/LandingVideo';
-import { ContactForm, SERVICES } from '@/features/landing/Landing';
-import { CONTACT, CUBIQ, HERO, INK, NAV, OTHERS, ROUTE, STUDY, VOICES } from './content';
+import Portal from './Portal';
+import DepthField from './DepthField';
+import Stitch from './Stitch';
+import ServiceDeck from './ServiceDeck';
+import WorkGallery from './WorkGallery';
+import CubiqStory from './CubiqStory';
+import TeamVoice from './TeamVoice';
+import { ContactForm } from '@/features/landing/Landing';
+import { CONTACT, CUBIQ, FONT, HERO, INK, NAV, OTHERS, ROUTE_LEAD, STUDY, VOICES } from './content';
 import jorge from '@/assets/images/testimonials/Jorge.jpeg';
 import mauro from '@/assets/images/testimonials/Mauro.jpeg';
 import milena from '@/assets/images/testimonials/Milena.jpeg';
@@ -18,15 +23,20 @@ import kodi from '@/assets/images/testimonials/Kodi.png';
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
 const PHOTOS: Record<string, string> = { jorge, mauro, milena, kodi };
+/* Cada testimonio es un afiche de una tinta: fondo y texto con contraste AA. */
+const VOICE_SKIN = [
+  { '--q-bg': INK.violet, '--q-fg': INK.cream },
+  { '--q-bg': INK.lime, '--q-fg': INK.ground },
+  { '--q-bg': INK.orange, '--q-fg': INK.ground },
+  { '--q-bg': INK.teal, '--q-fg': INK.cream },
+];
 const MOTION = '(prefers-reduced-motion: no-preference)';
 const LOADER_KEY = 'poster-loader-seen';
-const DISPLAY = `'Morganite', 'Arial Narrow', sans-serif`;
-const TEXT = `'NHaas', 'Helvetica Neue', Arial, sans-serif`;
+const DISPLAY = FONT.display;
+const TEXT = FONT.text;
 
 /* El idioma de esta página es fijo: todo en español aunque el detector elija otro. */
 const t = i18n.getFixedT('es');
-
-const fmt = (n: number) => Math.round(n).toLocaleString('es-AR');
 
 const scrollToId = (id: string) => (e: React.MouseEvent) => {
   const el = document.getElementById(id);
@@ -138,39 +148,15 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
         });
       }
 
-      // Trayectoria: el riel crece y cada parada se marca al llegar.
-      const rail = q('[data-rail]')[0];
-      if (rail) {
+      // Secciones que pisan a la anterior: la de atrás se achica y oscurece mientras la nueva sube.
+      q('[data-overlap]').forEach(sec => {
+        const prev = sec.previousElementSibling;
+        if (!prev) return;
         gsap.fromTo(
-          rail,
-          { scaleY: 0 },
-          { scaleY: 1, ease: 'none', transformOrigin: '50% 0%', scrollTrigger: { trigger: rail.parentElement, start: 'top 70%', end: 'bottom 70%', scrub: true } }
+          prev,
+          { scale: 1, opacity: 1 },
+          { scale: 0.9, opacity: 0.35, ease: 'none', transformOrigin: '50% 100%', scrollTrigger: { trigger: sec, start: 'clamp(top bottom)', end: 'top top', scrub: true } }
         );
-      }
-      q('[data-stop-ring]').forEach(ring =>
-        gsap.from(ring, {
-          scale: 0,
-          duration: 0.5,
-          ease: 'back.out(2.4)',
-          scrollTrigger: { trigger: ring, start: 'top 70%', toggleActions: 'play none none reverse' },
-        })
-      );
-
-      // Cifras que cuentan hasta su valor una sola vez.
-      const counters = q('[data-count]');
-      counters.forEach(el => {
-        const target = Number(el.dataset.count);
-        const box = { v: 0 };
-        gsap.to(box, {
-          v: target,
-          duration: 1.4,
-          ease: 'power2.out',
-          onUpdate: () => {
-            el.textContent = fmt(box.v);
-          },
-          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-        });
-        el.textContent = fmt(0);
       });
 
       // Bloques de texto: entran con un desplazamiento corto. Solo opacity (no autoAlpha) para que sigan enfocables.
@@ -184,7 +170,6 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
 
       return () => {
         alive = false;
-        counters.forEach(el => (el.textContent = fmt(Number(el.dataset.count))));
         hero.current = null;
       };
     });
@@ -211,16 +196,29 @@ interface PosterProps {
   accent: string;
   accentGlyphs?: number[];
   flip?: boolean;
+  /** Fondo de color plano: la sección cambia el clima de la página. */
+  bg?: string;
+  fg?: string;
+  /** La sección sube y tapa a la anterior, que se achica detrás. */
+  overlap?: boolean;
   children: React.ReactNode;
 }
 
 const Poster = forwardRef<HTMLElement, PosterProps>(
-  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, children }, ref) => (
-    <Section id={id} ref={ref} aria-labelledby={`${id}-title`} data-poster="">
+  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, children }, ref) => (
+    <Section
+      id={id}
+      ref={ref}
+      aria-labelledby={`${id}-title`}
+      data-poster=""
+      data-overlap={overlap ? '' : undefined}
+      $overlap={overlap}
+      style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
+    >
       <Grid $flip={flip}>
         <WordCol>
           <WordWrap data-word="">
-            <ConstructedWord word={word} cols={cols} ink={ink} accent={accent} accentGlyphs={accentGlyphs} />
+            <ConstructedWord word={word} cols={cols} ink={ink} accent={accent} accentGlyphs={accentGlyphs} guides />
           </WordWrap>
         </WordCol>
         <Body>
@@ -234,62 +232,6 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
   )
 );
 Poster.displayName = 'Poster';
-
-const Services: React.FC = () => {
-  const [active, setActive] = useState(0);
-  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
-  const s = SERVICES[active];
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
-    if (!step) return;
-    e.preventDefault();
-    const next = (active + step + SERVICES.length) % SERVICES.length;
-    setActive(next);
-    tabs.current[next]?.focus();
-  };
-
-  return (
-    <ServicesWrap>
-      <TabList role="tablist" aria-label="Servicios" onKeyDown={onKeyDown} data-reveal="">
-        {SERVICES.map((srv, i) => (
-          <Tab
-            key={srv.key}
-            ref={el => {
-              tabs.current[i] = el;
-            }}
-            role="tab"
-            id={`tab-${srv.key}`}
-            aria-selected={i === active}
-            aria-controls={`panel-${srv.key}`}
-            tabIndex={i === active ? 0 : -1}
-            onClick={() => setActive(i)}
-          >
-            {t(`landing.${srv.key}Title`)}
-          </Tab>
-        ))}
-      </TabList>
-      <Panel key={s.key} role="tabpanel" id={`panel-${s.key}`} aria-labelledby={`tab-${s.key}`}>
-        <Media>
-          {s.media.video ? (
-            <LandingVideo src={s.media.video} poster={s.media.poster} label={t(`landing.${s.key}Alt`)} loop={s.media.loop} />
-          ) : (
-            <img src={s.media.image} alt={t(`landing.${s.key}Alt`)} loading="lazy" />
-          )}
-        </Media>
-        <p>{t(`landing.${s.key}Text`)}</p>
-        <Tags aria-label="Herramientas">
-          {s.tags.map(tag => (
-            <li key={tag}>{tag}</li>
-          ))}
-        </Tags>
-        <ArrowLink as={Link} to={s.to}>
-          {t('landing.learnMore')}: {t(`landing.${s.key}Title`)}
-        </ArrowLink>
-      </Panel>
-    </ServicesWrap>
-  );
-};
 
 /* ---------- página ---------- */
 
@@ -330,9 +272,10 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
       </Nav>
 
       <main>
-        <Hero aria-labelledby="hero-name">
+        <Hero aria-labelledby="hero-name" data-hero="">
+          <DepthField />
           <HeroWord data-hero-word="">
-            <ConstructedWord word="AV" cols={1} ink={INK.cream} accent={INK.red} />
+            <ConstructedWord word="AV" cols={1} ink={INK.cream} accent={INK.red} guides />
           </HeroWord>
           <HeroName id="hero-name" data-hero-name="">
             {HERO.name}
@@ -352,96 +295,44 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           </HeroText>
         </Hero>
 
-        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.lime} accent={INK.red} flip>
+        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap>
           <Lead data-split="">{t('landing.lead')}</Lead>
-          <Pair>
-            <div data-reveal="">
-              <h3>{t('landing.feature1Title')}</h3>
-              <p>{t('landing.feature1Text')}</p>
-            </div>
-            <div data-reveal="">
-              <h3>{t('landing.feature2Title')}</h3>
-              <p>{t('landing.feature2Text')}</p>
-            </div>
-          </Pair>
         </Poster>
 
         <Poster id="experience" label="Trayectoria" word="RUTA" cols={2} ink={INK.blue} accent={INK.orange} accentGlyphs={[3]}>
-          <Route>
-            <Rail aria-hidden="true">
-              <span data-rail="" />
-            </Rail>
-            <ol>
-              {ROUTE.map(stop => (
-                <Stop key={stop.company}>
-                  <StopRing data-stop-ring="" aria-hidden="true" />
-                  <div data-reveal="">
-                    <Years>{stop.years}</Years>
-                    <h3>
-                      {stop.company} <span>{stop.role}</span>
-                    </h3>
-                    <p>{stop.text}</p>
-                    {stop.to ? (
-                      <ArrowLink as={Link} to={stop.to}>
-                        {stop.linkLabel}
-                      </ArrowLink>
-                    ) : (
-                      <ArrowLink href={`#${stop.anchor}`} onClick={scrollToId(stop.anchor ?? '')}>
-                        {stop.linkLabel}
-                      </ArrowLink>
-                    )}
-                  </div>
-                </Stop>
-              ))}
-            </ol>
-          </Route>
+          <Intro data-reveal="">{ROUTE_LEAD}</Intro>
           <Small data-reveal="">{STUDY}</Small>
           <ArrowLink as={Link} to={OTHERS.to} data-reveal="">
             {OTHERS.label}
           </ArrowLink>
         </Poster>
 
+        <Stitch color={INK.blue} />
+        <WorkGallery />
+        <Stitch color={INK.red} flip />
+
         <Poster id="cubiq" label="Cubiq Digital" word="NODO" cols={2} ink={INK.red} accent={INK.cream} flip>
           <Intro data-reveal="">{CUBIQ.intro}</Intro>
-          {CUBIQ.beats.map(beat => (
-            <BeatRow key={beat.title}>
-              <h3 data-reveal="">{beat.title}</h3>
-              <p data-reveal="">{beat.text}</p>
-              {beat.stats && (
-                <Stats>
-                  {beat.stats.map(stat => (
-                    <div key={stat.label} data-reveal="">
-                      <dt>
-                        <span aria-hidden="true" data-count={stat.value.replace(/\./g, '')}>
-                          {stat.value}
-                        </span>
-                        <SrOnly>{stat.value}</SrOnly>
-                      </dt>
-                      <dd>{stat.label}</dd>
-                    </div>
-                  ))}
-                </Stats>
-              )}
-            </BeatRow>
-          ))}
+          <CubiqStory />
           <Small data-reveal="">{CUBIQ.note}</Small>
         </Poster>
 
-        <RingPassage />
+        <Portal to={INK.cream} />
 
-        <Poster id="services" label="Servicios" word="OFICIO" cols={2} ink={INK.orange} accent={INK.teal}>
-          <Services />
+        <Poster id="services" label="Servicios" word="OFICIO" cols={2} ink={INK.ground} accent={INK.red} bg={INK.cream} fg={INK.ground}>
+          <ServiceDeck />
         </Poster>
 
         <Poster id="voces" label="Testimonios" word="VOCES" cols={2} ink={INK.violet} accent={INK.lime} flip>
+          <TeamVoice />
           <Quotes>
-            {VOICES.map(v => (
-              <Quote key={v.key} data-reveal="">
+            {VOICES.map((v, i) => (
+              <Quote key={v.key} data-reveal="" style={VOICE_SKIN[i % VOICE_SKIN.length] as React.CSSProperties}>
                 <blockquote>
                   <p>{t(`testimonials.${v.key}`)}</p>
                 </blockquote>
                 <figcaption>
-                  <img src={PHOTOS[v.key]} alt="" loading="lazy" width={56} height={56} />
+                  <img src={PHOTOS[v.key]} alt="" loading="lazy" width={80} height={80} />
                   <span>
                     <strong>{v.name}</strong>
                     {v.role}
@@ -488,21 +379,18 @@ export default PosterHome;
 
 /* ---------- estilos ---------- */
 
-const SrOnly = styled.span`
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-`;
-
 const PosterGlobal = createGlobalStyle`
   /* GlobalStyles pone overflow-x: hidden en html y body, y eso convierte a body en contenedor
      de scroll: ningún position: sticky funciona. clip recorta igual sin crear el contenedor. */
   html,
   body {
     overflow-x: clip;
+  }
+
+  /* Los fondos de color de cada sección van de borde a borde: sin el ancho máximo del sitio viejo. */
+  body {
+    max-width: none;
+    padding: 0;
   }
 
   @font-face {
@@ -571,7 +459,7 @@ const Page = styled.div`
   }
 
   :focus-visible {
-    outline: 3px solid ${INK.lime};
+    outline: 3px solid var(--focus, ${INK.lime});
     outline-offset: 4px;
     border-radius: 4px;
   }
@@ -690,12 +578,14 @@ const GhostButton = styled.a`
 `;
 
 const Hero = styled.section`
+  position: relative;
   display: grid;
   grid-template-columns: auto auto minmax(0, 1fr);
   align-items: end;
   gap: clamp(1.5rem, 4vw, 4rem);
   min-height: 100svh;
-  padding: 6.5rem ${pad} clamp(2.5rem, 7vh, 4.5rem);
+  /* + 12vh: la sección siguiente sube 12vh encima (overlap) y no tiene que tapar la última línea. */
+  padding: 6.5rem ${pad} calc(clamp(2.5rem, 7vh, 4.5rem) + 12vh);
 
   @media (max-width: 860px) {
     grid-template-columns: auto minmax(0, 1fr);
@@ -706,7 +596,18 @@ const Hero = styled.section`
 `;
 
 const HeroWord = styled.div`
+  position: relative;
+  z-index: 1;
   height: min(78svh, 46rem);
+
+  [data-guide] {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  &:hover [data-guide] {
+    opacity: 0.6;
+  }
+
   align-self: center;
 
   svg {
@@ -728,6 +629,8 @@ const HeroWord = styled.div`
 `;
 
 const HeroName = styled.h1`
+  position: relative;
+  z-index: 1;
   margin: 0;
   align-self: stretch;
   writing-mode: vertical-rl;
@@ -750,6 +653,8 @@ const HeroName = styled.h1`
 `;
 
 const HeroText = styled.div`
+  position: relative;
+  z-index: 1;
   display: grid;
   gap: 1.3rem;
   max-width: 34rem;
@@ -782,9 +687,28 @@ const Small = styled.p`
   }
 `;
 
-const Section = styled.section`
+const Section = styled.section<{ $overlap?: boolean }>`
+  position: relative;
   padding: clamp(5rem, 14vh, 9rem) ${pad};
   scroll-margin-top: 4rem;
+
+  ${({ $overlap }) =>
+    $overlap &&
+    css`
+      z-index: 2;
+      margin-top: -12vh;
+      border-radius: clamp(1.5rem, 4vw, 3.5rem) clamp(1.5rem, 4vw, 3.5rem) 0 0;
+      box-shadow: 0 -2rem 4rem rgba(0, 0, 0, 0.45);
+    `}
+
+  /* La grilla de construcción de cada letra aparece al pasar el mouse por la palabra. */
+  [data-guide] {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  [data-word]:hover [data-guide] {
+    opacity: 0.55;
+  }
 `;
 
 const Grid = styled.div<{ $flip?: boolean }>`
@@ -851,7 +775,7 @@ const Lead = styled.p`
   && {
     font-size: clamp(1.55rem, 1rem + 1.9vw, 2.7rem);
     line-height: 1.18;
-    color: ${INK.cream};
+    color: inherit;
     letter-spacing: -0.015em;
     max-width: 24ch;
   }
@@ -862,104 +786,6 @@ const Intro = styled(Lead)`
     font-size: clamp(1.35rem, 1rem + 1.2vw, 2rem);
     max-width: 32ch;
   }
-`;
-
-const displayTitle = css`
-  font-family: ${DISPLAY};
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 0.9;
-`;
-
-const Pair = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(239, 230, 200, 0.14);
-
-  h3 {
-    ${displayTitle}
-    font-size: clamp(2.4rem, 3.6vw, 3.4rem);
-    color: ${INK.lime};
-    margin-bottom: 0.6rem;
-  }
-
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const Route = styled.div`
-  position: relative;
-
-  ol {
-    display: grid;
-    gap: clamp(2.5rem, 6vh, 4rem);
-    margin: 0;
-    padding: 0 0 0 3rem;
-    list-style: none;
-  }
-`;
-
-const Rail = styled.div`
-  position: absolute;
-  top: 0.6rem;
-  bottom: 0.6rem;
-  left: 0.85rem;
-  width: 4px;
-  border-radius: 4px;
-  background: rgba(31, 134, 198, 0.2);
-
-  span {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: ${INK.blue};
-    transform-origin: 50% 0%;
-  }
-`;
-
-const Stop = styled.li`
-  position: relative;
-
-  h3 {
-    font-size: clamp(1.5rem, 1.1rem + 1vw, 2.1rem);
-    line-height: 1.1;
-    color: ${INK.cream};
-    margin-bottom: 0.6rem;
-
-    span {
-      display: block;
-      font-size: 1rem;
-      color: rgba(239, 230, 200, 0.6);
-      margin-top: 0.3rem;
-    }
-  }
-
-  p {
-    margin-bottom: 0.9rem;
-  }
-`;
-
-const StopRing = styled.span`
-  position: absolute;
-  left: -3rem;
-  top: 0.35rem;
-  width: 1.75rem;
-  height: 1.75rem;
-  border-radius: 50%;
-  background: ${INK.orange};
-  box-shadow: inset 0 0 0 0.5rem ${INK.orange}, inset 0 0 0 2rem ${INK.ground};
-`;
-
-const Years = styled.span`
-  ${displayTitle}
-  display: block;
-  font-size: clamp(2rem, 2.8vw, 2.6rem);
-  color: ${INK.orange};
-  margin-bottom: 0.4rem;
 `;
 
 const ArrowLink = styled.a`
@@ -987,129 +813,50 @@ const ArrowLink = styled.a`
   }
 `;
 
-const BeatRow = styled.div`
-  display: grid;
-  gap: 0.9rem;
-  padding-top: 1.8rem;
-  border-top: 1px solid rgba(239, 230, 200, 0.14);
-
-  > h3 {
-    ${displayTitle}
-    font-size: clamp(2.6rem, 4vw, 3.8rem);
-    color: ${INK.red};
-  }
-`;
-
-const Stats = styled.dl`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-  gap: 1.5rem clamp(1.5rem, 3vw, 2.5rem);
-  margin: 0.8rem 0 0;
-
-  dt {
-    ${displayTitle}
-    font-weight: 900;
-    font-size: clamp(4.2rem, 8vw, 7rem);
-    color: ${INK.cream};
-    font-variant-numeric: tabular-nums;
-  }
-
-  dd {
-    margin: 0.4rem 0 0;
-    font-size: 0.95rem;
-    color: rgba(239, 230, 200, 0.7);
-  }
-`;
-
-const ServicesWrap = styled.div`
-  display: grid;
-  gap: 2rem;
-`;
-
-const TabList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem 1.6rem;
-`;
-
-const Tab = styled.button`
-  ${displayTitle}
-  font-size: clamp(2.2rem, 4.2vw, 3.8rem);
-  padding: 0.2rem 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  color: rgba(239, 230, 200, 0.3);
-  transition: color 0.25s ease;
-
-  &:hover {
-    color: rgba(239, 230, 200, 0.7);
-  }
-
-  &[aria-selected='true'] {
-    color: ${INK.orange};
-  }
-`;
-
-const panelIn = keyframes`
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; }
-`;
-
-const Panel = styled.div`
-  display: grid;
-  gap: 1.3rem;
-  animation: ${panelIn} 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-`;
-
-const Media = styled.div`
-  aspect-ratio: 16 / 10;
-  border-radius: 1.2rem;
-  overflow: hidden;
-  background: #1a1816;
-
-  video,
-  img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`;
-
-const Tags = styled.ul`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-
-  li {
-    padding: 0.35rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.9rem;
-    color: ${INK.teal};
-    box-shadow: inset 0 0 0 1.5px ${INK.teal};
-  }
-`;
-
 const Quotes = styled.div`
   display: grid;
   gap: clamp(2.5rem, 6vh, 4rem);
 `;
 
 const Quote = styled.figure`
+  position: relative;
   margin: 0;
   display: grid;
-  gap: 1.2rem;
+  gap: 1.4rem;
+  padding: clamp(1.6rem, 3vw, 2.6rem);
+  padding-top: clamp(3.4rem, 6vw, 4.6rem);
+  border-radius: clamp(1.2rem, 2vw, 2rem);
+  background: var(--q-bg);
+  color: var(--q-fg);
+  /* rotate y translate sueltos: el reveal de GSAP escribe transform y no los pisa. */
+  rotate: -1.2deg;
+  transition: rotate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 
   &:nth-child(even) {
-    padding-left: clamp(0rem, 6vw, 5rem);
+    margin-left: clamp(0rem, 6vw, 5rem);
+    rotate: 1.4deg;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      rotate: 0deg;
+      translate: 0 -6px;
+    }
+  }
+
+  /* Comilla gigante en la tipografía de los afiches. */
+  &::before {
+    content: '“';
+    position: absolute;
+    top: -0.12em;
+    left: 0.12em;
+    font-family: ${DISPLAY};
+    font-weight: 900;
+    font-size: clamp(7rem, 12vw, 10rem);
+    line-height: 1;
+    color: var(--q-fg);
+    opacity: 0.9;
+    pointer-events: none;
   }
 
   blockquote {
@@ -1117,31 +864,49 @@ const Quote = styled.figure`
   }
 
   blockquote p {
-    font-size: clamp(1.2rem, 1rem + 0.7vw, 1.6rem);
-    line-height: 1.35;
-    color: ${INK.cream};
+    font-size: clamp(1.1rem, 0.95rem + 0.6vw, 1.45rem);
+    line-height: 1.38;
+    color: inherit;
   }
 
   figcaption {
     display: flex;
     align-items: center;
-    gap: 0.9rem;
+    gap: 1rem;
     font-size: 0.95rem;
-    color: rgba(239, 230, 200, 0.65);
   }
 
   img {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: 4.5rem;
+    height: 4.5rem;
     border-radius: 50%;
     object-fit: cover;
-    box-shadow: 0 0 0 3px ${INK.ground}, 0 0 0 6px ${INK.violet};
+    filter: grayscale(1) contrast(1.1);
+    box-shadow: 0 0 0 4px var(--q-bg), 0 0 0 9px var(--q-fg);
+    transition: filter 0.4s ease;
+  }
+
+  &:hover img {
+    filter: none;
   }
 
   strong {
     display: block;
-    font-weight: 400;
-    color: ${INK.cream};
+    font-family: ${DISPLAY};
+    font-weight: 800;
+    font-size: 1.9rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &,
+    &:nth-child(even),
+    &:hover {
+      rotate: none;
+      translate: none;
+    }
   }
 `;
 

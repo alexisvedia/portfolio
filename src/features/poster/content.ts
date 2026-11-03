@@ -13,6 +13,11 @@ export const INK = {
   violet: '#8a5cc4',
 } as const;
 
+export const FONT = {
+  display: `'Morganite', 'Arial Narrow', sans-serif`,
+  text: `'NHaas', 'Helvetica Neue', Arial, sans-serif`,
+} as const;
+
 export const NAV = [
   { id: 'about', label: 'Manifiesto' },
   { id: 'experience', label: 'Trayectoria' },
@@ -75,6 +80,8 @@ export const ROUTE: Stop[] = [
   },
 ];
 
+export const ROUTE_LEAD = 'Cuatro paradas: del diseño de interfaces a la IA que las opera.';
+
 export const STUDY =
   'Formación: Diplomatura en Desarrollo Web Frontend en la UTN FRC (2025) y certificaciones de Vanderbilt, DeepLearning.AI, Meta (Front-End) y Google (UX).';
 
@@ -134,6 +141,19 @@ export const VOICES = [
   { key: 'kodi', name: 'Kodi', role: 'CEO en Bandit' },
   { key: 'milena', name: 'Milena', role: 'Especialista digital' },
 ] as const;
+
+/* Testimonio destacado, puesto como mensaje en el chat del equipo. */
+export const TEAM_VOICE = {
+  name: 'Sabri',
+  role: 'Cubiq Digital',
+  room: 'equipo',
+  time: '18:42',
+  text: 'Desde que Alexis armó el chat interno, una reunión termina y las tareas ya están cargadas. Nos ordenó a todos y nos hizo trabajar con IA de verdad, no como experimento.',
+  reactions: [
+    { emoji: '🔥', count: 4 },
+    { emoji: '🙌', count: 3 },
+  ],
+} as const;
 
 export const CONTACT = {
   lead: 'Si tenés un producto para diseñar, un proceso para automatizar o un equipo que necesita IA que funcione, escribime.',
