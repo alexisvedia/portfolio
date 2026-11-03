@@ -56,13 +56,12 @@ const createLazyComponent = <T extends React.ComponentType<any>>( // eslint-disa
 };
 
 const ProjectPage = createLazyComponent(() => import('./pages/ProjectPage'));
-const XConsExperiencePage = createLazyComponent(
-  () => import('./features/xcons/XConsExperiencePage')
+// Los casos usan el estilo de afiches; las páginas viejas (`features/xcons`, `features/fusionads`) quedan sin ruta.
+const CaseStudy = createLazyComponent<typeof import('./features/poster/CaseStudy').default>(
+  () => import('./features/poster/CaseStudy')
 );
-const XCons2ExperiencePage = createLazyComponent(
-  () => import('./features/xcons/XCons2ExperiencePage')
-);
-const FusionAdsPage = createLazyComponent(() => import('./features/fusionads/FusionAdsPage'));
+/* Rutas con el estilo de afiches: traen su propia navegación y fondo, sin sidebar. */
+const POSTER_PATHS = ['/', '/xcons', '/fusionads', '/bandit'];
 const MaintenancePage = createLazyComponent(() => import('./pages/MaintenancePage'));
 
 import '@utils/i18n';
@@ -121,9 +120,7 @@ try {
     if (!shouldPrefetch()) return;
     Promise.all([
       import('./pages/ProjectPage'),
-      import('./features/xcons/XConsExperiencePage'),
-      import('./features/xcons/XCons2ExperiencePage'),
-      import('./features/fusionads/FusionAdsPage'),
+      import('./features/poster/CaseStudy'),
       import('./pages/MaintenancePage'),
 
       import('@components/ChatbotAssistant'),
@@ -178,8 +175,8 @@ const HomeWrapper = () => {
 const AppContent = () => {
   // Removed Lenis smooth scrolling for native behavior
   const location = useLocation();
-  // La home de afiches trae su propia navegación, fondo y loader.
-  const isHome = location.pathname === '/';
+  // La home y los casos de afiches traen su propia navegación, fondo y loader.
+  const isPoster = POSTER_PATHS.includes(location.pathname.toLowerCase().replace(/\/$/, '') || '/');
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isContactSectionInView, setIsContactSectionInView] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
@@ -201,7 +198,7 @@ const AppContent = () => {
     } else {
       setFontsLoaded(true);
     }
-    const startsOnHome = window.location.pathname === '/';
+    const startsOnHome = POSTER_PATHS.includes(window.location.pathname.toLowerCase().replace(/\/$/, '') || '/');
     document.fonts.ready.then(() => {
       if (hasVisitedBefore || startsOnHome) {
         setFontsLoaded(true);
@@ -330,12 +327,12 @@ const AppContent = () => {
   };
 
   const shouldHideContactButton = isContactSectionInView;
-  const hasSidebar = !isHome && isSidebarOpen && !isMobile;
+  const hasSidebar = !isPoster && isSidebarOpen && !isMobile;
 
   return (
     <AppWrapper>
-      {shouldShowLoader && !fontsLoaded && !isHome && <FontLoader onLoaded={handleFontsLoaded} />}
-      {!isHome && (
+      {shouldShowLoader && !fontsLoaded && !isPoster && <FontLoader onLoaded={handleFontsLoaded} />}
+      {!isPoster && (
         <Sidebar
           isOpen={isSidebarOpen}
           toggleSidebar={toggleSidebar}
@@ -349,10 +346,10 @@ const AppContent = () => {
         $isSidebarPresent={hasSidebar}
         $isSidebarCollapsed={isSidebarCollapsed}
       >
-        {!isHome && (
+        {!isPoster && (
           <DotBackground isSidebarPresent={hasSidebar} isSidebarCollapsed={isSidebarCollapsed} />
         )}
-        {!isHome && (
+        {!isPoster && (
           <ContactButtonStyled initialDelay={500} $hideOnScroll={shouldHideContactButton} />
         )}
         {chatbotVisible && (
@@ -400,9 +397,7 @@ function App() {
         // Disparar fetch de los chunks; se silencian errores para no afectar UX
         Promise.all([
           import('./pages/ProjectPage'),
-          import('./features/xcons/XConsExperiencePage'),
-          import('./features/xcons/XCons2ExperiencePage'),
-          import('./features/fusionads/FusionAdsPage'),
+          import('./features/poster/CaseStudy'),
           import('./pages/MaintenancePage'),
 
           import('@components/ChatbotAssistant'),
@@ -435,15 +430,15 @@ function App() {
           },
           {
             path: 'xcons',
-            element: <XConsExperiencePage />,
+            element: <CaseStudy key="xcons" slug="xcons" />,
           },
           {
             path: 'bandit',
-            element: <XCons2ExperiencePage />,
+            element: <CaseStudy key="bandit" slug="bandit" />,
           },
           {
             path: 'fusionads',
-            element: <FusionAdsPage />,
+            element: <CaseStudy key="fusionads" slug="fusionads" />,
           },
           {
             path: 'otros',

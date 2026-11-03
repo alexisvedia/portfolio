@@ -20,6 +20,7 @@ const ARCH = 'M10,90 V50 A40,40 0 0 1 90,50 V90';
 
 export const GLYPHS: Record<string, Glyph> = {
   A: { strokes: [ARCH, 'M10,62 H90'] },
+  B: { strokes: ['M10,90 V24 Q10,10 24,10 H58 A20,20 0 0 1 58,50 H10', 'M10,50 H64 A20,20 0 0 1 64,90 H10'] },
   C: { strokes: ['M84.6,30 A40,40 0 1 0 84.6,70', 'M60,40 A14,14 0 1 0 60,60'] },
   D: { strokes: ['M50,10 H24 Q10,10 10,24 V76 Q10,90 24,90 H50 A40,40 0 0 0 50,10'] },
   E: { strokes: ['M90,10 H24 Q10,10 10,24 V76 Q10,90 24,90 H90', 'M10,50 H72'] },
@@ -34,6 +35,7 @@ export const GLYPHS: Record<string, Glyph> = {
   T: { strokes: ['M10,10 H90', 'M50,10 V90'] },
   U: { strokes: ['M10,10 V50 A40,40 0 0 0 90,50 V10'] },
   V: { strokes: ['M10,10 L43,77 Q50,90 57,77 L90,10'] },
+  X: { strokes: ['M10,10 L90,90', 'M90,10 L10,90'], rings: [{ cx: 50, cy: 50, r: 17 }] },
 };
 
 export interface PlacedGlyph {
