@@ -22,7 +22,8 @@ const MOBILE = '(max-width: 860px)';
 const STACK = '(min-width: 861px) and (min-height: 601px)';
 const FINE = '(hover: hover) and (pointer: fine)';
 /* Mismo margen lateral que las secciones de PosterHome (no se importa: PosterHome importa este archivo). */
-const pad = 'clamp(1.25rem, 4vw, 3.5rem)';
+// Margen lateral con tope: en pantallas anchas el contenido no pasa de 1320px.
+const pad = 'max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2))';
 const cardPad = 'clamp(1.1rem, 3.2vw, 2rem)';
 
 /* Una tinta por card. Las cuatro pasan 4,5:1 con texto INK.ground encima; teal y violet no, por eso quedan afuera. */

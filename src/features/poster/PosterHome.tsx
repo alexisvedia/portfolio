@@ -401,7 +401,8 @@ export default PosterHome;
 
 
 
-const pad = 'clamp(1.25rem, 4vw, 3.5rem)';
+// Margen lateral con tope: en pantallas anchas el contenido no pasa de 1320px.
+const pad = 'max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2))';
 
 const Page = styled.div`
   --poster-ground: ${INK.ground};
@@ -690,6 +691,13 @@ const Grid = styled.div<{ $flip?: boolean }>`
         grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
         > :first-child {
           order: 2;
+        }
+      }
+      /* Cubiq lleva los pasos en columna al lado de la maqueta: la palabra cede ancho.
+         Mismo corte que el pin de CubiqStory (PIN_QUERY). */
+      @media (min-width: 1024px) {
+        #cubiq & {
+          grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
         }
       }
     `}

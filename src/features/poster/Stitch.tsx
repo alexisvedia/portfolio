@@ -53,7 +53,7 @@ const Stitch: React.FC<Props> = ({ color = INK.cream, flip }) => {
 };
 
 const Wrap = styled.div`
-  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+  padding-inline: max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2));
   margin-block: clamp(-2rem, -3vh, -1rem);
   pointer-events: none;
 

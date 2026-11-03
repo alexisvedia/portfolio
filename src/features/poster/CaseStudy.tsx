@@ -15,7 +15,8 @@ const MOTION = '(prefers-reduced-motion: no-preference)';
 /* Desktop con movimiento: las piezas viajan en una fila pineada. En cualquier otro caso, carrusel nativo. */
 const PIN = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)';
 const ORDER: CaseSlug[] = ['xcons', 'fusionads', 'bandit'];
-const pad = 'clamp(1.25rem, 4vw, 3.5rem)';
+// Margen lateral con tope: en pantallas anchas el contenido no pasa de 1320px.
+const pad = 'max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2))';
 const cream = (a: number) => `rgba(239, 230, 200, ${a})`;
 const pad2 = (n: number) => String(n).padStart(2, '0');
 /* Una captura más alta que el marco se recorre adentro en vez de recortarse. */

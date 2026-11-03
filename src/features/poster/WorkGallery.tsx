@@ -430,7 +430,8 @@ export default WorkGallery;
 
 /* ---------- estilos ---------- */
 
-const pad = 'clamp(1.25rem, 4vw, 3.5rem)';
+// Margen lateral con tope: en pantallas anchas el contenido no pasa de 1320px.
+const pad = 'max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2))';
 const cream = (a: number) => `rgba(239, 230, 200, ${a})`;
 const pinned = '[data-pinned] &';
 const desktop = '@media (min-width: 1024px)';

@@ -7,13 +7,18 @@ import {
   PiArrowLeftBold,
   PiArrowRightBold,
   PiChatsCircleFill,
+  PiClosedCaptioningFill,
+  PiHandFill,
   PiHashFill,
   PiKanbanFill,
+  PiMicrophoneFill,
   PiPaletteFill,
+  PiPhoneDisconnectFill,
   PiPauseFill,
   PiPlayFill,
   PiRobotFill,
   PiTreeStructureFill,
+  PiVideoCameraFill,
   PiWarningCircleFill,
 } from 'react-icons/pi';
 import { CUBIQ, FONT, INK } from './content';
@@ -30,7 +35,7 @@ const TRAVEL = 'cubiqTravel';
  */
 
 const PIN_QUERY =
-  '(min-width: 861px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)';
+  '(min-width: 1024px) and (min-height: 560px) and (prefers-reduced-motion: no-preference)';
 const REDUCED_QUERY = '(prefers-reduced-motion: reduce)';
 // La nav fija de la home mide unos 70px: el bloque se pinea por debajo.
 const PIN_TOP = 84;
@@ -86,13 +91,15 @@ const APP = {
   ink1: 'rgba(255, 255, 255, 0.05)',
   ink2: 'rgba(255, 255, 255, 0.07)',
   ink3: 'rgba(255, 255, 255, 0.1)',
-  ink4: 'rgba(255, 255, 255, 0.14)',
   text: '#9d9da1',
   body: '#cfcfd3',
   strong: '#ececee',
   faint: '#6c6c70',
   icon: '#8f8f95',
 };
+/* Paleta de la llamada: la de Google Meet en modo oscuro. */
+const MEET = { ground: '#202124', tile: '#3c4043', blue: '#8ab4f8', red: '#ea4335' };
+
 const STATUS_DOT = [APP.faint, INK.lime, INK.teal];
 const SHADOW_REST = '0 0 0 1px rgba(255, 255, 255, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.35)';
 const SHADOW_LIFT = '0 0 0 1px rgba(255, 255, 255, 0.14), 0 18px 34px -6px rgba(0, 0, 0, 0.7)';
@@ -121,11 +128,6 @@ const LINES = [
   { who: WHO.desarrollo, text: 'Lo sumo al workflow de pedidos.' },
 ];
 const FRAGMENT = 'Que se reintenten solos y nos avise';
-
-// Alturas de la onda: fijas para que el render sea estable.
-const WAVE = Array.from({ length: 30 }, (_, i) =>
-  (0.22 + 0.78 * Math.abs(Math.sin(i * 1.7) * Math.cos(i * 0.55))).toFixed(2)
-);
 
 const COLS: { id: Col; fillers: { tag: string; w: [number, number] }[] }[] = [
   {
@@ -541,11 +543,12 @@ const CubiqStory: React.FC = () => {
       aria-label="Historia de Cubiq en seis pasos: de una reunión a un sistema con IA"
       data-cs-compact={on(compact)}
       data-still={on(still)}
+      data-cs-pinned={on(pinned)}
     >
       <Pin ref={pinRef}>
         <Steps aria-label="Pasos">
           <Track aria-hidden="true">
-            <span style={{ transform: `scaleX(${step / (N - 1)})` }} />
+            <span style={{ '--p': step / (N - 1) } as React.CSSProperties} />
           </Track>
           {STEPS.map((s, i) => (
             <li key={s.title}>
@@ -819,71 +822,74 @@ const CubiqStory: React.FC = () => {
             </Window>
 
             <Recorder data-on={on(step <= 1)}>
-              <RecBar aria-hidden="true">
-                <RecDot data-live={on(recording)} />
-                <strong>MeetRecorder</strong>
-                <span>Distribuidora</span>
-                <time>
-                  <RecTimer running={recording} />
-                </time>
-              </RecBar>
-              <RecBody>
-                <WaveRow>
+              <MeetTop>
+                <span aria-hidden="true">Distribuidora · pedidos</span>
+                <RecBadge>
+                  <RecDot data-live={on(recording)} aria-hidden="true" />
+                  <strong aria-hidden="true">{playing ? 'REC' : 'Pausa'}</strong>
+                  <time aria-hidden="true">
+                    <RecTimer running={recording} />
+                  </time>
                   <PlayButton
                     type="button"
-                    aria-pressed={!playing}
                     aria-label={playing ? 'Pausar la grabación' : 'Reanudar la grabación'}
                     disabled={step > 1}
                     onClick={() => setPlaying(p => !p)}
                   >
-                    {playing ? (
-                      <PiPauseFill aria-hidden="true" />
-                    ) : (
-                      <PiPlayFill aria-hidden="true" />
-                    )}
+                    {playing ? <PiPauseFill aria-hidden="true" /> : <PiPlayFill aria-hidden="true" />}
                   </PlayButton>
-                  <Wave aria-hidden="true" data-live={on(recording)}>
-                    {WAVE.map((h, i) => (
-                      <i
-                        key={i}
-                        style={
-                          {
-                            '--h': h,
-                            '--t': `${0.8 + (i % 5) * 0.13}s`,
-                            '--dl': `${-i * 0.11}s`,
-                          } as React.CSSProperties
-                        }
-                      />
-                    ))}
-                  </Wave>
-                  <RecState aria-hidden="true">{playing ? 'Grabando' : 'En pausa'}</RecState>
-                </WaveRow>
-                <Chips aria-hidden="true">
-                  {SPEAKERS.map(p => (
-                    <Chip key={p.name} data-on={on(speaking === p)}>
-                      <Dot style={{ background: p.bg }} />
-                      {p.name}
-                    </Chip>
-                  ))}
-                </Chips>
-                <Transcript aria-hidden="true">
-                  {LINES.map((line, i) => (
-                    <TLine key={line.text} data-on={on(i < heardShown)}>
-                      <span style={{ color: line.who.bg }}>{line.who.name}</span>
-                      {line.text.startsWith(FRAGMENT) ? (
-                        <span>
-                          <Frag ref={fragRef} data-on={on(step >= 1)}>
-                            {FRAGMENT}
-                          </Frag>
-                          {line.text.slice(FRAGMENT.length)}
-                        </span>
-                      ) : (
-                        <span>{line.text}</span>
-                      )}
-                    </TLine>
-                  ))}
-                </Transcript>
-              </RecBody>
+                </RecBadge>
+              </MeetTop>
+              <Tiles aria-hidden="true">
+                {SPEAKERS.map(p => (
+                  <Tile key={p.name} data-on={on(speaking === p)}>
+                    <Avatar who={p} size={30} />
+                    <TileName>{p.name}</TileName>
+                    <Talk>
+                      <i />
+                      <i />
+                      <i />
+                    </Talk>
+                  </Tile>
+                ))}
+              </Tiles>
+              <Transcript aria-hidden="true">
+                {LINES.map((line, i) => (
+                  <TLine key={line.text} data-on={on(i < heardShown)}>
+                    <span style={{ color: line.who.bg }}>{line.who.name}</span>
+                    {line.text.startsWith(FRAGMENT) ? (
+                      <span>
+                        <Frag ref={fragRef} data-on={on(step >= 1)}>
+                          {FRAGMENT}
+                        </Frag>
+                        {line.text.slice(FRAGMENT.length)}
+                      </span>
+                    ) : (
+                      <span>{line.text}</span>
+                    )}
+                  </TLine>
+                ))}
+              </Transcript>
+              <MeetControls aria-hidden="true">
+                <time>15:14</time>
+                <span>
+                  <MeetBtn>
+                    <PiMicrophoneFill />
+                  </MeetBtn>
+                  <MeetBtn>
+                    <PiVideoCameraFill />
+                  </MeetBtn>
+                  <MeetBtn data-on="">
+                    <PiClosedCaptioningFill />
+                  </MeetBtn>
+                  <MeetBtn>
+                    <PiHandFill />
+                  </MeetBtn>
+                  <HangUp>
+                    <PiPhoneDisconnectFill />
+                  </HangUp>
+                </span>
+              </MeetControls>
             </Recorder>
 
             <FlyChip ref={chipRef} aria-hidden="true">
@@ -981,6 +987,14 @@ const Pin = styled.div`
   flex-direction: column;
   gap: clamp(0.9rem, 2.2vh, 1.4rem);
   padding-bottom: 0.5rem;
+
+  /* Pineado, el scroll baja: los pasos van en columna, a la izquierda del texto y la maqueta. */
+  [data-cs-pinned] & {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-content: start;
+    column-gap: clamp(2rem, 4vw, 3.5rem);
+  }
 `;
 
 const Steps = styled.ol`
@@ -990,6 +1004,15 @@ const Steps = styled.ol`
   margin: 0;
   padding: 0;
   list-style: none;
+
+  [data-cs-pinned] & {
+    grid-row: 1 / span 2;
+    align-self: start;
+    grid-template-columns: none;
+    align-content: start;
+    gap: 0.6rem;
+    padding-top: 0.4rem;
+  }
 `;
 
 const Track = styled.span`
@@ -1006,8 +1029,24 @@ const Track = styled.span`
     height: 100%;
     border-radius: inherit;
     background: ${INK.red};
+    transform: scaleX(var(--p));
     transform-origin: 0 50%;
     transition: transform 0.5s ${EASE_TRAVEL};
+  }
+
+  /* En columna, la línea une el centro del primer anillo con el del último. */
+  [data-cs-pinned] & {
+    top: calc(0.4rem + 22px);
+    bottom: 22px;
+    left: 10px;
+    right: auto;
+    width: 2px;
+    height: auto;
+
+    span {
+      transform: scaleY(var(--p));
+      transform-origin: 50% 0;
+    }
   }
 `;
 
@@ -1028,6 +1067,12 @@ const StepLabel = styled.span`
   justify-items: center;
   gap: 0.1rem;
 
+  [data-cs-pinned] & {
+    grid-auto-flow: column;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+
   > span:first-child {
     font-family: ${FONT.display};
     font-weight: 800;
@@ -1041,6 +1086,12 @@ const StepTitle = styled.span`
   font-size: 0.8rem;
   line-height: 1.2;
   text-align: center;
+
+  [data-cs-pinned] & {
+    font-size: 0.95rem;
+    text-align: left;
+    white-space: nowrap;
+  }
 
   @container (max-width: 560px) {
     position: absolute;
@@ -1068,6 +1119,15 @@ const StepButton = styled.button`
 
   &:hover {
     color: ${INK.cream};
+  }
+
+  [data-cs-pinned] & {
+    grid-auto-flow: column;
+    grid-template-columns: 22px auto;
+    justify-content: start;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0;
   }
 
   &[data-done] ${Ring} {
@@ -1183,10 +1243,10 @@ const Frame = styled.div`
 
   /* Pineado, la maqueta entra en el alto de la pantalla junto con la barra y el texto. */
   @media ${PIN_QUERY} {
-    width: min(100%, calc((100svh - 22rem) * 720 / 460));
+    width: min(100%, calc((100svh - 18rem) * 720 / 460));
 
     [data-cs-compact] & {
-      width: min(100%, calc((100svh - 22rem) * 358 / 600));
+      width: min(100%, calc((100svh - 18rem) * 358 / 600));
     }
   }
 `;
@@ -2029,12 +2089,12 @@ const AvatarSwap = styled.span`
 const Recorder = styled.div`
   position: absolute;
   z-index: 10;
-  top: 248px;
+  top: 234px;
   left: 340px;
   width: 360px;
   overflow: hidden;
   border-radius: 12px;
-  background: ${APP.rec};
+  background: ${MEET.ground};
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.1),
     0 24px 48px -12px rgba(0, 0, 0, 0.75),
@@ -2064,28 +2124,36 @@ const Recorder = styled.div`
   }
 `;
 
-const RecBar = styled.div`
+/* Barra superior de la llamada: título a la izquierda, el badge de la extensión a la derecha. */
+const MeetTop = styled.div`
   display: flex;
   align-items: center;
-  gap: 7px;
+  justify-content: space-between;
   height: 30px;
-  padding: 0 12px;
+  padding: 0 8px 0 12px;
   font-size: 11.5px;
-  box-shadow: inset 0 -1px 0 ${APP.line};
+  color: ${APP.body};
+`;
+
+const RecBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 3px 0 8px;
+  border-radius: 999px;
+  background: rgba(234, 67, 53, 0.16);
+  font-size: 10.5px;
+  color: #f6aea9;
 
   strong {
-    font-weight: 400;
-    color: ${APP.strong};
-  }
-
-  span {
-    color: ${APP.faint};
+    font-weight: 500;
+    letter-spacing: 0.04em;
   }
 
   time {
-    margin-left: auto;
-    color: ${APP.text};
     font-variant-numeric: tabular-nums;
+    color: ${APP.body};
   }
 `;
 
@@ -2095,34 +2163,23 @@ const pulse = keyframes`
 `;
 
 const RecDot = styled.span`
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: ${INK.red};
+  background: ${MEET.red};
 
   &[data-live] {
     animation: ${pulse} 1.4s ease-in-out infinite;
   }
 `;
 
-const RecBody = styled.div`
-  display: grid;
-  gap: 10px;
-  padding: 10px 12px 12px;
-`;
-
-const WaveRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-`;
-
 const PlayButton = styled.button`
+  position: relative;
   flex: none;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
+  width: 18px;
+  height: 18px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -2141,85 +2198,150 @@ const PlayButton = styled.button`
     transform: scale(0.92);
   }
 
+  /* Área táctil más grande que el círculo visible. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
+
+  svg {
+    width: 9px;
+    height: 9px;
+  }
+`;
+
+const Tiles = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  padding: 0 8px;
+`;
+
+/* Mosaico de participante: el que habla lleva el borde y las barras de voz, como en Meet. */
+const Tile = styled.div`
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 66px;
+  border-radius: 8px;
+  background: ${MEET.tile};
+  box-shadow: inset 0 0 0 2px transparent;
+  transition: box-shadow 0.25s ease;
+
+  &[data-on] {
+    box-shadow: inset 0 0 0 2px ${MEET.blue};
+  }
+`;
+
+const TileName = styled.span`
+  position: absolute;
+  left: 7px;
+  bottom: 5px;
+  font-size: 10px;
+  color: ${APP.strong};
+`;
+
+const talk = keyframes`
+  0%, 100% { transform: scaleY(0.35); }
+  50% { transform: scaleY(1); }
+`;
+
+const Talk = styled.span`
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 18px;
+  height: 18px;
+  justify-content: center;
+  border-radius: 50%;
+  background: ${MEET.blue};
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  i {
+    width: 2px;
+    height: 8px;
+    border-radius: 1px;
+    background: ${MEET.ground};
+    transform: scaleY(0.35);
+  }
+
+  [data-on] > & {
+    opacity: 1;
+  }
+
+  [data-on] > & i {
+    animation: ${talk} 0.7s ease-in-out infinite;
+  }
+
+  [data-on] > & i:nth-child(2) {
+    animation-delay: -0.25s;
+  }
+
+  [data-on] > & i:nth-child(3) {
+    animation-delay: -0.45s;
+  }
+`;
+
+const MeetControls = styled.div`
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 38px;
+  padding: 0 10px;
+
+  time {
+    font-size: 11px;
+    color: ${APP.body};
+    font-variant-numeric: tabular-nums;
+  }
+
+  > span {
+    display: flex;
+    gap: 6px;
+  }
+`;
+
+const MeetBtn = styled.span`
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: ${MEET.tile};
+  color: ${APP.strong};
+
+  &[data-on] {
+    background: ${MEET.blue};
+    color: ${MEET.ground};
+  }
+
   svg {
     width: 12px;
     height: 12px;
   }
 `;
 
-const wave = keyframes`
-  0%, 100% { transform: scaleY(0.3); }
-  50% { transform: scaleY(1); }
-`;
-
-const Wave = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 28px;
-
-  i {
-    width: 3px;
-    height: calc(var(--h) * 28px);
-    border-radius: 2px;
-    background: ${INK.red};
-    transform: scaleY(0.6);
-    transition: background-color 0.3s ease;
-    animation: ${wave} var(--t) ease-in-out var(--dl) infinite;
-    animation-play-state: paused;
-  }
-
-  &[data-live] i {
-    animation-play-state: running;
-  }
-
-  &:not([data-live]) i {
-    background: ${APP.faint};
-  }
-`;
-
-const RecState = styled.span`
-  flex: none;
-  width: 56px;
-  font-size: 11px;
-  text-align: right;
-  color: ${APP.text};
-`;
-
-const Chips = styled.div`
-  display: flex;
-  gap: 6px;
-`;
-
-const Chip = styled.span`
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 22px;
-  padding: 0 9px;
+const HangUp = styled(MeetBtn)`
+  width: 38px;
   border-radius: 999px;
-  background: ${APP.ink1};
-  font-size: 11px;
-  color: ${APP.faint};
-  transition:
-    background-color 0.25s ease,
-    color 0.25s ease;
-
-  &[data-on] {
-    background: ${APP.ink4};
-    color: ${APP.strong};
-  }
-
-  &[data-on] ${Dot} {
-    animation: ${pulse} 1s ease-in-out infinite;
-  }
+  background: ${MEET.red};
+  color: #fff;
 `;
 
+/* Subtítulos de la llamada: lo que el grabador transcribe, con quién lo dijo. */
 const Transcript = styled.div`
   display: grid;
-  gap: 5px;
-  min-height: 61px;
+  gap: 4px;
+  min-height: 60px;
+  margin: 8px 8px 0;
+  padding: 7px 9px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.45);
 `;
 
 const TLine = styled.div`
