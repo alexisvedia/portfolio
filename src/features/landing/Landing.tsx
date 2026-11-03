@@ -28,7 +28,7 @@ export const SERVICES: Service[] = [
   {
     key: 'ai',
     Icon: Brain,
-    tags: ['n8n', 'AI', 'Chatbots', 'Web Scraping'],
+    tags: ['n8n', 'AI Agents', 'RAG', 'Embeddings', 'Web Scraping'],
     to: '/otros',
     media: { video: `${A}/n8n.mp4`, poster: `${A}/n8n-poster.jpg` },
   },

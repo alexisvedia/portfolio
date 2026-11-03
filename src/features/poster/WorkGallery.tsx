@@ -522,6 +522,24 @@ const Section = styled.section`
 `;
 
 const Pin = styled.div`
+  position: relative;
+
+  /* Tablero de trabajo: grilla de plancha de corte (menor cada 1,5rem, mayor cada 6rem) que se apaga hacia los bordes.
+     Va en el bloque pineado: el tablero queda quieto y los casos pasan por encima. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(to right, rgba(239, 230, 200, 0.12) 1px, transparent 1px) 0 0 / 6rem 6rem,
+      linear-gradient(to bottom, rgba(239, 230, 200, 0.12) 1px, transparent 1px) 0 0 / 6rem 6rem,
+      linear-gradient(to right, rgba(239, 230, 200, 0.05) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem,
+      linear-gradient(to bottom, rgba(239, 230, 200, 0.05) 1px, transparent 1px) 0 0 / 1.5rem 1.5rem;
+    -webkit-mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 75% 70% at 50% 50%, #000 40%, transparent 100%);
+  }
+
   ${pinned} {
     position: relative;
     height: 100vh;
@@ -1020,6 +1038,18 @@ const Rail = styled.div`
 
   &[data-done] span:last-child {
     visibility: hidden;
+  }
+  /* Cuña al final del rail: engrosa de 3 px al ancho del hilo (7 unidades del viewBox a 1320 px, unos 8 px) para que el paso no salte. */
+  &[data-done]::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: clamp(6rem, 12vw, 11rem);
+    height: 8px;
+    margin-top: -4px;
+    background: ${INK.red};
+    clip-path: polygon(0 31.25%, 100% 0, 100% 100%, 0 68.75%);
   }
 
   span:first-child {

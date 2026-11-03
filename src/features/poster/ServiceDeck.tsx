@@ -108,13 +108,15 @@ const ServiceDeck: React.FC = () => {
       const setHalf = () => list.style.setProperty('--half', `${half()}px`);
       setHalf();
       gsap.set(wrap, { perspective: 2400 });
+      const grid = (wrap.closest('section')?.firstElementChild as HTMLElement | null) ?? wrap;
 
       // z negativo: la cara de frente queda en el plano de la página y no se agranda con la perspectiva.
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
-          trigger: wrap,
-          pin: true,
+          // Se pinea la grilla entera de la sección (OFICIO, rótulo y cubo): los tres quedan juntos mientras gira.
+          trigger: grid,
+          pin: grid,
           // Centrado en el alto que deja la nav (6rem; ScrollTrigger no entiende rem).
           start: () => `center ${(parseFloat(getComputedStyle(document.documentElement).fontSize) * 6 + window.innerHeight) / 2}px`,
           end: () => `+=${Math.round(window.innerHeight * 0.8 * turns)}`,
@@ -141,21 +143,6 @@ const ServiceDeck: React.FC = () => {
       cards.forEach((card, i) => {
         if (i > 0) tl.from(card.querySelector('[data-deck-num]'), { yPercent: 55, duration: 1 }, i - 1);
       });
-
-      // El rótulo de la sección (h2 de Poster) queda fuera del pin: se fija bajo la nav y se suelta junto con el cubo.
-      const title = wrap.closest('section')?.querySelector('h2');
-      if (title) {
-        ScrollTrigger.create({
-          trigger: title,
-          pin: true,
-          pinSpacing: false,
-          start: () => `top ${parseFloat(getComputedStyle(document.documentElement).fontSize) * 4.75}px`,
-          // Prioridad 0: se mide después del cubo (1) y toma su fin ya calculado.
-          end: () => cubeRef.current?.end ?? 0,
-          invalidateOnRefresh: true,
-          refreshPriority: 0,
-        });
-      }
 
       return () => {
         offs.forEach(off => off());
@@ -443,7 +430,8 @@ const Card = styled.li`
     position: relative;
     top: auto;
     grid-area: 1 / 1;
-    height: ${CARD_H};
+    /* El pin lleva también el rótulo de la sección (unos 4,5rem con el hueco): la cara resta ese alto para entrar entera. */
+    height: min(calc(100svh - 13rem), 46rem);
     transform: translateZ(calc(-1 * var(--half, 0px))) rotateY(calc(var(--i) * 90deg + var(--turn, 0deg)))
       translateZ(var(--half, 0px));
     backface-visibility: hidden;

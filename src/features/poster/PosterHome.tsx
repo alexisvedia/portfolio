@@ -10,6 +10,7 @@ import ConstructedWord from './ConstructedWord';
 import Portal from './Portal';
 import DepthField from './DepthField';
 import HiloMark from './HiloMark';
+import HeroAgents, { heroIntro } from './HeroAgents';
 import Stitch from './Stitch';
 import ServiceDeck, { CUBE } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
@@ -98,34 +99,12 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
       let alive = true;
       const q = gsap.utils.selector(scope);
 
-      // Entrada del hero: una sola ola, por debajo de 1,2 s.
-      const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
-      tl.fromTo(
-        q('[data-hero-guides] [data-stroke]'),
-        { drawSVG: '0% 0%', autoAlpha: 0 },
-        { drawSVG: '0% 100%', autoAlpha: 1, duration: 0.8, ease: 'power2.inOut', stagger: 0.08 }
-      )
-        .fromTo(q('[data-hero-name]'), { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, clearProps: 'clipPath' }, 0.05)
-        .from(q('[data-hero-text] > *'), { autoAlpha: 0, y: 24, duration: 0.6, stagger: 0.07 }, 0.25)
-        .from(q('[data-hero-portrait]'), { autoAlpha: 0, y: 48, duration: 0.9 }, 0.15)
-        .from(q('[data-nav]'), { autoAlpha: 0, y: -16, duration: 0.5 }, 0.3);
+      // Entrada del hero: tres agentes la arman en orquesta (HeroAgents); la nav entra a la par.
+      const heroRoot = q('[data-hero]')[0] as HTMLElement;
+      const tl = heroIntro(heroRoot).from(q('[data-nav]'), { autoAlpha: 0, y: -16, duration: 0.5, ease: 'power3.out' }, 0.3);
       hero.current = tl;
-      if (readyRef.current) tl.play();
-
-      // Cada palabra construida se dibuja con el scroll, trazo por trazo.
-      q('[data-poster]').forEach(section => {
-        const word = section.querySelector('[data-word]');
-        if (!word) return;
-        const rings = word.querySelectorAll('[data-ring]');
-        const draw = gsap
-          .timeline({ scrollTrigger: { trigger: section, start: 'top 80%', end: 'top 10%', scrub: 0.6 } })
-          .fromTo(
-            word.querySelectorAll('[data-stroke]'),
-            { drawSVG: '0% 0%', autoAlpha: 0 },
-            { drawSVG: '0% 100%', autoAlpha: 1, ease: 'none', stagger: 0.12 }
-          );
-        if (rings.length) draw.from(rings, { scale: 0, transformOrigin: '50% 50%', ease: 'back.out(2)', stagger: 0.1 }, '-=0.3');
-      });
+      // Se mide al arrancar: sin Morganite cargada el nombre mide el doble y los cursores apuntan mal.
+      if (readyRef.current) document.fonts.ready.then(() => { if (hero.current === tl) tl.play(); });
 
       // Manifiesto: el texto se ilumina palabra por palabra.
       // SplitText instancia Intl.Segmenter al cargar: se importa aparte para que sin él no caiga todo el sitio.
@@ -188,13 +167,39 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
       };
     });
 
+    // Cada palabra construida se dibuja con el scroll, trazo por trazo. La de Servicios, pineada con el cubo, se dibuja sola
+    // cuando la grilla llega al centro: con scrub se dibujaba mientras subía desde abajo y se veía a medias.
+    mm.add({ motion: MOTION, cube: CUBE }, ctx => {
+      if (!ctx.conditions?.motion) return;
+      const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
+      gsap.utils.toArray<HTMLElement>('[data-poster]', scope).forEach(section => {
+        const word = section.querySelector('[data-word]');
+        if (!word) return;
+        const strokes = word.querySelectorAll('[data-stroke]');
+        const rings = word.querySelectorAll('[data-ring]');
+        const draw =
+          ctx.conditions?.cube && section.hasAttribute('data-center-word')
+            ? gsap
+                .timeline({
+                  // La columna está centrada en la grilla: mismo start que el pin del cubo (ServiceDeck), un poco antes.
+                  // No se usa la grilla porque a esta altura ya está envuelta en el pin-spacer.
+                  scrollTrigger: { trigger: word.parentElement, start: () => `center ${(rem() * 6 + window.innerHeight) / 2 + 80}px`, toggleActions: 'play none none reverse', invalidateOnRefresh: true },
+                })
+                .fromTo(strokes, { drawSVG: '0% 0%', autoAlpha: 0 }, { drawSVG: '0% 100%', autoAlpha: 1, duration: 0.7, ease: 'power2.inOut', stagger: 0.08 })
+            : gsap
+                .timeline({ scrollTrigger: { trigger: section, start: 'top 80%', end: 'top 10%', scrub: 0.6 } })
+                .fromTo(strokes, { drawSVG: '0% 0%', autoAlpha: 0 }, { drawSVG: '0% 100%', autoAlpha: 1, ease: 'none', stagger: 0.12 });
+        if (rings.length) draw.from(rings, { scale: 0, transformOrigin: '50% 50%', ease: 'back.out(2)', duration: 0.5, stagger: 0.1 }, '-=0.3');
+      });
+    });
+
     document.fonts?.ready.then(() => ScrollTrigger.refresh());
     return () => mm.revert();
   }, [root]);
 
   useEffect(() => {
     if (!ready) return;
-    hero.current?.play();
+    document.fonts.ready.then(() => { hero.current?.play(); });
     ScrollTrigger.refresh();
   }, [ready]);
 };
@@ -229,6 +234,7 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
       ref={ref}
       aria-labelledby={`${id}-title`}
       data-poster=""
+      data-center-word={centerWord ? '' : undefined}
       data-overlap={overlap ? '' : undefined}
       $overlap={overlap}
       style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
@@ -312,6 +318,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
       <main>
         <Hero aria-labelledby="hero-name" data-hero="">
           <DepthField />
+          <HeroAgents />
           {/* Capas de atrás hacia adelante: nombre, foto, grilla, copy. */}
           <HeroName id="hero-name" data-hero-name="">
             {HERO.name}
@@ -588,7 +595,8 @@ const Hero = styled.section`
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  align-items: end;
+  /* El copy arranca debajo del nombre (su margin-top reserva el alto); no se va al fondo. */
+  align-items: start;
   min-height: 100svh;
   padding: 6.5rem ${pad} 0;
   overflow: clip;
@@ -597,7 +605,6 @@ const Hero = styled.section`
   --name-top: max(clamp(5.5rem, 13svh, 8rem), calc(4.75rem + 0.05 * var(--name-size)));
 
   @media (max-width: 860px) {
-    align-items: start;
     padding-top: 5.5rem;
   }
 `;
@@ -634,7 +641,8 @@ const HeroFigure = styled.div`
   position: absolute;
   z-index: 2;
   bottom: 0;
-  right: clamp(1rem, 8vw, 10rem);
+  /* Dentro del ancho de 1320 px, como el resto: en pantallas anchas no se va al borde de la ventana. */
+  right: calc(${pad} + clamp(0rem, 4vw, 4rem));
   height: min(calc(100svh - 5rem), 62vw, 66rem);
   aspect-ratio: 722 / 964;
 
@@ -793,12 +801,10 @@ const WordCol = styled.div<{ $center?: boolean }>`
   ${({ $center }) =>
     $center &&
     css`
-      /* Misma condición que el cubo de ServiceDeck: sin cubo, las cards quedan arriba y la palabra también. */
+      /* Misma condición que el cubo de ServiceDeck, que pinea la grilla entera: la palabra se centra al lado del cubo y viaja con él. */
       @media ${CUBE} {
-        height: calc(100svh - 6rem);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
+        position: static;
+        align-self: center;
       }
     `}
 
