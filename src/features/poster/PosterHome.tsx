@@ -9,7 +9,7 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import ConstructedWord from './ConstructedWord';
 import Portal from './Portal';
 import DepthField from './DepthField';
-import VectorPortrait from './VectorPortrait';
+import HiloMark from './HiloMark';
 import Stitch from './Stitch';
 import ServiceDeck, { CUBE } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
@@ -23,6 +23,7 @@ import milena from '@/assets/images/testimonials/Milena.jpeg';
 import kodi from '@/assets/images/testimonials/Kodi.png';
 import rutaArt from '@/assets/poster/ruta.webp';
 import holaArt from '@/assets/poster/hola.webp';
+import retrato from '@/assets/poster/retrato.webp';
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
@@ -75,7 +76,7 @@ const Loader: React.FC<{ onDone: () => void }> = ({ onDone }) => {
 
   return (
     <LoaderVeil ref={ref} aria-hidden="true">
-      <ConstructedWord word="AV" cols={2} ink={INK.cream} accent={INK.red} />
+      <HiloMark ink={INK.cream} accent={INK.red} />
     </LoaderVeil>
   );
 };
@@ -100,13 +101,13 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
       // Entrada del hero: una sola ola, por debajo de 1,2 s.
       const tl = gsap.timeline({ paused: true, defaults: { ease: 'power3.out' } });
       tl.fromTo(
-        q('[data-hero-word] [data-stroke]'),
+        q('[data-hero-guides] [data-stroke]'),
         { drawSVG: '0% 0%', autoAlpha: 0 },
         { drawSVG: '0% 100%', autoAlpha: 1, duration: 0.8, ease: 'power2.inOut', stagger: 0.08 }
       )
         .fromTo(q('[data-hero-name]'), { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, clearProps: 'clipPath' }, 0.05)
         .from(q('[data-hero-text] > *'), { autoAlpha: 0, y: 24, duration: 0.6, stagger: 0.07 }, 0.25)
-        .from(q('[data-hero-portrait]'), { autoAlpha: 0, scale: 0.92, duration: 0.9 }, 0.15)
+        .from(q('[data-hero-portrait]'), { autoAlpha: 0, y: 48, duration: 0.9 }, 0.15)
         .from(q('[data-nav]'), { autoAlpha: 0, y: -16, duration: 0.5 }, 0.3);
       hero.current = tl;
       if (readyRef.current) tl.play();
@@ -154,16 +155,22 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
       }
 
       // El Manifiesto tapa al hero: el hero queda fijo desde que se ve entero hasta que el verde llega arriba,
-      // y mientras tanto se achica, se apaga y las tintas del retrato se desfasan.
+      // y mientras tanto se achica y se apaga.
       const heroEl = q('[data-hero]')[0];
       const cover = q('[data-overlap]')[0];
       if (heroEl && cover) {
         ScrollTrigger.create({ trigger: heroEl, start: 'bottom bottom', endTrigger: cover, end: 'top top', pin: true, pinSpacing: false, anticipatePin: 1 });
-        gsap
-          .timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: cover, start: 'top bottom', end: 'top top', scrub: 0.6 } })
-          .fromTo(heroEl, { scale: 1, opacity: 1 }, { scale: 0.92, opacity: 0.35, transformOrigin: '50% 100%' }, 0)
-          .to(q('[data-layer="shade"]'), { x: -16, y: 14 }, 0)
-          .to(q('[data-layer="light"]'), { x: 14, y: -16 }, 0);
+        gsap.fromTo(
+          heroEl,
+          { scale: 1, opacity: 1 },
+          {
+            scale: 0.92,
+            opacity: 0.35,
+            transformOrigin: '50% 100%',
+            ease: 'none',
+            scrollTrigger: { trigger: cover, start: 'top bottom', end: 'top top', scrub: 0.6 },
+          }
+        );
       }
 
       // Bloques de texto: entran con un desplazamiento corto. Solo opacity (no autoAlpha) para que sigan enfocables.
@@ -286,7 +293,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
 
       <Nav data-nav="" aria-label="Secciones">
         <Mark href="#home" onClick={scrollToId('home')} aria-label="Alexis Vedia, inicio">
-          <ConstructedWord word="AV" cols={2} ink={INK.cream} accent={INK.red} />
+          <HiloMark ink={INK.cream} accent={INK.red} />
         </Mark>
         <NavLinks>
           {NAV.map(item => (
@@ -305,18 +312,15 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
       <main>
         <Hero aria-labelledby="hero-name" data-hero="">
           <DepthField />
-          <HeroArt>
-            <HeroWord data-hero-word="">
-              <ConstructedWord word="AV" cols={1} ink={INK.teal} accent={INK.red} guides />
-            </HeroWord>
-            <HeroPortrait>
-              <VectorPortrait />
-            </HeroPortrait>
-          </HeroArt>
+          {/* Capas de atrás hacia adelante: nombre, foto, grilla, copy. */}
+          <HeroName id="hero-name" data-hero-name="">
+            {HERO.name}
+          </HeroName>
+          <HeroFigure data-hero-portrait="">
+            <img src={retrato} alt="" width={722} height={964} fetchPriority="high" decoding="async" />
+            <HeroGuides />
+          </HeroFigure>
           <HeroCopy>
-            <HeroName id="hero-name" data-hero-name="">
-              {HERO.name}
-            </HeroName>
             <HeroText data-hero-text="">
               <HeroRole>{HERO.role}</HeroRole>
               <p>{HERO.line}</p>
@@ -461,7 +465,7 @@ const LoaderVeil = styled.div`
   clip-path: circle(75% at 50% 50%);
 
   svg {
-    width: clamp(9rem, 28vmin, 16rem);
+    width: clamp(6rem, 18vmin, 10rem);
   }
 `;
 
@@ -480,7 +484,7 @@ const Nav = styled.nav`
 
 const Mark = styled.a`
   display: block;
-  width: 3.4rem;
+  width: 2.3rem;
   flex: none;
 
   svg {
@@ -563,104 +567,115 @@ const GhostButton = styled.a`
   }
 `;
 
+/* Grilla y círculo con punto sobre la foto, en coordenadas de la foto original (el recorte arranca en 170, 60). */
+const GUIDE_X = Array.from({ length: 10 }, (_, i) => 232 + 72 * i);
+const GUIDE_Y = Array.from({ length: 12 }, (_, i) => 123 + 83 * i);
+const HeroGuides: React.FC = () => (
+  <Guides viewBox="170 60 722 964" aria-hidden="true" focusable="false" data-hero-guides="">
+    <path
+      d={GUIDE_X.map(x => `M${x} 60V1024`).join('') + GUIDE_Y.map(y => `M170 ${y}H892`).join('')}
+      stroke={INK.cream}
+      strokeOpacity={0.3}
+      strokeWidth={1.5}
+      vectorEffect="non-scaling-stroke"
+    />
+    <circle data-stroke="" cx={482} cy={300} r={190} fill="none" stroke={INK.cream} strokeOpacity={0.55} strokeWidth={2} vectorEffect="non-scaling-stroke" />
+    <circle cx={482} cy={300} r={6} fill={INK.red} />
+  </Guides>
+);
+
 const Hero = styled.section`
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: end;
-  gap: clamp(1.5rem, 4vw, 4rem);
   min-height: 100svh;
   padding: 6.5rem ${pad} 0;
+  overflow: clip;
+  /* Cuerpo del nombre y su tope. El tope despeja la nav: Morganite asoma 0,05em por encima de su caja con line-height 0,8. */
+  --name-size: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 2.66), calc(1320px / 2.66), 62svh);
+  --name-top: max(clamp(5.5rem, 13svh, 8rem), calc(4.75rem + 0.05 * var(--name-size)));
 
   @media (max-width: 860px) {
-    grid-template-columns: minmax(0, 1fr);
     align-items: start;
     padding-top: 5.5rem;
   }
 `;
 
-/* Retrato grande apoyado en el borde de abajo, con el AV construido detrás. */
-const HeroArt = styled.div`
-  position: relative;
-  grid-column: 2;
-  grid-row: 1;
-  height: min(calc(100svh - 7rem), 60vw, 62rem);
-  aspect-ratio: 370 / 480;
-
-  @media (max-width: 860px) {
-    grid-column: 1;
-    justify-self: center;
-    height: min(58svh, 118vw);
-  }
-`;
-
-const HeroPortrait = styled.div`
-  position: relative;
-  z-index: 1;
-  height: 100%;
-
-  @media (max-width: 860px) {
-    /* El nombre se apoya sobre los hombros: el retrato se funde en el fondo. */
-    mask-image: linear-gradient(#000 70%, transparent 96%);
-  }
-`;
-
-const HeroWord = styled.div`
-  position: absolute;
-  top: 4%;
-  right: 58%;
-  height: 92%;
-
-  [data-guide] {
-    opacity: 0;
-    transition: opacity 0.35s ease;
-  }
-  &:hover [data-guide] {
-    opacity: 0.6;
-  }
-
-  svg {
-    display: block;
-    height: 100%;
-    width: auto;
-  }
-
-  @media (max-width: 860px) {
-    right: 62%;
-    height: 80%;
-  }
-`;
-
-const HeroCopy = styled.div`
-  position: relative;
-  /* Sobre las piezas del frente del DepthField (z-index 3): el texto no se tapa. */
-  z-index: 4;
-  grid-column: 1;
-  grid-row: 1;
-  display: grid;
-  gap: clamp(1.5rem, 4vh, 2.5rem);
-  padding-bottom: clamp(2.5rem, 7vh, 4.5rem);
-
-  @media (max-width: 860px) {
-    grid-row: 2;
-    margin-top: -5.5rem;
-  }
-`;
-
+/* El nombre ocupa el ancho en una línea, detrás de la foto. 2.66 es el ancho de "ALEXIS VEDIA" en Morganite por cada em. */
 const HeroName = styled.h1`
+  position: absolute;
+  z-index: 1;
+  top: var(--name-top);
+  left: 0;
+  right: 0;
   margin: 0;
-  /* min-content: una palabra por línea. */
-  width: min-content;
+  text-align: center;
+  white-space: nowrap;
   font-family: ${DISPLAY};
   font-weight: 900;
-  font-size: min(16vw, 31svh, 17rem);
+  font-size: var(--name-size);
   line-height: 0.8;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: ${INK.cream};
 
+  /* En mobile, una palabra por línea. 1.37 es el ancho de "ALEXIS" por cada em. */
   @media (max-width: 860px) {
-    font-size: clamp(5.5rem, 31vw, 9rem);
+    white-space: normal;
+    width: min-content;
+    margin-inline: auto;
+    font-size: calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37);
+  }
+`;
+
+/* La foto se apoya en el borde de abajo, corrida a la derecha para dejar lugar al copy. */
+const HeroFigure = styled.div`
+  position: absolute;
+  z-index: 2;
+  bottom: 0;
+  right: clamp(1rem, 8vw, 10rem);
+  height: min(calc(100svh - 5rem), 62vw, 66rem);
+  aspect-ratio: 722 / 964;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  @media (max-width: 860px) {
+    position: relative;
+    right: auto;
+    justify-self: center;
+    height: min(72svh, 128vw);
+    /* La cabeza arranca a la altura de la segunda palabra: "VEDIA" se lee arriba del pelo. */
+    margin-top: calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37 * 1.05);
+    /* El copy se apoya sobre el torso: la foto se funde en el fondo. */
+    -webkit-mask-image: linear-gradient(#000 55%, transparent 88%);
+    mask-image: linear-gradient(#000 55%, transparent 88%);
+  }
+`;
+
+const Guides = styled.svg`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+`;
+
+const HeroCopy = styled.div`
+  position: relative;
+  /* Sobre la foto y las piezas del frente del DepthField (z-index 3): el texto no se tapa. */
+  z-index: 4;
+  padding-bottom: clamp(2.5rem, 7vh, 4.5rem);
+  /* Reserva el alto del nombre: en pantallas bajas el hero crece en vez de montar el copy sobre "ALEXIS". */
+  margin-top: calc(var(--name-top) + 0.8 * var(--name-size) - 6.5rem + 2rem);
+
+  @media (max-width: 860px) {
+    margin-top: -9rem;
   }
 `;
 
@@ -669,7 +684,11 @@ const HeroText = styled.div`
   z-index: 1;
   display: grid;
   gap: 1.3rem;
-  max-width: 34rem;
+  max-width: min(30rem, 36vw);
+
+  @media (max-width: 860px) {
+    max-width: 34rem;
+  }
 `;
 
 const HeroRole = styled.p`
