@@ -12,7 +12,7 @@ import DepthField from './DepthField';
 import HiloMark from './HiloMark';
 import HeroAgents, { heroIntro } from './HeroAgents';
 import Stitch from './Stitch';
-import ServiceDeck, { CUBE } from './ServiceDeck';
+import ServiceDeck, { CUBE, cubeTop } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
 import CubiqStory from './CubiqStory';
 import TeamVoice from './TeamVoice';
@@ -171,7 +171,6 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
     // cuando la grilla llega al centro: con scrub se dibujaba mientras subía desde abajo y se veía a medias.
     mm.add({ motion: MOTION, cube: CUBE }, ctx => {
       if (!ctx.conditions?.motion) return;
-      const rem = () => parseFloat(getComputedStyle(document.documentElement).fontSize);
       gsap.utils.toArray<HTMLElement>('[data-poster]', scope).forEach(section => {
         const word = section.querySelector('[data-word]');
         if (!word) return;
@@ -181,9 +180,8 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
           ctx.conditions?.cube && section.hasAttribute('data-center-word')
             ? gsap
                 .timeline({
-                  // La columna está centrada en la grilla: mismo start que el pin del cubo (ServiceDeck), un poco antes.
-                  // No se usa la grilla porque a esta altura ya está envuelta en el pin-spacer.
-                  scrollTrigger: { trigger: word.parentElement, start: () => `center ${(rem() * 6 + window.innerHeight) / 2 + 80}px`, toggleActions: 'play none none reverse', invalidateOnRefresh: true },
+                  // Un poco antes que el pin del cubo (ServiceDeck), con el Portal ya casi apagado.
+                  scrollTrigger: { trigger: section, start: () => `top ${cubeTop(section) + 40}px`, toggleActions: 'play none none reverse', invalidateOnRefresh: true },
                 })
                 .fromTo(strokes, { drawSVG: '0% 0%', autoAlpha: 0 }, { drawSVG: '0% 100%', autoAlpha: 1, duration: 0.7, ease: 'power2.inOut', stagger: 0.08 })
             : gsap
@@ -247,7 +245,7 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
           {art && <WordArt src={art} alt="" loading="lazy" width={1000} height={747} data-reveal="" />}
         </WordCol>
         <Body>
-          <Label id={`${id}-title`} style={{ color: ink }}>
+          <Label id={`${id}-title`} style={{ color: ink }} $hidden={centerWord}>
             {label}
           </Label>
           {children}
@@ -726,6 +724,12 @@ const Section = styled.section<{ $overlap?: boolean }>`
   padding: clamp(5rem, 14vh, 9rem) ${pad};
   scroll-margin-top: 4rem;
 
+  /* Servicios sube debajo del Portal, que termina de apagarse cuando su borde llega arriba: el ancla cae ahí.
+     El padding de la sección ya despeja la nav. */
+  &#services {
+    scroll-margin-top: 0;
+  }
+
   /* La maqueta de Cubiq es la pieza central: en pantallas anchas pasa el tope de 1320px. */
   @media (min-width: 1024px) {
     &#cubiq {
@@ -851,7 +855,20 @@ const Body = styled.div`
   min-width: 0;
 `;
 
-const Label = styled.h2`
+/* Con el cubo (Servicios) cada cara ya trae su título: el rótulo queda solo para lectores de pantalla. */
+const Label = styled.h2<{ $hidden?: boolean }>`
+  ${({ $hidden }) =>
+    $hidden &&
+    css`
+      @media ${CUBE} {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+      }
+    `}
   margin: 0;
   font-family: ${TEXT};
   font-weight: 400;

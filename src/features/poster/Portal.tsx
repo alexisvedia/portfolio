@@ -21,6 +21,8 @@ const Z_NEAR = 0.5;
 const IRIS_END = 0.24;
 const ZOOM_START = 0.06;
 const COVER = 0.88;
+/* Desde acá el escenario se apaga y deja ver la sección siguiente, que ya está en su lugar debajo. */
+const REVEAL = 0.9;
 
 const clamp01 = gsap.utils.clamp(0, 1);
 
@@ -245,8 +247,14 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
         stroke.style.opacity = drawn ? '1' : '0';
         disc.style.transform = `scale(${popEase(clamp01((e - 0.55) / 0.4))})`;
 
-        // En mobile el escenario mide 100svh: con la barra escondida queda una franja del contenedor abajo.
-        track.style.backgroundColor = covered ? to : '';
+        // La sección siguiente sube debajo del escenario (margen negativo del Track): al final el escenario se apaga
+        // y el contenido aparece en su lugar, sin un viewport de color vacío antes.
+        const reveal = clamp01((d - REVEAL) / (1 - REVEAL));
+        stage.style.opacity = String(1 - reveal);
+        // El Track va encima de la sección siguiente. Mientras el escenario se apaga, el color tapa solo lo que está
+        // arriba de esa sección (sin franja oscura bajo la nav); antes, su fondo tapa la franja que queda debajo del
+        // escenario de 100svh cuando la barra de mobile se esconde.
+        track.style.background = reveal ? `linear-gradient(${to}, ${to}) top / 100% calc(100% - 100svh) no-repeat` : covered ? to : INK.ground;
 
         const active = e > 0 && d < 1;
         if (active !== hinted) {
@@ -371,6 +379,13 @@ const Track = styled.div`
   height: 180vh;
   height: 180svh;
   pointer-events: none;
+
+  @media ${MOTION} {
+    /* El último viewport se comparte con la sección siguiente, que queda debajo del escenario fijo. */
+    z-index: 1;
+    margin-bottom: -100vh;
+    margin-bottom: -100svh;
+  }
 
   @media ${DESKTOP} {
     height: 220vh;

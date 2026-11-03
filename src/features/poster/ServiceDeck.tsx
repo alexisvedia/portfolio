@@ -23,6 +23,19 @@ const STACK = '(min-width: 861px) and (min-height: 601px)';
 const FINE = '(hover: hover) and (pointer: fine)';
 /* Desktop con movimiento: las cuatro cards son las caras de un cubo que gira con el scroll. */
 export const CUBE = `${STACK} and ${MOTION}`;
+
+/**
+ * Altura de pantalla del borde de arriba de Servicios cuando arranca el pin del cubo.
+ * La grilla se centra en el alto que deja la nav (6rem), pero nunca antes de que el borde llegue arriba: la sección sube
+ * debajo del Portal, que termina de apagarse justo ahí.
+ */
+export const cubeTop = (section: Element) => {
+  const spacer = section.firstElementChild;
+  const grid = (spacer?.classList.contains('pin-spacer') ? spacer.firstElementChild : spacer) as HTMLElement | null;
+  if (!grid) return 0;
+  const center = (parseFloat(getComputedStyle(document.documentElement).fontSize) * 6 + window.innerHeight) / 2;
+  return Math.min(center - parseFloat(getComputedStyle(section).paddingTop) - grid.offsetHeight / 2, 0);
+};
 /* Alto de la card pegada: 6rem de nav y aire abajo. */
 const CARD_H = 'min(calc(100svh - 9.5rem), 46rem)';
 /* Mismo margen lateral que las secciones de PosterHome (no se importa: PosterHome importa este archivo). */
@@ -108,17 +121,17 @@ const ServiceDeck: React.FC = () => {
       const setHalf = () => list.style.setProperty('--half', `${half()}px`);
       setHalf();
       gsap.set(wrap, { perspective: 2400 });
-      const grid = (wrap.closest('section')?.firstElementChild as HTMLElement | null) ?? wrap;
+      const section = wrap.closest('section');
+      const grid = (section?.firstElementChild as HTMLElement | null) ?? wrap;
 
       // z negativo: la cara de frente queda en el plano de la página y no se agranda con la perspectiva.
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
-          // Se pinea la grilla entera de la sección (OFICIO, rótulo y cubo): los tres quedan juntos mientras gira.
-          trigger: grid,
+          // Se pinea la grilla entera de la sección (OFICIO y cubo): los tres quedan juntos mientras gira.
+          trigger: section ?? grid,
           pin: grid,
-          // Centrado en el alto que deja la nav (6rem; ScrollTrigger no entiende rem).
-          start: () => `center ${(parseFloat(getComputedStyle(document.documentElement).fontSize) * 6 + window.innerHeight) / 2}px`,
+          start: () => (section ? `top ${cubeTop(section)}px` : 'top top'),
           end: () => `+=${Math.round(window.innerHeight * 0.8 * turns)}`,
           scrub: 0.6,
           snap: { snapTo: (v: number) => Math.round(v * turns) / turns, inertia: false, delay: 0.15, duration: { min: 0.2, max: 0.5 }, ease: 'power2.inOut' },
@@ -430,8 +443,7 @@ const Card = styled.li`
     position: relative;
     top: auto;
     grid-area: 1 / 1;
-    /* El pin lleva también el rótulo de la sección (unos 4,5rem con el hueco): la cara resta ese alto para entrar entera. */
-    height: min(calc(100svh - 13rem), 46rem);
+    height: ${CARD_H};
     transform: translateZ(calc(-1 * var(--half, 0px))) rotateY(calc(var(--i) * 90deg + var(--turn, 0deg)))
       translateZ(var(--half, 0px));
     backface-visibility: hidden;
