@@ -115,8 +115,8 @@ const ServiceDeck: React.FC = () => {
         scrollTrigger: {
           trigger: wrap,
           pin: true,
-          // ScrollTrigger no entiende rem: 6rem de nav en px.
-          start: () => `top ${parseFloat(getComputedStyle(document.documentElement).fontSize) * 6}px`,
+          // Centrado en el alto que deja la nav (6rem; ScrollTrigger no entiende rem).
+          start: () => `center ${(parseFloat(getComputedStyle(document.documentElement).fontSize) * 6 + window.innerHeight) / 2}px`,
           end: () => `+=${Math.round(window.innerHeight * 0.8 * turns)}`,
           scrub: 0.6,
           snap: { snapTo: (v: number) => Math.round(v * turns) / turns, inertia: false, delay: 0.15, duration: { min: 0.2, max: 0.5 }, ease: 'power2.inOut' },
@@ -464,8 +464,7 @@ const Num = styled.span`
   flex: none;
   display: flex;
   align-items: flex-end;
-  /* Pegado al borde de arriba: el afiche corta el número. */
-  margin: calc(-1 * ${cardPad} - 0.04em) -0.03em 0 0;
+  margin: 0 -0.03em 0 0;
   font-family: ${FONT.display};
   font-weight: 900;
   font-size: clamp(6.5rem, 30cqi, 13rem);
@@ -499,7 +498,8 @@ const MediaBox = styled.div`
 
   @media ${STACK} {
     flex: 1 1 0;
-    min-height: 7rem;
+    /* En pantallas bajas cede alto para que el pie de la card no se corte. */
+    min-height: min(7rem, 11svh);
     aspect-ratio: auto;
   }
 `;

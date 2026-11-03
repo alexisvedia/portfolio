@@ -183,7 +183,9 @@ const WorkGallery: React.FC = () => {
       });
       tl.to(slider, { x: () => -distance() }, 0)
         .fromTo(rail.firstElementChild, { scaleX: 0 }, { scaleX: 1 }, 0)
-        .fromTo(rail.lastElementChild, { x: 0 }, { x: () => rail.offsetWidth }, 0);
+        .fromTo(rail.lastElementChild, { x: 0 }, { x: () => rail.offsetWidth }, 0)
+        // Al final, el aro del hilo de abajo toma su lugar: la línea sigue y se arma el rulo.
+        .set(rail.lastElementChild, { autoAlpha: 0 }, '>');
 
       // Parallax dentro de cada card: cada capa viaja a otra velocidad que el track.
       cards.forEach(card => {
@@ -272,8 +274,10 @@ const WorkGallery: React.FC = () => {
           ry((px - 0.5) * 14);
           rx((0.5 - py) * 10);
           shine(1);
-          glare.style.setProperty('--gx', `${px * 100}%`);
-          glare.style.setProperty('--gy', `${py * 100}%`);
+          // El brillo vive dentro del marco (que lo recorta): se ubica sobre su propio rectángulo.
+          const g = glare.getBoundingClientRect();
+          glare.style.setProperty('--gx', `${((e.clientX - g.left) / g.width) * 100}%`);
+          glare.style.setProperty('--gy', `${((e.clientY - g.top) / g.height) * 100}%`);
         };
         const leave = () => {
           rx(0);
@@ -358,18 +362,7 @@ const WorkGallery: React.FC = () => {
                   </Meta>
 
                   <Stage data-wg-stage="">
-                    <Glow aria-hidden="true" data-wg-glow="" $art={!work.main}>
-                      {work.main && (
-                        <img
-                          src={work.main.src}
-                          width={work.main.w}
-                          height={work.main.h}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      )}
-                    </Glow>
+                    <Glow aria-hidden="true" data-wg-glow="" $art={!work.main} />
                     {work.main ? (
                       <Frame>
                         <Bar aria-hidden="true">
@@ -390,10 +383,12 @@ const WorkGallery: React.FC = () => {
                             style={{ objectPosition: work.main.pos ?? '50% 0%' }}
                           />
                         </ShotBox>
+                        <Glare aria-hidden="true" data-wg-glare="" />
                       </Frame>
                     ) : (
                       <Frame $art>
                         <Nodes />
+                        <Glare aria-hidden="true" data-wg-glare="" />
                       </Frame>
                     )}
                     {work.float && (
@@ -410,7 +405,6 @@ const WorkGallery: React.FC = () => {
                         </Float>
                       </FloatWrap>
                     )}
-                    <Glare aria-hidden="true" data-wg-glare="" />
                   </Stage>
                 </Card>
               );
@@ -764,27 +758,18 @@ const Stage = styled.div`
   }
 `;
 
+/* Halo con degradés que se apagan antes del borde: sin filter, porque blur dentro del tilt 3D se recorta a la caja. */
 const Glow = styled.div<{ $art?: boolean }>`
   position: absolute;
-  inset: 10% 6% 4%;
-  border-radius: 2rem;
-  opacity: 0.7;
-  filter: blur(42px) saturate(1.8);
+  inset: -4% -6%;
+  opacity: 0.45;
   pointer-events: none;
   background: ${({ $art }) =>
     $art
-      ? `radial-gradient(circle at 30% 40%, ${INK.red}, transparent 55%),
-         radial-gradient(circle at 70% 60%, ${INK.teal}, transparent 55%),
-         radial-gradient(circle at 50% 80%, ${INK.lime}, transparent 50%)`
-      : 'var(--wg-accent)'};
-
-  img {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    object-fit: cover;
-    border-radius: inherit;
-  }
+      ? `radial-gradient(closest-side at 30% 40%, ${INK.red}, transparent),
+         radial-gradient(closest-side at 70% 60%, ${INK.teal}, transparent),
+         radial-gradient(closest-side at 50% 80%, ${INK.lime}, transparent)`
+      : 'radial-gradient(closest-side, var(--wg-accent), transparent)'};
 `;
 
 const Frame = styled.div<{ $art?: boolean }>`
@@ -921,8 +906,9 @@ const Float = styled.div`
 const Glare = styled.div`
   position: absolute;
   inset: 0;
+  /* El marco de arte es grid centrado: sin esto el brillo mide 0x0. */
+  place-self: stretch;
   z-index: 3;
-  border-radius: 1rem;
   opacity: 0;
   pointer-events: none;
   mix-blend-mode: overlay;

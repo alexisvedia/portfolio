@@ -12,12 +12,19 @@ gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin, MotionPathPlugin);
 const PATH =
   'M150 0C150 80 118 122 200 140C300 162 334 58 272 58C206 58 226 172 360 180L400 146L440 204L480 146L520 204L560 146C646 112 712 262 624 254C556 248 598 138 702 150C806 162 850 222 850 300';
 
+/* Variante que continúa el rail de la galería: nace en el borde derecho, donde termina el aro de avance. */
+const FROM_RAIL = PATH.replace('M150 0C150 80 118 122 200 140', 'M0 0C-40 0 -40 120 200 140');
+
 interface Props {
   color?: string;
   flip?: boolean;
+  /** Hilo crema de 3px y aro rojo chico, alineado al final del rail de WorkGallery. Se usa con flip. */
+  fromRail?: boolean;
 }
 
-const Stitch: React.FC<Props> = ({ color = INK.cream, flip }) => {
+const Stitch: React.FC<Props> = ({ color = INK.cream, flip, fromRail }) => {
+  const d = fromRail ? FROM_RAIL : PATH;
+  const bead = fromRail ? INK.red : color;
   const ref = useRef<SVGSVGElement>(null);
 
   useLayoutEffect(() => {
@@ -39,13 +46,22 @@ const Stitch: React.FC<Props> = ({ color = INK.cream, flip }) => {
   }, []);
 
   return (
-    <Wrap aria-hidden="true">
+    <Wrap aria-hidden="true" data-from-rail={fromRail ? '' : undefined}>
       <svg ref={ref} viewBox="0 0 1000 310" style={flip ? { transform: 'scaleX(-1)' } : undefined}>
-        <path d={PATH} fill="none" stroke={color} strokeOpacity={0.14} strokeWidth={2} strokeDasharray="2 10" />
-        <path data-thread="" d={PATH} fill="none" stroke={color} strokeWidth={7} strokeLinecap="round" strokeLinejoin="round" />
+        <path d={d} fill="none" stroke={color} strokeOpacity={0.14} strokeWidth={2} strokeDasharray="2 10" />
+        <path
+          data-thread=""
+          d={d}
+          fill="none"
+          stroke={color}
+          strokeWidth={fromRail ? 3 : 7}
+          vectorEffect={fromRail ? 'non-scaling-stroke' : undefined}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
         <g data-bead="" transform="translate(850 300)">
-          <circle r={15} fill={color} />
-          <circle r={5.5} fill="var(--poster-ground, #0d0c0b)" />
+          <circle r={fromRail ? 7 : 15} fill={bead} />
+          <circle r={fromRail ? 2.3 : 5.5} fill="var(--poster-ground, #0d0c0b)" />
         </g>
       </svg>
     </Wrap>
@@ -63,6 +79,15 @@ const Wrap = styled.div`
     max-width: 72rem;
     margin-inline: auto;
     overflow: visible;
+  }
+
+  /* Mismo ancho que el rail: el hilo arranca justo en su extremo derecho. */
+  /* El margen de arriba replica el bottom del rail (y media altura de su línea de 3px): el hilo nace a su altura. */
+  &[data-from-rail] {
+    margin-top: calc(-1 * clamp(1.25rem, 4vh, 2.5rem) - 1.5px);
+  }
+  &[data-from-rail] svg {
+    max-width: 1320px;
   }
 `;
 

@@ -340,7 +340,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
 
         <Stitch color={INK.blue} />
         <WorkGallery />
-        <Stitch color={INK.red} flip />
+        <Stitch color={INK.cream} flip fromRail />
 
         <Poster id="cubiq" label="Cubiq Digital" word="NODO" cols={2} ink={INK.red} accent={INK.cream} flip>
           <Intro data-reveal="">{CUBIQ.intro}</Intro>
