@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import styled, { keyframes, css } from 'styled-components';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { sendMessageToN8N } from '../../services/n8nService';
 import { useTheme } from '../../context/ThemeContext';
@@ -59,6 +60,7 @@ const FloatingInputContainer = styled.div<{
   $isSidebarPresent?: boolean;
   $isSidebarCollapsed?: boolean;
   $hasText: boolean;
+  $hideOnMobile?: boolean;
 }>`
   position: fixed;
   bottom: 14px;
@@ -70,13 +72,22 @@ const FloatingInputContainer = styled.div<{
   transform: translateX(-50%);
   z-index: 10000;
   width: ${({ $isExpanded, $hasText }) => ($isExpanded || $hasText ? '450px' : '275px')};
-  transition: transform 0.22s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.22s ease, width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease, visibility 0.25s;
   pointer-events: auto;
 
   @media (max-width: 768px) {
     width: calc(100% - 32px);
     left: 16px;
     transform: none;
+  }
+
+  /* Mismo corte que el hero mobile de PosterHome. */
+  @media (max-width: 860px) {
+    ${({ $hideOnMobile }) => $hideOnMobile && css`
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    `}
   }
   
   /* Subtle lift when closed and hovered */
@@ -895,6 +906,23 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({
   const [bottomInset, setBottomInset] = useState<number>(14);
   const [isTyping, setIsTyping] = useState(false);
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+  // En mobile el input tapa el copy y los botones del hero: se esconde mientras ese texto está en pantalla.
+  const [overHeroText, setOverHeroText] = useState(false);
+  // El chat vive fuera del Outlet: el observer se rearma en cada ruta. Mientras el Manifiesto tapa el hero fijado, el chat vuelve.
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const target = document.querySelector('[data-hero-text]');
+    if (!target) return;
+    const cover = document.querySelector('[data-overlap]');
+    let inView = false;
+    let covered = false;
+    const sync = () => setOverHeroText(inView && !covered);
+    const io = new IntersectionObserver(([e]) => { inView = e.isIntersecting; sync(); });
+    const coverIo = new IntersectionObserver(([e]) => { covered = e.isIntersecting; sync(); }, { rootMargin: '0px 0px -80px 0px' });
+    io.observe(target);
+    if (cover) coverIo.observe(cover);
+    return () => { io.disconnect(); coverIo.disconnect(); setOverHeroText(false); };
+  }, [pathname]);
 
   // Lock page scroll when chat is expanded
   useEffect(() => {
@@ -1410,6 +1438,7 @@ const ChatbotAssistant: React.FC<ChatbotAssistantProps> = ({
         $isSidebarPresent={isSidebarPresent}
         $isSidebarCollapsed={isSidebarCollapsed}
         $hasText={!!inputValue.trim()}
+        $hideOnMobile={overHeroText && !isExpanded && !inputValue.trim()}
         style={{ bottom: `${bottomInset}px` }}
       >
         {/* Input Bar */}

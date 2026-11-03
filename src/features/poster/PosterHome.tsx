@@ -103,6 +103,8 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
       const heroRoot = q('[data-hero]')[0] as HTMLElement;
       const tl = heroIntro(heroRoot).from(q('[data-nav]'), { autoAlpha: 0, y: -16, duration: 0.5, ease: 'power3.out' }, 0.3);
       hero.current = tl;
+      // QA cuadro por cuadro: en dev la timeline queda en window.__heroIntro.
+      if (import.meta.env.DEV) (window as unknown as { __heroIntro?: gsap.core.Timeline }).__heroIntro = tl;
       // Se mide al arrancar: sin Morganite cargada el nombre mide el doble y los cursores apuntan mal.
       if (readyRef.current) document.fonts.ready.then(() => { if (hero.current === tl) tl.play(); });
 
@@ -577,15 +579,17 @@ const GUIDE_X = Array.from({ length: 10 }, (_, i) => 232 + 72 * i);
 const GUIDE_Y = Array.from({ length: 12 }, (_, i) => 123 + 83 * i);
 const HeroGuides: React.FC = () => (
   <Guides viewBox="170 60 722 964" aria-hidden="true" focusable="false" data-hero-guides="">
-    <path
-      d={GUIDE_X.map(x => `M${x} 60V1024`).join('') + GUIDE_Y.map(y => `M170 ${y}H892`).join('')}
-      stroke={INK.cream}
-      strokeOpacity={0.3}
-      strokeWidth={1.5}
-      vectorEffect="non-scaling-stroke"
-    />
-    <circle data-stroke="" cx={482} cy={300} r={190} fill="none" stroke={INK.cream} strokeOpacity={0.55} strokeWidth={2} vectorEffect="non-scaling-stroke" />
-    <circle cx={482} cy={300} r={6} fill={INK.red} />
+    {/* Líneas sueltas: Gemini las traza de a una en la entrada. */}
+    <g stroke={INK.cream} strokeOpacity={0.3} strokeWidth={1.5}>
+      {GUIDE_X.map(x => (
+        <line key={`x${x}`} data-guide-v="" x1={x} y1={60} x2={x} y2={1024} vectorEffect="non-scaling-stroke" />
+      ))}
+      {GUIDE_Y.map(y => (
+        <line key={`y${y}`} data-guide-h="" x1={170} y1={y} x2={892} y2={y} vectorEffect="non-scaling-stroke" />
+      ))}
+    </g>
+    <circle data-guide-circle="" cx={482} cy={300} r={190} fill="none" stroke={INK.cream} strokeOpacity={0.55} strokeWidth={2} vectorEffect="non-scaling-stroke" />
+    <circle data-guide-dot="" cx={482} cy={300} r={6} fill={INK.red} />
   </Guides>
 );
 
@@ -654,9 +658,11 @@ const HeroFigure = styled.div`
     position: relative;
     right: auto;
     justify-self: center;
-    height: min(72svh, 128vw);
-    /* La cabeza arranca a la altura de la segunda palabra: "VEDIA" se lee arriba del pelo. */
-    margin-top: calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37 * 1.05);
+    /* La cara está a la izquierda del centro de la foto: la corro para que quede en el eje de la pantalla. */
+    translate: 6.5% 0;
+    height: min(62svh, 112vw);
+    /* La cabeza arranca debajo de "VEDIA": el nombre se lee entero y la cara no queda tapada. */
+    margin-top: calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37 * 1.5);
     /* El copy se apoya sobre el torso: la foto se funde en el fondo. */
     -webkit-mask-image: linear-gradient(#000 55%, transparent 88%);
     mask-image: linear-gradient(#000 55%, transparent 88%);
