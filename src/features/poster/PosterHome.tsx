@@ -9,7 +9,7 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import ConstructedWord from './ConstructedWord';
 import Portal from './Portal';
 import DepthField from './DepthField';
-import HalftonePortrait from './HalftonePortrait';
+import VectorPortrait from './VectorPortrait';
 import Stitch from './Stitch';
 import ServiceDeck, { CUBE } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
@@ -104,7 +104,7 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
         { drawSVG: '0% 0%', autoAlpha: 0 },
         { drawSVG: '0% 100%', autoAlpha: 1, duration: 0.8, ease: 'power2.inOut', stagger: 0.08 }
       )
-        .fromTo(q('[data-hero-name]'), { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9 }, 0.05)
+        .fromTo(q('[data-hero-name]'), { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9, clearProps: 'clipPath' }, 0.05)
         .from(q('[data-hero-text] > *'), { autoAlpha: 0, y: 24, duration: 0.6, stagger: 0.07 }, 0.25)
         .from(q('[data-hero-portrait]'), { autoAlpha: 0, scale: 0.92, duration: 0.9 }, 0.15)
         .from(q('[data-nav]'), { autoAlpha: 0, y: -16, duration: 0.5 }, 0.3);
@@ -153,16 +153,18 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
         });
       }
 
-      // Secciones que pisan a la anterior: la de atrás se achica y oscurece mientras la nueva sube.
-      q('[data-overlap]').forEach(sec => {
-        const prev = sec.previousElementSibling;
-        if (!prev) return;
-        gsap.fromTo(
-          prev,
-          { scale: 1, opacity: 1 },
-          { scale: 0.9, opacity: 0.35, ease: 'none', transformOrigin: '50% 100%', scrollTrigger: { trigger: sec, start: 'clamp(top bottom)', end: 'top top', scrub: true } }
-        );
-      });
+      // El Manifiesto tapa al hero: el hero queda fijo desde que se ve entero hasta que el verde llega arriba,
+      // y mientras tanto se achica, se apaga y las tintas del retrato se desfasan.
+      const heroEl = q('[data-hero]')[0];
+      const cover = q('[data-overlap]')[0];
+      if (heroEl && cover) {
+        ScrollTrigger.create({ trigger: heroEl, start: 'bottom bottom', endTrigger: cover, end: 'top top', pin: true, pinSpacing: false, anticipatePin: 1 });
+        gsap
+          .timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: cover, start: 'top bottom', end: 'top top', scrub: 0.6 } })
+          .fromTo(heroEl, { scale: 1, opacity: 1 }, { scale: 0.92, opacity: 0.35, transformOrigin: '50% 100%' }, 0)
+          .to(q('[data-layer="shade"]'), { x: -16, y: 14 }, 0)
+          .to(q('[data-layer="light"]'), { x: 14, y: -16 }, 0);
+      }
 
       // Bloques de texto: entran con un desplazamiento corto. Solo opacity (no autoAlpha) para que sigan enfocables.
       const reveal = q('[data-reveal]');
@@ -303,28 +305,32 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
       <main>
         <Hero aria-labelledby="hero-name" data-hero="">
           <DepthField />
-          <HeroPortrait>
-            <HalftonePortrait />
-          </HeroPortrait>
-          <HeroWord data-hero-word="">
-            <ConstructedWord word="AV" cols={1} ink={INK.cream} accent={INK.red} guides />
-          </HeroWord>
-          <HeroName id="hero-name" data-hero-name="">
-            {HERO.name}
-          </HeroName>
-          <HeroText data-hero-text="">
-            <HeroRole>{HERO.role}</HeroRole>
-            <p>{HERO.line}</p>
-            <Ctas>
-              <Button href="#contact" onClick={scrollToId('contact')}>
-                {HERO.ctaPrimary}
-              </Button>
-              <GhostButton href="#experience" onClick={scrollToId('experience')}>
-                {HERO.ctaSecondary}
-              </GhostButton>
-            </Ctas>
-            <Small>{HERO.place}</Small>
-          </HeroText>
+          <HeroArt>
+            <HeroWord data-hero-word="">
+              <ConstructedWord word="AV" cols={1} ink={INK.teal} accent={INK.red} guides />
+            </HeroWord>
+            <HeroPortrait>
+              <VectorPortrait />
+            </HeroPortrait>
+          </HeroArt>
+          <HeroCopy>
+            <HeroName id="hero-name" data-hero-name="">
+              {HERO.name}
+            </HeroName>
+            <HeroText data-hero-text="">
+              <HeroRole>{HERO.role}</HeroRole>
+              <p>{HERO.line}</p>
+              <Ctas>
+                <Button href="#contact" onClick={scrollToId('contact')}>
+                  {HERO.ctaPrimary}
+                </Button>
+                <GhostButton href="#experience" onClick={scrollToId('experience')}>
+                  {HERO.ctaSecondary}
+                </GhostButton>
+              </Ctas>
+              <Small>{HERO.place}</Small>
+            </HeroText>
+          </HeroCopy>
         </Hero>
 
         <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap>
@@ -560,44 +566,50 @@ const GhostButton = styled.a`
 const Hero = styled.section`
   position: relative;
   display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: end;
   gap: clamp(1.5rem, 4vw, 4rem);
   min-height: 100svh;
-  /* + 12vh: la sección siguiente sube 12vh encima (overlap) y no tiene que tapar la última línea. */
-  padding: 6.5rem ${pad} calc(clamp(2.5rem, 7vh, 4.5rem) + 12vh);
+  padding: 6.5rem ${pad} 0;
 
   @media (max-width: 860px) {
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-rows: 1fr auto;
-    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
     padding-top: 5.5rem;
   }
 `;
 
-/* Retrato en semitono en el hueco de arriba a la derecha, encima de la bajada. */
-const HeroPortrait = styled.div`
-  position: absolute;
-  z-index: 1;
-  top: 5.5rem;
-  right: ${pad};
-  height: min(46svh, 30rem);
-  mask-image: linear-gradient(#000 72%, transparent);
-  aspect-ratio: 700 / 820;
+/* Retrato grande apoyado en el borde de abajo, con el AV construido detrás. */
+const HeroArt = styled.div`
+  position: relative;
+  grid-column: 2;
+  grid-row: 1;
+  height: min(calc(100svh - 7rem), 60vw, 62rem);
+  aspect-ratio: 370 / 480;
 
   @media (max-width: 860px) {
-    top: auto;
-    bottom: calc(clamp(2.5rem, 7vh, 4.5rem) + 12vh + 15rem);
-    height: min(34svh, 18rem);
-    /* Queda detrás del nombre: tenue para que el texto crema siga legible. */
-    opacity: 0.3;
+    grid-column: 1;
+    justify-self: center;
+    height: min(58svh, 118vw);
+  }
+`;
+
+const HeroPortrait = styled.div`
+  position: relative;
+  z-index: 1;
+  height: 100%;
+
+  @media (max-width: 860px) {
+    /* El nombre se apoya sobre los hombros: el retrato se funde en el fondo. */
+    mask-image: linear-gradient(#000 70%, transparent 96%);
   }
 `;
 
 const HeroWord = styled.div`
-  position: relative;
-  z-index: 1;
-  height: min(78svh, 46rem);
+  position: absolute;
+  top: 4%;
+  right: 58%;
+  height: 92%;
 
   [data-guide] {
     opacity: 0;
@@ -607,8 +619,6 @@ const HeroWord = styled.div`
     opacity: 0.6;
   }
 
-  align-self: center;
-
   svg {
     display: block;
     height: 100%;
@@ -616,38 +626,41 @@ const HeroWord = styled.div`
   }
 
   @media (max-width: 860px) {
-    height: auto;
-    width: 38vw;
-    align-self: start;
+    right: 62%;
+    height: 80%;
+  }
+`;
 
-    svg {
-      width: 100%;
-      height: auto;
-    }
+const HeroCopy = styled.div`
+  position: relative;
+  /* Sobre las piezas del frente del DepthField (z-index 3): el texto no se tapa. */
+  z-index: 4;
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  gap: clamp(1.5rem, 4vh, 2.5rem);
+  padding-bottom: clamp(2.5rem, 7vh, 4.5rem);
+
+  @media (max-width: 860px) {
+    grid-row: 2;
+    margin-top: -5.5rem;
   }
 `;
 
 const HeroName = styled.h1`
-  position: relative;
-  z-index: 1;
   margin: 0;
-  align-self: stretch;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
+  /* min-content: una palabra por línea. */
+  width: min-content;
   font-family: ${DISPLAY};
   font-weight: 900;
-  font-size: clamp(7rem, 23svh, 15rem);
+  font-size: min(16vw, 31svh, 17rem);
   line-height: 0.8;
   letter-spacing: 0.01em;
   text-transform: uppercase;
   color: ${INK.cream};
-  white-space: nowrap;
-  text-align: end;
 
   @media (max-width: 860px) {
-    justify-self: end;
-    font-size: clamp(5.5rem, 30vw, 8rem);
-    text-align: start;
+    font-size: clamp(5.5rem, 31vw, 9rem);
   }
 `;
 
@@ -657,11 +670,6 @@ const HeroText = styled.div`
   display: grid;
   gap: 1.3rem;
   max-width: 34rem;
-  padding-bottom: 0.4rem;
-
-  @media (max-width: 860px) {
-    grid-column: 1 / -1;
-  }
 `;
 
 const HeroRole = styled.p`
@@ -702,7 +710,8 @@ const Section = styled.section<{ $overlap?: boolean }>`
     $overlap &&
     css`
       z-index: 2;
-      margin-top: -12vh;
+      /* Alto de un viewport (vh, no svh: el fin del pin se mide con innerHeight) para que el hero fijo no asome debajo. */
+      min-height: 100vh;
       border-radius: clamp(1.5rem, 4vw, 3.5rem) clamp(1.5rem, 4vw, 3.5rem) 0 0;
       box-shadow: 0 -2rem 4rem rgba(0, 0, 0, 0.45);
     `}
