@@ -557,8 +557,10 @@ const Hero = styled.section`
   --name-size: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 2.66), calc(1320px / 2.66), 62svh);
   --name-top: max(clamp(5.5rem, 13svh, 8rem), calc(4.75rem + 0.05 * var(--name-size)));
 
+  /* En mobile el hero entero (nombre, foto, texto y botones) entra en el primer pantallazo: el copy se apoya abajo. */
   @media (max-width: 860px) {
     padding-top: 5.5rem;
+    align-content: end;
   }
 `;
 
@@ -585,7 +587,7 @@ const HeroName = styled.h1`
     white-space: normal;
     width: min-content;
     margin-inline: auto;
-    font-size: calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37);
+    font-size: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37), 27svh, calc((100svh - 26.5rem) / 1.6));
   }
 `;
 
@@ -606,17 +608,15 @@ const HeroFigure = styled.div`
   }
 
   @media (max-width: 860px) {
-    position: relative;
     right: auto;
-    justify-self: center;
-    /* La cara está a la izquierda del centro de la foto: la corro para que quede en el eje de la pantalla. */
-    translate: 6.5% 0;
-    height: min(62svh, 112vw);
-    /* La cabeza arranca debajo de "VEDIA": el nombre se lee entero y la cara no queda tapada. */
-    margin-top: calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37 * 1.5);
+    /* Centrada y corrida 6,5 %: la cara está a la izquierda del centro de la foto y así queda en el eje de la pantalla. */
+    left: 50%;
+    translate: -43.5% 0;
+    /* Anclada abajo; puede tapar parte del nombre (Alexis, 2026-11-03: no importa si la foto pisa el título). */
+    height: min(72svh, 125vw);
     /* El copy se apoya sobre el torso: la foto se funde en el fondo. */
-    -webkit-mask-image: linear-gradient(#000 55%, transparent 88%);
-    mask-image: linear-gradient(#000 55%, transparent 88%);
+    -webkit-mask-image: linear-gradient(#000 38%, transparent 80%);
+    mask-image: linear-gradient(#000 38%, transparent 80%);
   }
 `;
 
@@ -638,7 +638,9 @@ const HeroCopy = styled.div`
   margin-top: calc(var(--name-top) + 0.8 * var(--name-size) - 6.5rem + 2rem);
 
   @media (max-width: 860px) {
-    margin-top: -9rem;
+    margin-top: 0;
+    /* Despeja el botón redondo del chat (56 px a 16 px del borde). */
+    padding-bottom: 4.75rem;
   }
 `;
 
@@ -651,6 +653,7 @@ const HeroText = styled.div`
 
   @media (max-width: 860px) {
     max-width: 34rem;
+    gap: 0.85rem;
   }
 `;
 
@@ -660,6 +663,10 @@ const HeroRole = styled.p`
     line-height: 1.12;
     color: ${INK.cream};
     letter-spacing: -0.01em;
+
+    @media (max-width: 860px) {
+      font-size: 1.45rem;
+    }
   }
 `;
 

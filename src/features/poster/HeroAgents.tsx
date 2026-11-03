@@ -174,9 +174,9 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
     if (mobile) {
       const size = TAG * ROW_SCALE;
       const gap = 6;
-      const x0 = box.figure.x + box.figure.w / 2 - (AI_AGENTS.length * size + (AI_AGENTS.length - 1) * gap) / 2;
-      // En mobile el texto del hero se monta sobre el pie de la foto: la fila va justo arriba del texto.
-      const y = Math.min(box.figure.y + box.figure.h, box.text.y) - size - 16;
+      // Debajo del texto, alineada a su borde izquierdo: arriba taparía la cara y a la derecha está el botón del chat.
+      const x0 = box.text.x;
+      const y = box.text.y + box.text.h + 10;
       // La posición del agente es la punta del cursor: el ícono está corrido TAG_AT dentro, escalado desde la esquina.
       parked = Object.fromEntries(AI_AGENTS.map(({ id }, i) => [id, { x: x0 + i * (size + gap) - TAG_AT.x * ROW_SCALE, y: y - TAG_AT.y * ROW_SCALE }])) as Record<Id, Point>;
       return parked;
