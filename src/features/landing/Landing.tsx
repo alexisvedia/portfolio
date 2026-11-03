@@ -2,6 +2,7 @@ import React, { forwardRef, useLayoutEffect, useRef, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import confetti from 'canvas-confetti';
@@ -15,7 +16,7 @@ const A = '/assets/home';
 const DESKTOP = '(min-width: 1024px)';
 const CONTACT_WEBHOOK = 'https://n8n-fly-misty-resonance-9294.fly.dev/webhook/contact-form';
 
-interface Service {
+export interface Service {
   key: 'ai' | 'front' | 'wp' | 'design';
   Icon: LucideIcon;
   tags: string[];
@@ -23,7 +24,7 @@ interface Service {
   media: { video?: string; image?: string; poster: string; loop?: boolean };
 }
 
-const SERVICES: Service[] = [
+export const SERVICES: Service[] = [
   {
     key: 'ai',
     Icon: Brain,
@@ -651,8 +652,15 @@ const TitleMark = ({ label }: { label: string }) => (
 type FormState = { name: string; title: string; email: string; message: string };
 const EMPTY_FORM: FormState = { name: '', title: '', email: '', message: '' };
 
-const ContactForm = () => {
-  const { t } = useTranslation();
+interface ContactFormProps {
+  /** Traducción fija; si falta, usa el idioma activo. La home de afiches pasa `getFixedT('es')`. */
+  t?: TFunction;
+  confettiColors?: string[];
+}
+
+export const ContactForm = ({ t: fixedT, confettiColors }: ContactFormProps) => {
+  const { t: activeT } = useTranslation();
+  const t = fixedT ?? activeT;
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
@@ -676,7 +684,7 @@ const ContactForm = () => {
       if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
       setForm(EMPTY_FORM);
       setStatus('sent');
-      confetti({ particleCount: 140, spread: 90, origin: { y: 0.7 }, colors: ['#ff7a00', '#8b3dff', '#ffffff'] });
+      confetti({ particleCount: 140, spread: 90, origin: { y: 0.7 }, colors: confettiColors ?? ['#ff7a00', '#8b3dff', '#ffffff'] });
     } catch (error) {
       console.error('Contact form failed', error);
       setStatus('error');

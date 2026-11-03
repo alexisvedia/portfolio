@@ -1,8 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import styled from 'styled-components';
-import PageTransition from '@components/PageTransition/PageTransition';
 import SEOContent from '@components/SEOContent';
-import Landing from '@/features/landing';
+import PosterHome from '@/features/poster/PosterHome';
 
 const HomeContainer = styled.div`
   position: relative;
@@ -46,13 +45,12 @@ const Home: React.FC<HomeProps> = ({ onAnimationComplete, onContactSectionViewCh
   }, [onContactSectionViewChange]);
 
   return (
-    <PageTransition>
-      <HomeContainer id="home">
-        <SEOContent />
-        <Landing ref={contactSectionRef} />
-      </HomeContainer>
-    </PageTransition>
+    // Sin PageTransition: su overflow-x: hidden rompe el position: sticky de los afiches.
+    <HomeContainer id="home">
+      <SEOContent />
+      <PosterHome ref={contactSectionRef} />
+    </HomeContainer>
   );
 };
 
-export default Home;
+export default Home;

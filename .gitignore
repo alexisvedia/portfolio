@@ -50,3 +50,7 @@ mcp.json
 # TypeScript
 tsc.err
 tsc.out
+
+# Contexto de diseño local
+PRODUCT.md
+.impeccable/

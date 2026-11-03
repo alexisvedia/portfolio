@@ -54,7 +54,8 @@
     "split-type": "^0.3.4",
     "styled-components": "^6.1.8",
     "swiper": "^11.2.6",
-    "tailwind-merge": "^3.0.2"
+    "tailwind-merge": "^3.0.2",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.4.2",
@@ -64,6 +65,7 @@
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "@types/react-router-dom": "^5.3.3",
+    "@types/three": "^0.170.0",
     "@typescript-eslint/eslint-plugin": "^7.0.2",
     "@typescript-eslint/parser": "^7.0.2",
     "@vitejs/plugin-react": "^4.7.0",

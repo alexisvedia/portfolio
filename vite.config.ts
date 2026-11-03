@@ -44,6 +44,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       workbox: {
+        // three solo se usa en desktop: que no lo descargue cada visitante mobile.
+        globIgnores: ['**/three.module-*.js'],
         clientsClaim: true,
         skipWaiting: true
       }

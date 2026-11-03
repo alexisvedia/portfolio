@@ -178,6 +178,8 @@ const HomeWrapper = () => {
 const AppContent = () => {
   // Removed Lenis smooth scrolling for native behavior
   const location = useLocation();
+  // La home de afiches trae su propia navegación, fondo y loader.
+  const isHome = location.pathname === '/';
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isContactSectionInView, setIsContactSectionInView] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
@@ -199,8 +201,9 @@ const AppContent = () => {
     } else {
       setFontsLoaded(true);
     }
+    const startsOnHome = window.location.pathname === '/';
     document.fonts.ready.then(() => {
-      if (hasVisitedBefore) {
+      if (hasVisitedBefore || startsOnHome) {
         setFontsLoaded(true);
       }
     });
@@ -327,33 +330,37 @@ const AppContent = () => {
   };
 
   const shouldHideContactButton = isContactSectionInView;
+  const hasSidebar = !isHome && isSidebarOpen && !isMobile;
 
   return (
     <AppWrapper>
-      {shouldShowLoader && !fontsLoaded && <FontLoader onLoaded={handleFontsLoaded} />}
-      <Sidebar
-        isOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-        isMobile={isMobile}
-        isCollapsed={isSidebarCollapsed}
-        toggleCollapse={toggleSidebarCollapse}
-      />
+      {shouldShowLoader && !fontsLoaded && !isHome && <FontLoader onLoaded={handleFontsLoaded} />}
+      {!isHome && (
+        <Sidebar
+          isOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+          isMobile={isMobile}
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={toggleSidebarCollapse}
+        />
+      )}
 
       <MainContentWrapper
-        $isSidebarPresent={isSidebarOpen && !isMobile}
+        $isSidebarPresent={hasSidebar}
         $isSidebarCollapsed={isSidebarCollapsed}
       >
-        <DotBackground
-          isSidebarPresent={isSidebarOpen && !isMobile}
-          isSidebarCollapsed={isSidebarCollapsed}
-        />
-        <ContactButtonStyled initialDelay={500} $hideOnScroll={shouldHideContactButton} />
+        {!isHome && (
+          <DotBackground isSidebarPresent={hasSidebar} isSidebarCollapsed={isSidebarCollapsed} />
+        )}
+        {!isHome && (
+          <ContactButtonStyled initialDelay={500} $hideOnScroll={shouldHideContactButton} />
+        )}
         {chatbotVisible && (
           <React.Suspense fallback={null}>
             <ChatbotAssistant
               initialDelay={0}
               n8nServerReady={n8nServerReady}
-              isSidebarPresent={isSidebarOpen && !isMobile}
+              isSidebarPresent={hasSidebar}
               isSidebarCollapsed={isSidebarCollapsed}
             />
           </React.Suspense>
