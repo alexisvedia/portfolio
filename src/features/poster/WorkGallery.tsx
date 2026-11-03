@@ -177,6 +177,7 @@ const WorkGallery: React.FC = () => {
           start: 'top top',
           end: () => `+=${distance()}`,
           invalidateOnRefresh: true,
+          refreshPriority: 3,
           anticipatePin: 1,
         },
       });
@@ -202,7 +203,7 @@ const WorkGallery: React.FC = () => {
           });
         };
         drift('[data-wg-num]', { xPercent: 28 }, { xPercent: -28 });
-        drift('[data-wg-shot]', { xPercent: -5 }, { xPercent: 5 });
+        drift('[data-wg-shot]', { xPercent: -3 }, { xPercent: 3 });
         drift('[data-wg-glow]', { xPercent: -10 }, { xPercent: 10 });
         drift(
           '[data-wg-float]',
@@ -377,7 +378,7 @@ const WorkGallery: React.FC = () => {
                           <i />
                           <b />
                         </Bar>
-                        <ShotBox>
+                        <ShotBox style={{ aspectRatio: `${work.main.w} / ${work.main.h}` }}>
                           <img
                             data-wg-shot=""
                             src={work.main.src}
@@ -397,7 +398,7 @@ const WorkGallery: React.FC = () => {
                     )}
                     {work.float && (
                       <FloatWrap data-wg-float="">
-                        <Float>
+                        <Float style={{ aspectRatio: `${work.float.w} / ${work.float.h}` }}>
                           <img
                             src={work.float.src}
                             alt={work.float.alt}
@@ -849,17 +850,26 @@ const ShotBox = styled.div`
 
   img {
     display: block;
-    /* Más ancha que el marco: el parallax nunca deja ver los bordes. */
-    width: 120%;
+    width: 100%;
     max-width: none;
     height: 100%;
-    margin-left: -10%;
     object-fit: cover;
+  }
+
+  /* Desktop: el parallax mueve la captura un 3 % de su ancho; 4 % de sobra por lado tapa el borde. */
+  ${desktop} {
+    img {
+      width: 108%;
+      margin-left: -4%;
+    }
   }
 
   ${mobileMotion} {
     @supports (animation-timeline: view()) {
       img {
+        /* Más ancha que el marco solo con parallax: así nunca deja ver los bordes. */
+        width: 120%;
+        margin-left: -10%;
         animation: ${shotDrift} linear both;
         animation-timeline: view(inline);
       }
@@ -905,7 +915,6 @@ const Float = styled.div`
     height: 100%;
     object-fit: cover;
     object-position: 50% 0%;
-    scale: 1.05;
   }
 `;
 

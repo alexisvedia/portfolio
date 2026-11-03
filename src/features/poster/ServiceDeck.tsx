@@ -21,6 +21,10 @@ const MOBILE = '(max-width: 860px)';
 /* El stack sticky necesita que la card entre entera en la pantalla; más bajo queda una lista común. */
 const STACK = '(min-width: 861px) and (min-height: 601px)';
 const FINE = '(hover: hover) and (pointer: fine)';
+/* Desktop con movimiento: las cuatro cards son las caras de un cubo que gira con el scroll. */
+const CUBE = `${STACK} and ${MOTION}`;
+/* Alto de la card pegada: 6rem de nav y aire abajo. */
+const CARD_H = 'min(calc(100svh - 9.5rem), 46rem)';
 /* Mismo margen lateral que las secciones de PosterHome (no se importa: PosterHome importa este archivo). */
 // Margen lateral con tope: en pantallas anchas el contenido no pasa de 1320px.
 const pad = 'max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2))';
@@ -62,39 +66,88 @@ const stuckY = (list: HTMLElement, i: number) => {
  */
 const ServiceDeck: React.FC = () => {
   const listRef = useRef<HTMLUListElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const cubeRef = useRef<ScrollTrigger | null>(null);
   const [active, setActive] = useState(0);
   const total = SERVICES.length;
 
   useLayoutEffect(() => {
     const list = listRef.current;
-    if (!list) return;
+    const wrap = wrapRef.current;
+    if (!list || !wrap) return;
     const mm = gsap.matchMedia(list);
 
-    mm.add(`${STACK} and ${MOTION}`, () => {
+    // Cubo: el <ul> gira 90° por servicio con el scroll; cada card es una cara a media arista del centro.
+    mm.add(CUBE, () => {
       const cards = Array.from(list.children) as HTMLElement[];
-      const last = cards.length - 1;
-      // Un solo trigger sobre el <ul>: el tramo [i, i + 1] es la card i + 1 subiendo hasta pegarse.
+      const turns = cards.length - 1;
+      const half = () => list.offsetWidth / 2;
+      list.dataset.cube = '';
+      // Las cuatro caras ocupan la misma celda y todas "se ven" para el IntersectionObserver: solo corre el video de frente.
+      const videos = cards.map(c => c.querySelector('video'));
+      let front = 0; // Antes del pin, la cara de frente es la primera.
+      const playFront = (i: number) => {
+        if (i === front) return;
+        front = i;
+        videos.forEach((v, j) => {
+          if (!v) return;
+          if (j !== i) return v.pause();
+          if (v.ended) v.currentTime = 0;
+          v.play().catch(() => {});
+        });
+      };
+      // El observer de LandingVideo puede dar play después: una cara de costado se vuelve a pausar.
+      const offs = videos.map((v, j) => {
+        if (!v) return () => {};
+        const hold = () => {
+          if (j !== front) v.pause();
+        };
+        v.addEventListener('play', hold);
+        return () => v.removeEventListener('play', hold);
+      });
+      const setHalf = () => list.style.setProperty('--half', `${half()}px`);
+      setHalf();
+      gsap.set(wrap, { perspective: 2400 });
+
+      // z negativo: la cara de frente queda en el plano de la página y no se agranda con la perspectiva.
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
-          trigger: list,
-          start: () => stuckY(list, 0),
-          end: () => stuckY(list, last),
-          scrub: 0.5,
+          trigger: wrap,
+          pin: true,
+          // ScrollTrigger no entiende rem: 6rem de nav en px.
+          start: () => `top ${parseFloat(getComputedStyle(document.documentElement).fontSize) * 6}px`,
+          end: () => `+=${Math.round(window.innerHeight * 0.8 * turns)}`,
+          scrub: 0.6,
+          snap: { snapTo: (v: number) => Math.round(v * turns) / turns, inertia: false, delay: 0.15, duration: { min: 0.2, max: 0.5 }, ease: 'power2.inOut' },
           invalidateOnRefresh: true,
+          // Los pins de arriba pueden crearse después (otro breakpoint): sin prioridad, este start no los descuenta.
+          refreshPriority: 1,
+          onRefresh: setHalf,
+          onUpdate: self => playFront(Math.round(self.progress * turns)),
         },
       });
+      cubeRef.current = tl.scrollTrigger ?? null;
+      // Giran las caras, no el <ul>: con el <ul> de canto (-90°, -270°) Chrome no detecta el clic en la cara de frente.
+      tl.fromTo(list, { '--turn': '0deg' }, { '--turn': `${-90 * turns}deg`, duration: turns }, 0);
+      // En cada giro el cubo se aleja un poco y vuelve, como un carrusel que toma impulso.
+      for (let i = 0; i < turns; i++) {
+        tl.to(list, { scale: 0.88, duration: 0.5, ease: 'sine.out' }, i).to(
+          list,
+          { scale: 1, duration: 0.5, ease: 'sine.in' },
+          i + 0.5
+        );
+      }
       cards.forEach((card, i) => {
-        const q = gsap.utils.selector(card);
-        if (i < last) {
-          tl.to(card, { scale: 1 - (last - i) * 0.06, duration: last - i }, i).to(
-            q('[data-deck-shade]'),
-            { opacity: 0.2 + (last - i) * 0.15, duration: last - i },
-            i
-          );
-        }
-        if (i > 0) tl.from(q('[data-deck-num]'), { yPercent: 55, duration: 1 }, i - 1);
+        if (i > 0) tl.from(card.querySelector('[data-deck-num]'), { yPercent: 55, duration: 1 }, i - 1);
       });
+
+      return () => {
+        offs.forEach(off => off());
+        cubeRef.current = null;
+        delete list.dataset.cube;
+        list.style.removeProperty('--half');
+      };
     });
 
     return () => mm.revert();
@@ -127,7 +180,15 @@ const ServiceDeck: React.FC = () => {
   };
 
   // Con Shift + Tab el foco puede caer en una card tapada por la siguiente: se scrollea hasta que quede arriba.
+  // En el cubo, se gira hasta la cara enfocada.
   const onFocus = (i: number) => (e: React.FocusEvent<HTMLLIElement>) => {
+    const cube = cubeRef.current;
+    if (cube) {
+      // Con mouse el foco llega en el mousedown: scrollear ahí saca el link de abajo del puntero.
+      if (!(e.target as Element).matches(':focus-visible')) return;
+      window.scrollTo({ top: cube.start + ((cube.end - cube.start) * i) / (total - 1), behavior: 'auto' });
+      return;
+    }
     const list = listRef.current;
     const next = e.currentTarget.nextElementSibling;
     if (!list || !next || !window.matchMedia(STACK).matches) return;
@@ -156,7 +217,7 @@ const ServiceDeck: React.FC = () => {
   const current = SERVICES[active];
 
   return (
-    <Wrap>
+    <Wrap ref={wrapRef}>
       <Deck
         ref={listRef}
         role="list"
@@ -289,6 +350,13 @@ const Deck = styled.ul`
     }
   }
 
+  &[data-cube] {
+    display: grid;
+    transform-style: preserve-3d;
+    /* La cara de frente comparte el plano del <ul>: sin esto, el redondeo a veces deja el clic en la lista. */
+    pointer-events: none;
+  }
+
   @media (min-width: 861px) {
     flex-direction: column;
     /* Cuánto scroll queda la card entera a la vista antes de que llegue la siguiente. */
@@ -352,7 +420,19 @@ const Card = styled.li`
     position: sticky;
     top: calc(6rem + var(--i) * 0.75rem);
     /* 6rem de nav, 3 x 0,75rem de escalones y aire abajo: la card entra entera en la pantalla. */
-    height: min(calc(100svh - 9.5rem), 46rem);
+    height: ${CARD_H};
+  }
+
+  /* Cara del cubo: todas en la misma celda, giradas 90° entre sí y a media arista del centro. */
+  [data-cube] > & {
+    position: relative;
+    top: auto;
+    grid-area: 1 / 1;
+    height: ${CARD_H};
+    transform: translateZ(calc(-1 * var(--half, 0px))) rotateY(calc(var(--i) * 90deg + var(--turn, 0deg)))
+      translateZ(var(--half, 0px));
+    backface-visibility: hidden;
+    pointer-events: auto;
   }
 `;
 

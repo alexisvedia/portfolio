@@ -9,6 +9,7 @@ import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
 import ConstructedWord from './ConstructedWord';
 import Portal from './Portal';
 import DepthField from './DepthField';
+import HalftonePortrait from './HalftonePortrait';
 import Stitch from './Stitch';
 import ServiceDeck from './ServiceDeck';
 import WorkGallery from './WorkGallery';
@@ -20,6 +21,8 @@ import jorge from '@/assets/images/testimonials/Jorge.jpeg';
 import mauro from '@/assets/images/testimonials/Mauro.jpeg';
 import milena from '@/assets/images/testimonials/Milena.jpeg';
 import kodi from '@/assets/images/testimonials/Kodi.png';
+import rutaArt from '@/assets/poster/ruta.webp';
+import holaArt from '@/assets/poster/hola.webp';
 
 gsap.registerPlugin(ScrollTrigger, DrawSVGPlugin);
 
@@ -103,6 +106,7 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>, ready: boolean) 
       )
         .fromTo(q('[data-hero-name]'), { clipPath: 'inset(0% 0% 100% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9 }, 0.05)
         .from(q('[data-hero-text] > *'), { autoAlpha: 0, y: 24, duration: 0.6, stagger: 0.07 }, 0.25)
+        .from(q('[data-hero-portrait]'), { autoAlpha: 0, scale: 0.92, duration: 0.9 }, 0.15)
         .from(q('[data-nav]'), { autoAlpha: 0, y: -16, duration: 0.5 }, 0.3);
       hero.current = tl;
       if (readyRef.current) tl.play();
@@ -202,11 +206,13 @@ interface PosterProps {
   fg?: string;
   /** La sección sube y tapa a la anterior, que se achica detrás. */
   overlap?: boolean;
+  /** Ilustración debajo de la palabra (solo desktop). */
+  art?: string;
   children: React.ReactNode;
 }
 
 const Poster = forwardRef<HTMLElement, PosterProps>(
-  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, children }, ref) => (
+  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, children }, ref) => (
     <Section
       id={id}
       ref={ref}
@@ -221,6 +227,7 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
           <WordWrap data-word="">
             <ConstructedWord word={word} cols={cols} ink={ink} accent={accent} accentGlyphs={accentGlyphs} guides />
           </WordWrap>
+          {art && <WordArt src={art} alt="" loading="lazy" width={1000} height={747} data-reveal="" />}
         </WordCol>
         <Body>
           <Label id={`${id}-title`} style={{ color: ink }}>
@@ -294,6 +301,9 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
       <main>
         <Hero aria-labelledby="hero-name" data-hero="">
           <DepthField />
+          <HeroPortrait>
+            <HalftonePortrait />
+          </HeroPortrait>
           <HeroWord data-hero-word="">
             <ConstructedWord word="AV" cols={1} ink={INK.cream} accent={INK.red} guides />
           </HeroWord>
@@ -325,6 +335,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           <ArrowLink as={Link} to={OTHERS.to} data-reveal="">
             {OTHERS.label}
           </ArrowLink>
+          <RouteArt src={rutaArt} alt="" loading="lazy" width={1400} height={781} data-reveal="" />
         </Poster>
 
         <Stitch color={INK.blue} />
@@ -363,7 +374,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           </Quotes>
         </Poster>
 
-        <Poster id="contact" ref={contactRef} label="Contacto" word="HOLA" cols={2} ink={INK.cream} accent={INK.red} accentGlyphs={[1]}>
+        <Poster id="contact" ref={contactRef} label="Contacto" word="HOLA" cols={2} ink={INK.cream} accent={INK.red} accentGlyphs={[1]} art={holaArt}>
           <Intro data-reveal="">{t('landing.contactSubtitle')}.</Intro>
           <p data-reveal="">{CONTACT.lead}</p>
           <FormSkin data-reveal="">
@@ -562,6 +573,25 @@ const Hero = styled.section`
   }
 `;
 
+/* Retrato en semitono en el hueco de arriba a la derecha, encima de la bajada. */
+const HeroPortrait = styled.div`
+  position: absolute;
+  z-index: 1;
+  top: 5.5rem;
+  right: ${pad};
+  height: min(46svh, 30rem);
+  mask-image: linear-gradient(#000 72%, transparent);
+  aspect-ratio: 700 / 820;
+
+  @media (max-width: 860px) {
+    top: auto;
+    bottom: calc(clamp(2.5rem, 7vh, 4.5rem) + 12vh + 15rem);
+    height: min(34svh, 18rem);
+    /* Queda detrás del nombre: tenue para que el texto crema siga legible. */
+    opacity: 0.3;
+  }
+`;
+
 const HeroWord = styled.div`
   position: relative;
   z-index: 1;
@@ -659,6 +689,13 @@ const Section = styled.section<{ $overlap?: boolean }>`
   padding: clamp(5rem, 14vh, 9rem) ${pad};
   scroll-margin-top: 4rem;
 
+  /* La maqueta de Cubiq es la pieza central: en pantallas anchas pasa el tope de 1320px. */
+  @media (min-width: 1024px) {
+    &#cubiq {
+      padding-inline: max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1760px) / 2));
+    }
+  }
+
   ${({ $overlap }) =>
     $overlap &&
     css`
@@ -700,6 +737,11 @@ const Grid = styled.div<{ $flip?: boolean }>`
           grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
         }
       }
+      @media (min-width: 1440px) {
+        #cubiq & {
+          grid-template-columns: minmax(0, 5fr) minmax(0, 1fr);
+        }
+      }
     `}
 
   @media (max-width: 860px) {
@@ -728,6 +770,24 @@ const WordWrap = styled.div`
       width: min(64vw, 17rem);
     }
   }
+`;
+
+const WordArt = styled.img`
+  display: block;
+  width: min(100%, 30rem);
+  height: auto;
+  margin-top: 2.5rem;
+
+  @media (max-width: 860px) {
+    display: none;
+  }
+`;
+
+const RouteArt = styled.img`
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: 1rem;
 `;
 
 const Body = styled.div`

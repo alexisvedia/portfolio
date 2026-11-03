@@ -44,7 +44,7 @@ const COMPACT_BELOW = 560;
 const STEPS = [
   {
     title: 'La reunión',
-    line: 'Un grabador propio graba la llamada, la transcribe y separa quién dijo qué.',
+    line: 'Un grabador propio graba la llamada, separa quién dijo qué y va tomando notas.',
     hint: 'Probá pausar la grabación.',
   },
   { title: 'La tarea', line: 'De lo que se dijo sale una tarea, sin que nadie la anote.' },
@@ -128,6 +128,12 @@ const LINES = [
   { who: WHO.desarrollo, text: 'Lo sumo al workflow de pedidos.' },
 ];
 const FRAGMENT = 'Que se reintenten solos y nos avise';
+// Una nota por línea de la transcripción: aparece cuando el grabador la escucha.
+const NOTES = [
+  { text: 'Si el ERP se cae, los pedidos quedan trabados.' },
+  { text: 'Reintentar solos los pedidos y avisar al equipo.', task: true },
+  { text: 'Desarrollo lo suma al workflow de pedidos.' },
+];
 
 const COLS: { id: Col; fillers: { tag: string; w: [number, number] }[] }[] = [
   {
@@ -237,6 +243,7 @@ const CubiqStory: React.FC = () => {
   const cardRef = useRef<HTMLButtonElement>(null);
   const chipRef = useRef<HTMLSpanElement>(null);
   const fragRef = useRef<HTMLSpanElement>(null);
+  const recRef = useRef<HTMLDivElement>(null);
   const statsRef = useRef<HTMLDivElement>(null);
   const stRef = useRef<ScrollTrigger | null>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
@@ -308,6 +315,7 @@ const CubiqStory: React.FC = () => {
         end: () => `+=${Math.round(window.innerHeight * 0.75 * (N - 1))}`,
         anticipatePin: 1,
         invalidateOnRefresh: true,
+        refreshPriority: 2,
         snap: {
           snapTo: SNAPS,
           duration: { min: 0.2, max: 0.5 },
@@ -438,6 +446,26 @@ const CubiqStory: React.FC = () => {
         );
     });
   }, [slot, step, compact, still, fontsTick]);
+
+  /* La llamada pasa de ocupar la maqueta (paso 1) a su esquina sobre el chat: FLIP con translate y scale,
+     que no tocan offsetLeft/Top, así within() mide la posición final. */
+  const recBoxRef = useRef<{ x: number; y: number; w: number; compact: boolean } | null>(null);
+  useLayoutEffect(() => {
+    const rec = recRef.current;
+    const ctx = ctxRef.current;
+    if (!rec || !ctx) return;
+    const box = { x: rec.offsetLeft, y: rec.offsetTop, w: rec.offsetWidth, compact };
+    const prev = recBoxRef.current;
+    recBoxRef.current = box;
+    if (still || !prev || prev.compact !== compact || prev.w === box.w) return;
+    ctx.add(() => {
+      gsap.fromTo(
+        rec,
+        { '--fx': `${prev.x - box.x}px`, '--fy': `${prev.y - box.y}px`, '--fs': prev.w / box.w },
+        { '--fx': '0px', '--fy': '0px', '--fs': 1, duration: 0.6, ease: TRAVEL, overwrite: 'auto' }
+      );
+    });
+  }, [step, compact, still]);
 
   /* El fragmento resaltado vuela de la transcripción a la tarjeta nueva. */
   const chipStepRef = useRef(0);
@@ -821,7 +849,7 @@ const CubiqStory: React.FC = () => {
               </Card>
             </Window>
 
-            <Recorder data-on={on(step <= 1)}>
+            <Recorder ref={recRef} data-on={on(step <= 1)} data-full={on(step === 0)}>
               <MeetTop>
                 <span aria-hidden="true">Distribuidora · pedidos</span>
                 <RecBadge>
@@ -870,6 +898,21 @@ const CubiqStory: React.FC = () => {
                   </TLine>
                 ))}
               </Transcript>
+              <Notes aria-hidden="true">
+                <NotesHead>
+                  <Avatar who={WHO.recorder} size={20} />
+                  <span>Notas de MeetRecorder</span>
+                </NotesHead>
+                <ol>
+                  {NOTES.map((note, i) => (
+                    <Note key={note.text} data-on={on(i < heardShown)} data-task={on(!!note.task)}>
+                      {note.task && <b>Tarea</b>}
+                      {note.text}
+                    </Note>
+                  ))}
+                </ol>
+                <NotesFoot data-on={on(recording && heardShown < LINES.length)}>Escribiendo…</NotesFoot>
+              </Notes>
               <MeetControls aria-hidden="true">
                 <time>15:14</time>
                 <span>
@@ -1230,7 +1273,7 @@ const CapHint = styled.div`
 const Frame = styled.div`
   position: relative;
   width: 100%;
-  max-width: 972px;
+  max-width: 1240px;
   aspect-ratio: 720 / 460;
   container-type: inline-size;
   touch-action: pan-y;
@@ -2122,6 +2165,35 @@ const Recorder = styled.div`
     left: 12px;
     width: 334px;
   }
+
+  /* FLIP entre la llamada a pantalla completa y la esquina. */
+  translate: var(--fx, 0px) var(--fy, 0px);
+  scale: var(--fs, 1);
+  transform-origin: 0 0;
+
+  /* Paso 1: la llamada es la protagonista, con el panel de notas al costado. */
+  &[data-full] {
+    top: 0;
+    left: 0;
+    width: 720px;
+    height: 460px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-rows: 40px minmax(0, 1fr) auto 54px;
+    grid-template-areas: 'top top' 'tiles notes' 'cc notes' 'ctl notes';
+    border-radius: 14px;
+  }
+
+  [data-cs-compact] &[data-full] {
+    top: 0;
+    left: 0;
+    width: 358px;
+    height: 600px;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 40px auto auto minmax(0, 1fr) 54px;
+    grid-template-areas: 'top' 'tiles' 'cc' 'notes' 'ctl';
+    border-radius: 28px;
+  }
 `;
 
 /* Barra superior de la llamada: título a la izquierda, el badge de la extensión a la derecha. */
@@ -2129,10 +2201,17 @@ const MeetTop = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  grid-area: top;
   height: 30px;
   padding: 0 8px 0 12px;
   font-size: 11.5px;
   color: ${APP.body};
+
+  [data-full] > & {
+    height: auto;
+    padding: 0 12px 0 16px;
+    font-size: 13px;
+  }
 `;
 
 const RecBadge = styled.span`
@@ -2190,6 +2269,13 @@ const PlayButton = styled.button`
     background-color 0.2s ease,
     transform 0.15s ease;
 
+  /* Área táctil más grande que el círculo visible. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -12px;
+  }
+
   &:hover:not(:disabled) {
     background: #fff;
   }
@@ -2212,10 +2298,27 @@ const PlayButton = styled.button`
 `;
 
 const Tiles = styled.div`
+  grid-area: tiles;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 0 8px;
+
+  /* Tres participantes como en Meet: dos arriba y uno centrado abajo. */
+  [data-full] > & {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: center;
+    gap: 8px;
+    padding: 4px 12px 0 16px;
+  }
+  [data-full] > & > :last-child {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: calc(50% - 4px);
+  }
+  [data-cs-compact] [data-full] > & {
+    padding: 4px 12px 0;
+  }
 `;
 
 /* Mosaico de participante: el que habla lleva el borde y las barras de voz, como en Meet. */
@@ -2226,6 +2329,15 @@ const Tile = styled.div`
   height: 66px;
   border-radius: 8px;
   background: ${MEET.tile};
+
+  [data-full] & {
+    height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+  }
+  [data-full] & > :first-child {
+    scale: 1.8;
+  }
   box-shadow: inset 0 0 0 2px transparent;
   transition: box-shadow 0.25s ease;
 
@@ -2291,8 +2403,14 @@ const MeetControls = styled.div`
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
+  grid-area: ctl;
   height: 38px;
   padding: 0 10px;
+
+  [data-full] > & {
+    height: auto;
+    padding: 0 16px;
+  }
 
   time {
     font-size: 11px;
@@ -2324,10 +2442,20 @@ const MeetBtn = styled.span`
     width: 12px;
     height: 12px;
   }
+
+  [data-full] & {
+    width: 32px;
+    height: 32px;
+  }
 `;
 
 const HangUp = styled(MeetBtn)`
   width: 38px;
+
+  [data-full] & {
+    width: 46px;
+  }
+
   border-radius: 999px;
   background: ${MEET.red};
   color: #fff;
@@ -2335,6 +2463,7 @@ const HangUp = styled(MeetBtn)`
 
 /* Subtítulos de la llamada: lo que el grabador transcribe, con quién lo dijo. */
 const Transcript = styled.div`
+  grid-area: cc;
   display: grid;
   gap: 4px;
   min-height: 60px;
@@ -2342,6 +2471,105 @@ const Transcript = styled.div`
   padding: 7px 9px;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.45);
+
+  [data-full] > & {
+    margin: 10px 12px 0 16px;
+    padding: 9px 11px;
+  }
+`;
+
+/* Panel de notas del grabador: solo con la llamada a pantalla completa. */
+const Notes = styled.div`
+  grid-area: notes;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  margin: 4px 12px 12px 0;
+  padding: 12px;
+  border-radius: 10px;
+  background: #2a2b2e;
+  color: ${APP.body};
+
+  [data-full] > & {
+    display: flex;
+  }
+  [data-cs-compact] [data-full] > & {
+    margin: 10px 12px 0;
+  }
+
+  ol {
+    display: grid;
+    gap: 9px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+`;
+
+const NotesHead = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid ${APP.line};
+  font-size: 12px;
+  font-weight: 500;
+  color: ${APP.strong};
+`;
+
+/* Cada nota se escribe de izquierda a derecha cuando el grabador la escucha. */
+const Note = styled.li`
+  position: relative;
+  padding-left: 12px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.9s steps(26, end);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: ${APP.faint};
+  }
+
+  &[data-on] {
+    clip-path: inset(0 0 0 0);
+  }
+
+  &[data-task] {
+    color: ${APP.strong};
+  }
+  &[data-task]::before {
+    background: ${INK.lime};
+  }
+
+  b {
+    display: block;
+    margin-bottom: 2px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: ${INK.lime};
+  }
+`;
+
+const NotesFoot = styled.span`
+  margin-top: auto;
+  font-size: 10.5px;
+  color: #9a9aa0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+
+  &[data-on] {
+    opacity: 1;
+    animation: ${pulse} 1.4s ease-in-out infinite;
+  }
 `;
 
 const TLine = styled.div`

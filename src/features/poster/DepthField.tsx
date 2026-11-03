@@ -13,7 +13,7 @@ type Piece = { kind: 'ring' | 'bar' | 'arc'; top: string; left: string; size: st
 const PIECES: Piece[] = [
   { kind: 'ring', top: '12%', left: '62%', size: 'clamp(3rem, 7vw, 6rem)', color: INK.teal, depth: 1, rotate: 0 },
   { kind: 'bar', top: '30%', left: '86%', size: 'clamp(4rem, 9vw, 8rem)', color: INK.lime, depth: 2, rotate: -32 },
-  { kind: 'arc', top: '8%', left: '74%', size: 'clamp(5rem, 11vw, 10rem)', color: INK.orange, depth: 2, rotate: 20 },
+  { kind: 'arc', top: '80%', left: '22%', size: 'clamp(5rem, 11vw, 10rem)', color: INK.orange, depth: 2, rotate: 20 },
   { kind: 'ring', top: '78%', left: '90%', size: 'clamp(8rem, 18vw, 16rem)', color: INK.red, depth: 3, rotate: 0 },
   { kind: 'bar', top: '-4%', left: '40%', size: 'clamp(7rem, 15vw, 13rem)', color: INK.blue, depth: 3, rotate: 58 },
   { kind: 'arc', top: '18%', left: '8%', size: 'clamp(2.5rem, 5vw, 4.5rem)', color: INK.violet, depth: 1, rotate: -70 },
