@@ -12,7 +12,7 @@ import DepthField from './DepthField';
 import HiloMark from './HiloMark';
 import HeroAgents, { heroIntro } from './HeroAgents';
 import Stitch from './Stitch';
-import ServiceDeck, { CUBE, cubeTop } from './ServiceDeck';
+import ServiceDeck, { CARD_H, CUBE, cubeTop } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
 import CubiqStory from './CubiqStory';
 import TeamVoice from './TeamVoice';
@@ -728,6 +728,14 @@ const Section = styled.section<{ $overlap?: boolean }>`
      El padding de la sección ya despeja la nav. */
   &#services {
     scroll-margin-top: 0;
+  }
+
+  /* El pin del cubo no puede arrancar antes de que el borde llegue arriba. En pantallas altas el padding baja la grilla
+     hasta el centro del alto que deja la nav: así ya está centrada cuando se fija. */
+  @media ${CUBE} {
+    &#services {
+      padding-top: max(clamp(5rem, 14vh, 9rem), calc((6rem + 100vh) / 2 - ${CARD_H} / 2));
+    }
   }
 
   /* La maqueta de Cubiq es la pieza central: en pantallas anchas pasa el tope de 1320px. */

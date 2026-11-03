@@ -37,7 +37,7 @@ export const cubeTop = (section: Element) => {
   return Math.min(center - parseFloat(getComputedStyle(section).paddingTop) - grid.offsetHeight / 2, 0);
 };
 /* Alto de la card pegada: 6rem de nav y aire abajo. */
-const CARD_H = 'min(calc(100svh - 9.5rem), 46rem)';
+export const CARD_H = 'min(calc(100svh - 9.5rem), 46rem)';
 /* Mismo margen lateral que las secciones de PosterHome (no se importa: PosterHome importa este archivo). */
 // Margen lateral con tope: en pantallas anchas el contenido no pasa de 1320px.
 const pad = 'max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2))';
