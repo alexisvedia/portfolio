@@ -1037,6 +1037,11 @@ const Pin = styled.div`
     grid-template-columns: auto minmax(0, 1fr);
     align-content: start;
     column-gap: clamp(2rem, 4vw, 3.5rem);
+
+    /* Mismo ancho que la columna de la palabra en PosterHome (12rem): la maqueta queda en el eje de la página. */
+    @media (min-width: 1440px) {
+      grid-template-columns: 12rem minmax(0, 1fr);
+    }
   }
 `;
 
@@ -1277,6 +1282,10 @@ const Frame = styled.div`
   aspect-ratio: 720 / 460;
   container-type: inline-size;
   touch-action: pan-y;
+
+  [data-cs-pinned] & {
+    margin-inline: auto;
+  }
 
   [data-cs-compact] & {
     aspect-ratio: 358 / 600;

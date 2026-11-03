@@ -163,7 +163,11 @@ const WorkGallery: React.FC = () => {
     const mm = gsap.matchMedia(section);
 
     mm.add(PIN, () => {
-      const syncRing = (s: ScrollTrigger) => rail.toggleAttribute('data-done', s.progress === 1);
+      // Un solo aro a la vista: el del rail mientras avanza, el del hilo (Stitch fromRail) cuando terminó.
+      const syncRing = (s: ScrollTrigger) => {
+        rail.toggleAttribute('data-done', s.progress === 1);
+        document.documentElement.toggleAttribute('data-rail-done', s.progress === 1);
+      };
       // El atributo cambia el layout a fila pineada: va antes de medir.
       section.dataset.pinned = '';
       track.removeAttribute('tabindex');
@@ -191,7 +195,23 @@ const WorkGallery: React.FC = () => {
       });
       tl.to(slider, { x: () => -distance() }, 0)
         .fromTo(rail.firstElementChild, { scaleX: 0 }, { scaleX: 1 }, 0)
-        .fromTo(rail.lastElementChild, { x: 0 }, { x: () => rail.offsetWidth }, 0);
+        .fromTo(rail.lastElementChild, { x: 0 }, { x: () => rail.offsetWidth }, 0)
+        // Último tramo: la línea se pone roja y el aro crece hasta el tamaño del aro del hilo que sigue.
+        .fromTo(rail.firstElementChild, { backgroundColor: INK.cream }, { backgroundColor: INK.red, duration: 0.06 }, 0.44)
+        .fromTo(
+          rail.lastElementChild,
+          { scale: 1 },
+          {
+            // El aro del hilo escala con el ancho del svg: se mide en cada refresh en vez de fijar un factor.
+            scale: () => {
+              const ring = rail.lastElementChild as HTMLElement;
+              const bead = document.querySelector('[data-from-rail] [data-bead] circle');
+              return bead && ring.offsetWidth ? bead.getBoundingClientRect().width / ring.offsetWidth : 2;
+            },
+            duration: 0.06,
+          },
+          0.44
+        );
 
       // Parallax dentro de cada card: cada capa viaja a otra velocidad que el track.
       cards.forEach(card => {
@@ -259,6 +279,7 @@ const WorkGallery: React.FC = () => {
         slider.removeEventListener('focusin', onFocus);
         delete section.dataset.pinned;
         rail.removeAttribute('data-done');
+        document.documentElement.removeAttribute('data-rail-done');
         track.setAttribute('tabindex', '0');
       };
     });

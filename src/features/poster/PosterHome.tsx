@@ -710,11 +710,16 @@ const Section = styled.section<{ $overlap?: boolean }>`
     $overlap &&
     css`
       z-index: 2;
-      /* Alto de un viewport (vh, no svh: el fin del pin se mide con innerHeight) para que el hero fijo no asome debajo. */
-      min-height: 100vh;
       border-radius: clamp(1.5rem, 4vw, 3.5rem) clamp(1.5rem, 4vw, 3.5rem) 0 0;
       box-shadow: 0 -2rem 4rem rgba(0, 0, 0, 0.45);
     `}
+
+  /* La sección que sigue a la que tapa al hero también es opaca y va encima: el hero fijo no asoma por debajo
+     y la que tapa no necesita un viewport de alto. */
+  [data-overlap] + & {
+    z-index: 2;
+    background: ${INK.ground};
+  }
 
   /* La grilla de construcción de cada letra aparece al pasar el mouse por la palabra. */
   [data-guide] {
@@ -748,9 +753,11 @@ const Grid = styled.div<{ $flip?: boolean }>`
           grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
         }
       }
+      /* Pasos a la izquierda y palabra a la derecha con el mismo ancho y el mismo hueco: la maqueta queda en el eje de la página. */
       @media (min-width: 1440px) {
         #cubiq & {
-          grid-template-columns: minmax(0, 5fr) minmax(0, 1fr);
+          grid-template-columns: minmax(0, 1fr) 12rem;
+          column-gap: clamp(2rem, 4vw, 3.5rem);
         }
       }
     `}

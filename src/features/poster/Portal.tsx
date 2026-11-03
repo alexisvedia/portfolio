@@ -237,6 +237,9 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
         // +2 px: el iris queda apenas debajo del trazo y no se ve la costura.
         iris.style.clipPath = covered ? 'none' : `circle(${r ? r + 2 : 0}px at 50% 50%)`;
 
+        // Mientras sube, el borde de arriba del escenario se funde con la sección anterior: sin línea de corte.
+        stage.style.setProperty('--fade', `${(1 - e) * 40}vh`);
+
         const drawn = clamp01((e - 0.1) / 0.6) * 100;
         stroke.style.strokeDasharray = `${drawn} 200`;
         stroke.style.opacity = drawn ? '1' : '0';
@@ -310,7 +313,7 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
         io.disconnect();
         ro.disconnect();
         depth?.dispose();
-        [track, far, mid, near, core, rim, iris, stroke, disc].forEach(el => el.removeAttribute('style'));
+        [track, stage, far, mid, near, core, rim, iris, stroke, disc].forEach(el => el.removeAttribute('style'));
       };
     });
 
@@ -386,6 +389,7 @@ const Stage = styled.div`
   overflow: hidden;
   isolation: isolate;
   background: ${INK.ground};
+  mask-image: linear-gradient(transparent, #000 var(--fade, 0px));
 
   @media (prefers-reduced-motion: reduce) {
     position: relative;

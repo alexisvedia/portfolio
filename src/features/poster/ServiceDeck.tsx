@@ -142,6 +142,21 @@ const ServiceDeck: React.FC = () => {
         if (i > 0) tl.from(card.querySelector('[data-deck-num]'), { yPercent: 55, duration: 1 }, i - 1);
       });
 
+      // El rótulo de la sección (h2 de Poster) queda fuera del pin: se fija bajo la nav y se suelta junto con el cubo.
+      const title = wrap.closest('section')?.querySelector('h2');
+      if (title) {
+        ScrollTrigger.create({
+          trigger: title,
+          pin: true,
+          pinSpacing: false,
+          start: () => `top ${parseFloat(getComputedStyle(document.documentElement).fontSize) * 4.75}px`,
+          // Prioridad 0: se mide después del cubo (1) y toma su fin ya calculado.
+          end: () => cubeRef.current?.end ?? 0,
+          invalidateOnRefresh: true,
+          refreshPriority: 0,
+        });
+      }
+
       return () => {
         offs.forEach(off => off());
         cubeRef.current = null;

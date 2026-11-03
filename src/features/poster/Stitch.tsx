@@ -84,6 +84,9 @@ const Wrap = styled.div`
   padding-inline: max(clamp(1.25rem, 4vw, 3.5rem), calc((100% - 1320px) / 2));
   margin-block: clamp(-2rem, -3vh, -1rem);
   pointer-events: none;
+  /* Encima de la sección anterior, que puede tener fondo opaco: el margen negativo no esconde el arranque del hilo. */
+  position: relative;
+  z-index: 2;
 
   svg {
     display: block;
@@ -99,6 +102,13 @@ const Wrap = styled.div`
   }
   &[data-from-rail] svg {
     max-width: 1320px;
+  }
+  /* Mientras el rail avanza, su aro es el único punto: el del hilo aparece cuando la galería terminó. */
+  &[data-from-rail] [data-bead] {
+    visibility: hidden;
+  }
+  :root[data-rail-done] &[data-from-rail] [data-bead] {
+    visibility: visible;
   }
 `;
 
