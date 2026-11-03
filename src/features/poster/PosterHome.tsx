@@ -12,6 +12,7 @@ import DepthField from './DepthField';
 import HiloMark from './HiloMark';
 import HeroAgents, { heroIntro } from './HeroAgents';
 import Stitch from './Stitch';
+import Almohada from './Almohada';
 import ServiceDeck, { CARD_H, CUBE, cubeTop } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
 import CubiqStory from './CubiqStory';
@@ -65,7 +66,7 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>) => {
     if (!scope) return;
     const mm = gsap.matchMedia(scope);
 
-    // Movimiento reducido: sin intro ni flotado, los agentes quedan estacionados en el hero desde el principio.
+    // Movimiento reducido: sin intro, los agentes quedan estacionados en el hero desde el principio.
     mm.add('(prefers-reduced-motion: reduce)', () => {
       const q = gsap.utils.selector(scope);
       heroIntro(q('[data-hero]')[0] as HTMLElement, q('[data-nav]')[0] as HTMLElement, true).progress(1);
@@ -193,21 +194,14 @@ interface PosterProps {
   art?: string;
   /** La palabra se centra en el alto bajo la nav, a la par de un bloque pineado centrado. */
   centerWord?: boolean;
+  /** Efecto almohada al apretar (prototipo, ver Almohada.tsx). */
+  pillow?: boolean;
   children: React.ReactNode;
 }
 
 const Poster = forwardRef<HTMLElement, PosterProps>(
-  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, children }, ref) => (
-    <Section
-      id={id}
-      ref={ref}
-      aria-labelledby={`${id}-title`}
-      data-poster=""
-      data-center-word={centerWord ? '' : undefined}
-      data-overlap={overlap ? '' : undefined}
-      $overlap={overlap}
-      style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
-    >
+  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, pillow, children }, ref) => {
+    const grid = (
       <Grid $flip={flip}>
         <WordCol $center={centerWord}>
           <WordWrap data-word="">
@@ -222,8 +216,22 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
           {children}
         </Body>
       </Grid>
-    </Section>
-  )
+    );
+    return (
+      <Section
+        id={id}
+        ref={ref}
+        aria-labelledby={`${id}-title`}
+        data-poster=""
+        data-center-word={centerWord ? '' : undefined}
+        data-overlap={overlap ? '' : undefined}
+        $overlap={overlap}
+        style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
+      >
+        {pillow ? <Almohada>{grid}</Almohada> : grid}
+      </Section>
+    );
+  }
 );
 Poster.displayName = 'Poster';
 
@@ -303,7 +311,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           </HeroCopy>
         </Hero>
 
-        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap>
+        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap pillow>
           <Lead data-split="">{t('landing.lead')}</Lead>
         </Poster>
 
@@ -684,9 +692,15 @@ const Small = styled.p`
 `;
 
 const Section = styled.section<{ $overlap?: boolean }>`
+  --section-pad: clamp(5rem, 14vh, 9rem) ${pad};
   position: relative;
-  padding: clamp(5rem, 14vh, 9rem) ${pad};
+  padding: var(--section-pad);
   scroll-margin-top: 4rem;
+
+  /* Con la almohada, el padding pasa adentro del canvas para que el fondo también se hunda. */
+  &:has(> [data-almohada]) {
+    padding: 0;
+  }
 
   /* Servicios sube debajo del Portal, que termina de apagarse cuando su borde llega arriba: el ancla cae ahí.
      El padding de la sección ya despeja la nav. */
