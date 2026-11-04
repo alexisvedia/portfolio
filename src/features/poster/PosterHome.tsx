@@ -13,6 +13,7 @@ import HiloMark from './HiloMark';
 import HeroAgents, { heroIntro } from './HeroAgents';
 import Stitch from './Stitch';
 import Almohada from './Almohada';
+import ScissorEdge from './ScissorEdge';
 import ServiceDeck, { CARD_H, CUBE, cubeTop } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
 import CubiqStory from './CubiqStory';
@@ -196,11 +197,13 @@ interface PosterProps {
   centerWord?: boolean;
   /** Efecto almohada al apretar (ver Almohada.tsx). */
   pillow?: boolean;
+  /** Borde de arriba cortado a tijera sobre la sección anterior (ver ScissorEdge.tsx). */
+  edge?: React.ComponentProps<typeof ScissorEdge>;
   children: React.ReactNode;
 }
 
 const Poster = forwardRef<HTMLElement, PosterProps>(
-  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, pillow, children }, ref) => {
+  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, pillow, edge, children }, ref) => {
     const grid = (
       <Grid $flip={flip}>
         <WordCol $center={centerWord}>
@@ -228,6 +231,7 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
         $overlap={overlap}
         style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
       >
+        {edge && <ScissorEdge {...edge} />}
         {pillow ? <Almohada>{grid}</Almohada> : grid}
       </Section>
     );
@@ -321,11 +325,11 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           </HeroCopy>
         </Hero>
 
-        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap pillow>
+        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap pillow edge={{ color: INK.lime, light: '#e8ec5c', seed: 11 }}>
           <Lead data-split="">{t('landing.lead')}</Lead>
         </Poster>
 
-        <Poster id="experience" label="Trayectoria" word="RUTA" cols={2} ink={INK.blue} accent={INK.orange} accentGlyphs={[3]}>
+        <Poster id="experience" label="Trayectoria" word="RUTA" cols={2} ink={INK.blue} accent={INK.orange} accentGlyphs={[3]} edge={{ color: INK.ground, light: '#2a2622', seed: 23 }}>
           <Intro data-reveal="">{ROUTE_LEAD}</Intro>
           <Small data-reveal="">{STUDY}</Small>
           <ArrowLink as={Link} to={OTHERS.to} data-reveal="">
@@ -356,7 +360,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           <ServiceDeck />
         </Poster>
 
-        <Poster id="voces" label="Testimonios" word="VOCES" cols={2} ink={INK.violet} accent={INK.lime} flip>
+        <Poster id="voces" label="Testimonios" word="VOCES" cols={2} ink={INK.violet} accent={INK.lime} flip edge={{ color: INK.ground, light: '#2a2622', seed: 37 }}>
           <TeamVoice />
           <Quotes>
             {VOICES.map((v, i) => (
@@ -777,8 +781,6 @@ const Section = styled.section<{ $overlap?: boolean }>`
     $overlap &&
     css`
       z-index: 2;
-      border-radius: clamp(1.5rem, 4vw, 3.5rem) clamp(1.5rem, 4vw, 3.5rem) 0 0;
-      box-shadow: 0 -2rem 4rem rgba(0, 0, 0, 0.45);
     `}
 
   /* La sección que sigue a la que tapa al hero también es opaca y va encima: el hero fijo no asoma por debajo
@@ -967,16 +969,31 @@ const Quote = styled.figure`
   gap: 1.4rem;
   padding: clamp(1.6rem, 3vw, 2.6rem);
   padding-top: clamp(3.4rem, 6vw, 4.6rem);
-  border-radius: clamp(1.2rem, 2vw, 2rem);
-  background: var(--q-bg);
+  /* Papel recortado (docs/estilo-recorte.md): esquinas cortadas a tijera y dos facetas planas de bordes duros, la
+     de luz arriba a la izquierda y la de sombra abajo a la derecha, sobre la tinta de la tarjeta. */
+  clip-path: polygon(0 1.3rem, 2.4rem 0, 100% 0.5rem, calc(100% - 0.35rem) calc(100% - 1.9rem), calc(100% - 2.8rem) 100%, 0.6rem calc(100% - 0.4rem));
+  background:
+    linear-gradient(142deg, rgba(255, 250, 225, 0.17) 0 15%, transparent 15.1%),
+    linear-gradient(318deg, rgba(3, 4, 4, 0.22) 0 10%, transparent 10.1%),
+    var(--q-bg);
   color: var(--q-fg);
-  /* rotate y translate sueltos: el reveal de GSAP escribe transform y no los pisa. */
+  /* rotate y translate sueltos: el reveal de GSAP escribe transform y no los pisa. El hover salta en tres poses,
+     como un recorte que se acomoda. */
   rotate: -1.2deg;
-  transition: rotate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), translate 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: rotate 0.36s steps(3, jump-end), translate 0.36s steps(3, jump-end);
 
   &:nth-child(even) {
     margin-left: clamp(0rem, 6vw, 5rem);
     rotate: 1.4deg;
+    clip-path: polygon(0.4rem 0.7rem, calc(100% - 2.2rem) 0, 100% 1.5rem, 100% calc(100% - 0.5rem), 1.9rem 100%, 0 calc(100% - 2.2rem));
+    background:
+      linear-gradient(150deg, rgba(255, 250, 225, 0.17) 0 12%, transparent 12.1%),
+      linear-gradient(326deg, rgba(3, 4, 4, 0.22) 0 13%, transparent 13.1%),
+      var(--q-bg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 
   @media (hover: hover) {
@@ -990,8 +1007,8 @@ const Quote = styled.figure`
   &::before {
     content: '“';
     position: absolute;
-    top: -0.12em;
-    left: 0.12em;
+    top: 0.02em;
+    left: 0.2em;
     font-family: ${DISPLAY};
     font-weight: 900;
     font-size: clamp(7rem, 12vw, 10rem);

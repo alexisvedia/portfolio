@@ -9,6 +9,7 @@ import confetti from 'canvas-confetti';
 import { Brain, CodeXml, FileCode2, PenTool, LucideIcon } from 'lucide-react';
 import LandingVideo from './LandingVideo';
 import { TITLE_PATHS, TITLE_VIEWBOX } from './titlePaths';
+import { rng } from '@/features/poster/cut';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -649,6 +650,31 @@ const TitleMark = ({ label }: { label: string }) => (
   </Title>
 );
 
+/* Papelitos del confetti como recortes de papel (docs/estilo-recorte.md): polígonos de 4 a 6 cortes con semilla fija.
+   Se arman en el primer disparo y quedan guardados. Si el navegador no tiene Path2D, quedan en null y confetti usa
+   sus formas por defecto. */
+let paperShapes: confetti.Shape[] | null | undefined;
+const getPaperShapes = () => {
+  if (paperShapes !== undefined) return paperShapes;
+  try {
+    paperShapes = [3, 7, 12, 19, 26, 31].map(seed => {
+      const rand = rng(seed);
+      const n = 4 + Math.floor(rand() * 3);
+      const d = Array.from({ length: n }, (_, i) => {
+        const a = ((i + (rand() - 0.5) * 0.6) / n) * Math.PI * 2;
+        const r = 4 + rand() * 2;
+        return `${(Math.cos(a) * r * 1.2).toFixed(1)} ${(Math.sin(a) * r * 0.85).toFixed(1)}`;
+      });
+      // Ya centrado en 0 y de unos 10px: con matrix fija, confetti no barre 1000x1000 buscando el tamaño.
+      // Va como array (no DOMMatrix, pese al tipo) porque el render de confetti 1.9.3 pide Array.isArray.
+      return confetti.shapeFromPath({ path: `M${d.join('L')}Z`, matrix: [1, 0, 0, 1, 0, 0] as unknown as DOMMatrix });
+    });
+  } catch {
+    paperShapes = null;
+  }
+  return paperShapes;
+};
+
 type FormState = { name: string; title: string; email: string; message: string };
 const EMPTY_FORM: FormState = { name: '', title: '', email: '', message: '' };
 
@@ -684,7 +710,15 @@ export const ContactForm = ({ t: fixedT, confettiColors }: ContactFormProps) => 
       if (!res.ok) throw new Error(`Webhook responded ${res.status}`);
       setForm(EMPTY_FORM);
       setStatus('sent');
-      confetti({ particleCount: 140, spread: 90, origin: { y: 0.7 }, colors: confettiColors ?? ['#ff7a00', '#8b3dff', '#ffffff'] });
+      const shapes = getPaperShapes();
+      confetti({
+        particleCount: 140,
+        spread: 90,
+        origin: { y: 0.7 },
+        colors: confettiColors ?? ['#ff7a00', '#8b3dff', '#ffffff'],
+        disableForReducedMotion: true,
+        ...(shapes && { shapes }),
+      });
     } catch (error) {
       console.error('Contact form failed', error);
       setStatus('error');

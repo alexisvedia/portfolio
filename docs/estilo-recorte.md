@@ -79,8 +79,21 @@ El portfolio ya comparte tres decisiones: colores planos de imprenta, fondo negr
 constante. Lo que estas referencias suman es lo que le faltaba: **volumen sin degradado**, con la regla de tres tonos
 más negro, y **bordes cortados a mano** en vez de círculos y barras perfectos.
 
-Para no contradecir el alfabeto construido del sitio, el recorte va solo en los detalles decorativos y nunca en las
-letras. Cada detalle usa los colores de la sección donde aparece.
+Para no contradecir el alfabeto construido del sitio, los fustes de las letras siguen con trazo constante. El recorte
+va donde hay color, porque la sombra negra solo se lee sobre una superficie clara o saturada: sobre `#0d0c0b` es
+invisible. Cada pieza usa los colores de la sección donde aparece.
+
+## Dónde vive en el sitio
+
+| Pieza | Archivo | Qué hace |
+|---|---|---|
+| Generador de cortes | `src/features/poster/cut.ts` | `cut()` arma polígonos de corte a mano con semilla fija; `SHADOW` es el negro `#030404` |
+| Bordes entre secciones | `src/features/poster/ScissorEdge.tsx` | El papel de cada sección sube en dientes de tijera sobre la anterior, con filo claro y sombra-pieza; salta entre tres poses con el scroll |
+| Citas | `src/features/poster/PosterHome.tsx` (`Quote`) | Esquinas cortadas, faceta de luz arriba a la izquierda y de sombra abajo a la derecha; el hover salta en tres poses |
+| Chat de VOCES | `src/features/poster/TeamVoice.tsx` | Burbuja de "escribiendo" y reacciones recortadas, con entrada en `steps()` |
+| Portal | `src/features/poster/Portal.tsx` | El iris abre como un polígono recortado que crece en siete poses, con astilla negra detrás |
+| Hilo y confetti | `Stitch.tsx`, `src/features/landing/Landing.tsx` | Papelitos de 4 a 6 lados que aparecen a lo largo del hilo y salen del formulario enviado |
+| Almohada | `src/features/poster/Almohada.tsx` | La sección se hunde donde se aprieta y rebota con un resorte; filtro SVG `feDisplacementMap`, funciona en Chrome y Firefox |
 
 ## Cómo se traduce a SVG
 
