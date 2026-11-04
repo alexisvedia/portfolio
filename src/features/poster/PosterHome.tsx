@@ -306,7 +306,6 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
                   {HERO.ctaSecondary}
                 </GhostButton>
               </Ctas>
-              <Small>{HERO.place}</Small>
             </HeroText>
           </HeroCopy>
         </Hero>
@@ -571,6 +570,9 @@ const Hero = styled.section`
     align-content: end;
     /* Nombre en mobile, dos líneas. En pantallas muy bajas no baja de 4.5rem: el hero crece (ver HeroCopy). */
     --name-m: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37), 27svh, max(calc((100svh - 30rem) / 1.6), 4.5rem));
+    /* Alto de la foto (HeroFigure); HeroCopy lo usa para despejar la cara. Con el nombre chico la foto se achica con él:
+       si no, la cara tapa "VEDIA" entero. */
+    --fig-h: min(64svh, 112vw, 2.7 * var(--name-m));
   }
 `;
 
@@ -622,8 +624,11 @@ const HeroFigure = styled.div`
     /* Centrada y corrida 6,5 %: la cara está a la izquierda del centro de la foto y así queda en el eje de la pantalla. */
     left: 50%;
     translate: -43.5% 0;
-    /* Anclada abajo; puede tapar parte del nombre (Alexis, 2026-11-03: no importa si la foto pisa el título). */
-    height: min(64svh, 112vw);
+    /* Los ojos (0.245 del alto de la foto) al pie de la caja de "VEDIA": la cara pisa la base del apellido (Alexis,
+       2026-11-03: no importa si la foto pisa el título) y el copy queda sobre el torso, no sobre la cara. */
+    bottom: auto;
+    top: calc(var(--name-top) + 1.6 * var(--name-m) - 0.245 * var(--fig-h));
+    height: var(--fig-h);
     /* El copy se apoya sobre el torso: la foto se funde en el fondo. */
     -webkit-mask-image: linear-gradient(#000 38%, transparent 80%);
     mask-image: linear-gradient(#000 38%, transparent 80%);
@@ -648,8 +653,9 @@ const HeroCopy = styled.div`
   margin-top: calc(var(--name-top) + 0.8 * var(--name-size) - 6.5rem + 2rem);
 
   @media (max-width: 860px) {
-    /* Reserva las dos líneas del nombre (line-height 0.8) más 1rem: en pantallas bajas el copy no se monta sobre "VEDIA". */
-    margin-top: calc(var(--name-top) - 5.5rem + 1.6 * var(--name-m) + 1rem);
+    /* Reserva las dos líneas del nombre (line-height 0.8) y la cara, que sigue 0,19 del alto de la foto debajo: en
+       pantallas bajas el copy no se monta sobre "VEDIA" ni sobre la boca. */
+    margin-top: calc(var(--name-top) - 5.5rem + 1.6 * var(--name-m) + 0.2 * var(--fig-h));
     /* Despeja la fila de agentes (HeroAgents la pone 10 px debajo del texto) y el botón del chat. Chrome Android con la
        barra abajo tapa unos 60 px del primer pantallazo (captura de Alexis, 2026-11-03): la reserva los incluye. */
     padding-bottom: 7.5rem;

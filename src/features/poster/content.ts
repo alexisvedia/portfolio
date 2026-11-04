@@ -33,7 +33,6 @@ export const HERO = {
   line: 'Diseño interfaces, las programo y armo los sistemas de IA que las mantienen andando.',
   ctaPrimary: 'Escribime',
   ctaSecondary: 'Ver el recorrido',
-  place: 'Argentina, GMT-3. Trabajo remoto.',
 };
 
 export interface Stop {
