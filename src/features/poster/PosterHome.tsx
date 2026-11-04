@@ -607,8 +607,13 @@ const Hero = styled.section`
     align-content: end;
     /* Nombre en mobile, dos líneas. En pantallas muy bajas no baja de 4.5rem: el hero crece (ver HeroCopy). */
     --name-m: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37), 29svh, max(calc((100svh - 27rem) / 1.6), 4.5rem));
-    /* Sin barra en la nav el nombre sube hasta el pie del logo flotante. */
-    --name-top: calc(3.75rem + 0.05 * var(--name-m));
+    /* Sin barra en la nav, "ALEXIS" arranca a la altura del logo flotante (Alexis, 2026-11-03: ese espacio no se usaba).
+       Si el nombre es tan ancho que choca con el logo, baja 2.7rem hasta el pie del logo: el clamp es un escalón. */
+    --name-left: calc((100vw - 1.37 * var(--name-m)) / 2);
+    --name-top: calc(
+      1.05rem + 0.05 * var(--name-m) +
+        clamp(0rem, (clamp(1.25rem, 4vw, 3.5rem) + 2.45rem - var(--name-left)) * 1000, 2.7rem)
+    );
     /* Alto de la foto (HeroFigure); HeroCopy lo usa para despejar la cara. Con el nombre chico la foto se achica con él:
        si no, la cara tapa "VEDIA" entero. */
     --fig-h: min(64svh, 112vw, 2.7 * var(--name-m));

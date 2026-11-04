@@ -128,7 +128,10 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
     box.hero = { x: 0, y: 0, w: hero.offsetWidth, h: hero.offsetHeight };
     // El logo ocupa el centro; el anillo está en (215, 40) con radio 22 dentro del viewBox de 256.
     const s = Math.min(box.hero.w * 0.3, box.hero.h * 0.3, 220);
-    box.logo = { x: box.hero.w / 2 - s / 2, y: box.hero.h / 2 - s / 2, w: s, h: s };
+    // Centrado en la pantalla visible, no en el hero (puede ser más alto), y por el dibujo: el trazo del AV ocupa
+    // x 28 a 237 e y 18 a 214 del viewBox, así que se corre lo que le falta a su centro para caer en el de la caja.
+    const cy = Math.min(box.hero.h, window.innerHeight) / 2;
+    box.logo = { x: box.hero.w / 2 - s / 2 - (4.5 / 256) * s, y: cy - s / 2 + (12 / 256) * s, w: s, h: s };
     box.logoRing = { x: box.logo.x + (193 / 256) * s, y: box.logo.y + (18 / 256) * s, w: (44 / 256) * s, h: (44 / 256) * s };
     const node = name.firstChild;
     const chars: { x: number; top: number; space: boolean }[] = [];
