@@ -241,6 +241,17 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
   const root = useRef<HTMLDivElement>(null);
   usePosterMotion(root);
 
+  // En mobile el botón de la nav aparece pasada media pantalla de scroll (ver NavCta). No se observan los CTA del hero:
+  // el hero queda fijo mientras el Manifiesto lo tapa, y para un observer siguen en pantalla.
+  useEffect(() => {
+    const nav = root.current?.querySelector<HTMLElement>('[data-nav]');
+    if (!nav) return;
+    const onScroll = () => nav.toggleAttribute('data-past-hero', window.scrollY > window.innerHeight / 2);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   // Al llegar desde un caso con `/#casos` o `/#contact`, el router no scrollea: se espera a las fuentes y a los pines.
   useEffect(() => {
     const id = window.location.hash.slice(1);
@@ -445,12 +456,28 @@ const Nav = styled.nav`
   background: rgba(13, 12, 11, 0.86);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(239, 230, 200, 0.08);
+
+  /* Mobile: sin barra, el logo y el botón flotan sueltos (Alexis, 2026-11-03). La nav no genera caja: cada uno es su
+     propio fixed, porque el blend de un hijo dentro de la nav fixed solo se mezcla con la nav transparente. */
+  @media (max-width: 860px) {
+    display: contents;
+  }
 `;
 
 const Mark = styled.a`
   display: block;
   width: 2.3rem;
   flex: none;
+
+  /* Mobile: la diferencia invierte el logo contra el fondo para que siempre se vea. El botón no lleva blend: su texto y
+     su fondo se invertirían juntos y perderían contraste (1.95 sobre lime). */
+  @media (max-width: 860px) {
+    position: fixed;
+    top: 1.05rem;
+    left: ${pad};
+    z-index: 50;
+    mix-blend-mode: difference;
+  }
 
   svg {
     display: block;
@@ -508,7 +535,17 @@ const NavCta = styled.a`
   }
 
   @media (max-width: 860px) {
-    margin-left: auto;
+    position: fixed;
+    top: 0.9rem;
+    right: ${pad};
+    z-index: 50;
+    transition: opacity 0.3s ease, visibility 0.3s, background-color 0.25s ease, transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* En el hero ya está "Escribime": el de la nav espera a que se scrollee más allá. */
+    nav:not([data-past-hero]) > & {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 `;
 
@@ -569,7 +606,9 @@ const Hero = styled.section`
     padding-top: 5.5rem;
     align-content: end;
     /* Nombre en mobile, dos líneas. En pantallas muy bajas no baja de 4.5rem: el hero crece (ver HeroCopy). */
-    --name-m: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37), 27svh, max(calc((100svh - 30rem) / 1.6), 4.5rem));
+    --name-m: min(calc((100vw - 2 * clamp(1.25rem, 4vw, 3.5rem)) / 1.37), 29svh, max(calc((100svh - 27rem) / 1.6), 4.5rem));
+    /* Sin barra en la nav el nombre sube hasta el pie del logo flotante. */
+    --name-top: calc(3.75rem + 0.05 * var(--name-m));
     /* Alto de la foto (HeroFigure); HeroCopy lo usa para despejar la cara. Con el nombre chico la foto se achica con él:
        si no, la cara tapa "VEDIA" entero. */
     --fig-h: min(64svh, 112vw, 2.7 * var(--name-m));
@@ -624,10 +663,11 @@ const HeroFigure = styled.div`
     /* Centrada y corrida 6,5 %: la cara está a la izquierda del centro de la foto y así queda en el eje de la pantalla. */
     left: 50%;
     translate: -43.5% 0;
-    /* Los ojos (0.245 del alto de la foto) al pie de la caja de "VEDIA": la cara pisa la base del apellido (Alexis,
-       2026-11-03: no importa si la foto pisa el título) y el copy queda sobre el torso, no sobre la cara. */
+    /* Los ojos (0.245 del alto de la foto) 0,055 del alto de la foto por encima del pie de la caja de "VEDIA": la cara
+       pisa la base del apellido (Alexis, 2026-11-03: no importa si la foto pisa el título; subila para que se vea mejor
+       la cara) y el copy queda sobre el torso, no sobre la cara. */
     bottom: auto;
-    top: calc(var(--name-top) + 1.6 * var(--name-m) - 0.245 * var(--fig-h));
+    top: calc(var(--name-top) + 1.6 * var(--name-m) - 0.3 * var(--fig-h));
     height: var(--fig-h);
     /* El copy se apoya sobre el torso: la foto se funde en el fondo. */
     -webkit-mask-image: linear-gradient(#000 38%, transparent 80%);
@@ -653,9 +693,9 @@ const HeroCopy = styled.div`
   margin-top: calc(var(--name-top) + 0.8 * var(--name-size) - 6.5rem + 2rem);
 
   @media (max-width: 860px) {
-    /* Reserva las dos líneas del nombre (line-height 0.8) y la cara, que sigue 0,19 del alto de la foto debajo: en
-       pantallas bajas el copy no se monta sobre "VEDIA" ni sobre la boca. */
-    margin-top: calc(var(--name-top) - 5.5rem + 1.6 * var(--name-m) + 0.2 * var(--fig-h));
+    /* Reserva las dos líneas del nombre (line-height 0.8) y la cara, que sigue 0,145 del alto de la foto debajo (ver
+       HeroFigure): en pantallas bajas el copy no se monta sobre "VEDIA" ni sobre la boca. */
+    margin-top: calc(var(--name-top) - 5.5rem + 1.6 * var(--name-m) + 0.15 * var(--fig-h));
     /* Despeja la fila de agentes (HeroAgents la pone 10 px debajo del texto) y el botón del chat. Chrome Android con la
        barra abajo tapa unos 60 px del primer pantallazo (captura de Alexis, 2026-11-03): la reserva los incluye. */
     padding-bottom: 7.5rem;
