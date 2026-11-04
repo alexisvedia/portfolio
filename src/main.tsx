@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { registerSW } from 'virtual:pwa-register';
 
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -26,7 +27,9 @@ try {
 // Clarity now injected via official snippet in index.html
 
 
-// Service worker is now handled automatically by vite-plugin-pwa
+// Con autoUpdate, registerSW recarga la página cuando el service worker nuevo toma control: sin esto el celular
+// sigue mostrando la versión anterior del caché hasta la segunda visita.
+registerSW({ immediate: true });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

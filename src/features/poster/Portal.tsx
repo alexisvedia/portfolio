@@ -187,6 +187,7 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
     const mm = gsap.matchMedia();
 
     mm.add(MOTION, () => {
+      const desktop = window.matchMedia(DESKTOP);
       const stage = part('stage');
       const depthHost = part('depth');
       const far = part('far');
@@ -249,7 +250,8 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
 
         // La sección siguiente sube debajo del escenario (margen negativo del Track): al final el escenario se apaga
         // y el contenido aparece en su lugar, sin un viewport de color vacío antes.
-        const reveal = clamp01((d - REVEAL) / (1 - REVEAL));
+        // En mobile la sección no queda debajo (Track sin margen negativo): sube con el scroll y su palabra se dibuja mientras sube.
+        const reveal = desktop.matches ? clamp01((d - REVEAL) / (1 - REVEAL)) : 0;
         stage.style.opacity = String(1 - reveal);
         // El Track va encima de la sección siguiente. Mientras el escenario se apaga, el color tapa solo lo que está
         // arriba de esa sección (sin franja oscura bajo la nav); antes, su fondo tapa la franja que queda debajo del
@@ -383,12 +385,16 @@ const Track = styled.div`
   @media ${MOTION} {
     /* El último viewport se comparte con la sección siguiente, que queda debajo del escenario fijo. */
     z-index: 1;
-    margin-bottom: -100vh;
-    margin-bottom: -100svh;
   }
 
   @media ${DESKTOP} {
     height: 220vh;
+  }
+
+  /* Solo desktop: Alexis (2026-11-03) pidió que en mobile Oficio suba acompañando el scroll y no aparezca de golpe. */
+  @media ${MOTION} and ${DESKTOP} {
+    margin-bottom: -100vh;
+    margin-bottom: -100svh;
   }
 
   @media (prefers-reduced-motion: reduce) {
