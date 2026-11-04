@@ -13,7 +13,6 @@ import HiloMark from './HiloMark';
 import HeroAgents, { heroIntro } from './HeroAgents';
 import Stitch from './Stitch';
 import Almohada from './Almohada';
-import CutDetail from './CutDetail';
 import ServiceDeck, { CARD_H, CUBE, cubeTop } from './ServiceDeck';
 import WorkGallery from './WorkGallery';
 import CubiqStory from './CubiqStory';
@@ -195,15 +194,13 @@ interface PosterProps {
   art?: string;
   /** La palabra se centra en el alto bajo la nav, a la par de un bloque pineado centrado. */
   centerWord?: boolean;
-  /** Efecto almohada al apretar (prototipo, ver Almohada.tsx). */
+  /** Efecto almohada al apretar (ver Almohada.tsx). */
   pillow?: boolean;
-  /** Detalle vivo de papel recortado en la esquina de abajo (ver CutDetail.tsx). */
-  cut?: React.ComponentProps<typeof CutDetail>;
   children: React.ReactNode;
 }
 
 const Poster = forwardRef<HTMLElement, PosterProps>(
-  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, pillow, cut, children }, ref) => {
+  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, pillow, children }, ref) => {
     const grid = (
       <Grid $flip={flip}>
         <WordCol $center={centerWord}>
@@ -232,7 +229,6 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
         style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
       >
         {pillow ? <Almohada>{grid}</Almohada> : grid}
-        {cut && <CutSpot {...cut} $left={flip} />}
       </Section>
     );
   }
@@ -325,11 +321,11 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           </HeroCopy>
         </Hero>
 
-        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap pillow cut={{ kind: 'canopy', base: INK.teal, light: INK.lime, accent: INK.red }}>
+        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap pillow>
           <Lead data-split="">{t('landing.lead')}</Lead>
         </Poster>
 
-        <Poster id="experience" label="Trayectoria" word="RUTA" cols={2} ink={INK.blue} accent={INK.orange} accentGlyphs={[3]} cut={{ kind: 'leaf', base: INK.blue, light: INK.lime, accent: INK.orange }}>
+        <Poster id="experience" label="Trayectoria" word="RUTA" cols={2} ink={INK.blue} accent={INK.orange} accentGlyphs={[3]}>
           <Intro data-reveal="">{ROUTE_LEAD}</Intro>
           <Small data-reveal="">{STUDY}</Small>
           <ArrowLink as={Link} to={OTHERS.to} data-reveal="">
@@ -342,13 +338,13 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
         <WorkGallery />
         <Stitch color={INK.red} flip fromRail />
 
-        <Poster id="cubiq" label="Cubiq Digital" word="NODO" cols={2} ink={INK.red} accent={INK.cream} flip cut={{ kind: 'canopy', base: INK.red, light: INK.orange, accent: INK.cream }}>
+        <Poster id="cubiq" label="Cubiq Digital" word="NODO" cols={2} ink={INK.red} accent={INK.cream} flip>
           <Intro data-reveal="">{CUBIQ.intro}</Intro>
           <CubiqStory />
           <Small data-reveal="">{CUBIQ.note}</Small>
         </Poster>
 
-        <Poster id="stack" label="Stack de IA" word="IA" cols={2} ink={INK.teal} accent={INK.lime} cut={{ kind: 'leaf', base: INK.teal, light: INK.lime, accent: INK.red }}>
+        <Poster id="stack" label="Stack de IA" word="IA" cols={2} ink={INK.teal} accent={INK.lime}>
           <Intro data-reveal="">{AI_STACK.intro}</Intro>
           <AiStack />
           <Small data-reveal="">{AI_STACK.note}</Small>
@@ -360,7 +356,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           <ServiceDeck />
         </Poster>
 
-        <Poster id="voces" label="Testimonios" word="VOCES" cols={2} ink={INK.violet} accent={INK.lime} flip cut={{ kind: 'canopy', base: INK.violet, light: INK.orange, accent: INK.lime }}>
+        <Poster id="voces" label="Testimonios" word="VOCES" cols={2} ink={INK.violet} accent={INK.lime} flip>
           <TeamVoice />
           <Quotes>
             {VOICES.map((v, i) => (
@@ -756,11 +752,6 @@ const Section = styled.section<{ $overlap?: boolean }>`
   padding: var(--section-pad);
   scroll-margin-top: 4rem;
 
-  /* Con la almohada, el padding pasa adentro del canvas para que el fondo también se hunda. */
-  &:has(> [data-almohada]) {
-    padding: 0;
-  }
-
   /* Servicios sube debajo del Portal, que termina de apagarse cuando su borde llega arriba: el ancla cae ahí.
      El padding de la sección ya despeja la nav. */
   &#services {
@@ -805,16 +796,6 @@ const Section = styled.section<{ $overlap?: boolean }>`
   [data-word]:hover [data-guide] {
     opacity: 0.55;
   }
-`;
-
-/* En la banda del padding de abajo, del lado contrario a la palabra pineada; asoma desde el borde. */
-const CutSpot = styled(CutDetail)<{ $left?: boolean }>`
-  position: absolute;
-  bottom: clamp(0.5rem, 2vh, 1.5rem);
-  ${({ $left }) => ($left ? 'left' : 'right')}: clamp(-1.5rem, -1vw, 0rem);
-  width: clamp(6rem, 15vw, 11rem);
-  height: auto;
-  aspect-ratio: 1;
 `;
 
 const Grid = styled.div<{ $flip?: boolean }>`

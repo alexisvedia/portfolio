@@ -1,232 +1,174 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import React, { useEffect, useId, useRef } from 'react';
 import styled from 'styled-components';
 
-/* Efecto almohada: la sección real (no una captura) se dibuja en un canvas WebGL con la API HTML-in-Canvas
-   (Chrome 157) y se hunde donde se aprieta, con un resorte al soltar. Sin soporte, se renderiza normal.
-   ponytail: prototipo detrás de `?almohada` en la URL (mouse y touch); se abre sin flag cuando esté medido en el celular. */
+/* Efecto almohada: donde se aprieta, la sección se hunde como una tela rellena y rebota con un resorte al soltar.
+   Funciona en cualquier navegador: el contenido se deforma con un filtro SVG (feDisplacementMap) y el pozo se
+   sombrea con una capa de degradados, con la luz de arriba a la izquierda como en el resto del sitio.
+   El filtro se aplica solo mientras se mueve: en reposo la sección se pinta normal. */
 
-const supported = () => {
-  if (typeof document === 'undefined' || !new URLSearchParams(location.search).has('almohada')) return false;
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+// Mapa de desplazamiento del tamaño del envoltorio, con el pozo donde se apretó: cada punto toma el contenido de
+// más afuera, así lo de alrededor se estira hacia el centro. R es el corrimiento en x y G en y, con 128 como cero.
+// Cubre todo el filtro: no hace falta ubicar el feImage, que cada navegador mide distinto.
+const pitMap = (w: number, h: number, px: number, py: number, R: number) => {
+  const nx = 160;
+  const ny = Math.max(1, Math.min(480, Math.round((nx * h) / w)));
   const c = document.createElement('canvas');
-  c.setAttribute('content', 'drawable');
-  const h = c as unknown as Partial<HtmlCanvas> & { content?: string };
-  return h.content === 'drawable' && typeof h.requestPaint === 'function' && typeof h.getElementImageDefaultSize === 'function';
+  c.width = nx;
+  c.height = ny;
+  const ctx = c.getContext('2d')!;
+  const img = ctx.createImageData(nx, ny);
+  const s = 0.5;
+  const peak = (s / Math.SQRT2) * Math.exp(-0.5);
+  for (let y = 0; y < ny; y++)
+    for (let x = 0; x < nx; x++) {
+      const qx = (((x + 0.5) / nx) * w - px) / R;
+      const qy = (((y + 0.5) / ny) * h - py) / R;
+      const g = Math.exp(-(qx * qx + qy * qy) / (s * s)) / peak;
+      const i = (y * nx + x) * 4;
+      img.data[i] = 128 + 127 * qx * g;
+      img.data[i + 1] = 128 + 127 * qy * g;
+      img.data[i + 3] = 255;
+    }
+  ctx.putImageData(img, 0, 0);
+  return c.toDataURL();
 };
-
-const VERT = `attribute vec2 a;varying vec2 v;void main(){v=a*.5+.5;gl_Position=vec4(a,0.,1.);}`;
-
-/* La altura del pozo es h = -d·g, con g una gaussiana alrededor del toque. El contenido se toma de más afuera
-   (se achica hacia el centro, como tela que se estira) y la luz, de arriba a la izquierda, sombrea las laderas. */
-const FRAG = `precision highp float;
-varying vec2 v;uniform sampler2D t;uniform vec2 p;uniform vec2 asp;uniform float d;uniform float R;
-void main(){
-  vec2 q=(v-p)*asp;float g=exp(-dot(q,q)/(R*R));
-  vec4 c=texture2D(t,v+(v-p)*d*.3*g);
-  vec2 grad=d*g*2.*q/(R*R)*R;
-  vec3 L=normalize(vec3(-.4,.6,1.));
-  float lit=dot(normalize(vec3(-grad*.55,1.)),L)-L.z;
-  c.rgb*=1.-.16*d*g;
-  c.rgb=clamp(c.rgb+lit*.55,0.,1.);
-  gl_FragColor=c;
-}`;
-
-type HtmlCanvas = HTMLCanvasElement & {
-  onpaint: ((e: Event & { changedElements?: Element[] }) => void) | null;
-  requestPaint(): void;
-  getElementImageDefaultSize(el: Element): { width: number; height: number };
-  updateElementGeometry(el: Element, o: { canvasTransform: DOMMatrix }): void;
-};
-type Gl = WebGLRenderingContext & { texElementSubImage2D(t: number, l: number, x: number, y: number, el: Element): void };
 
 const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [on, setOn] = useState(supported);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
+  const id = `almohada${useId().replace(/:/g, '')}`;
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const shadeRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<SVGFEImageElement>(null);
+  const dispRef = useRef<SVGFEDisplacementMapElement>(null);
 
-  // Layout effect: el alto del canvas queda fijo antes de que ScrollTrigger mida la página (layout effect del padre).
-  useLayoutEffect(() => {
-    if (!on) return;
-    const canvas = canvasRef.current as HtmlCanvas;
-    const inner = innerRef.current!;
-    const gl = canvas.getContext('webgl', { premultipliedAlpha: false, antialias: false, depth: false }) as Gl | null;
-    if (!gl || typeof gl.texElementSubImage2D !== 'function') return setOn(false);
+  useEffect(() => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const wrap = wrapRef.current!;
+    const shade = shadeRef.current!;
+    const section = wrap.parentElement!;
+    const fe = imgRef.current!;
+    const disp = dispRef.current!;
 
-    const sh = (type: number, src: string) => {
-      const s = gl.createShader(type)!;
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      return s;
-    };
-    const prog = gl.createProgram()!;
-    gl.attachShader(prog, sh(gl.VERTEX_SHADER, VERT));
-    gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FRAG));
-    gl.bindAttribLocation(prog, 0, 'a');
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return setOn(false);
-    gl.useProgram(prog);
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-    const u = (n: string) => gl.getUniformLocation(prog, n);
-    const [uP, uAsp, uD, uR] = [u('p'), u('asp'), u('d'), u('R')];
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    // Resorte: d va hacia `target` (1 apretado, 0 suelto). Al soltar pasa de largo y se infla un poco antes de quedar.
+    let d = 0, vel = 0, target = 0, last = 0, raf = 0, R = 0;
+    const press = { x: 0, y: 0, sx: 0, sy: 0, id: -1 };
 
-    // Resorte: d va hacia `target` (1 apretado, 0 suelto) y rebota al soltar.
-    let d = 0, vel = 0, target = 0, last = 0, size = '';
-    const press = { x: 0.5, y: 0.5, sx: 0, sy: 0 };
-    let painted = false;
-    let dirty = true;
-
-    const paint = (e: Event & { changedElements?: Element[] }) => {
-      // Tras un resize la textura se vuelve a subir aunque el contenido no haya cambiado: su tamaño depende de la grilla.
-      const changed = dirty || !e.changedElements || Array.from(e.changedElements).includes(inner);
-      if (changed) {
-        dirty = false;
-        const def = canvas.getElementImageDefaultSize(inner);
-        const [width, height] = [Math.ceil(def.width), Math.ceil(def.height)];
-        if (Math.max(width, height) > gl.getParameter(gl.MAX_TEXTURE_SIZE)) return setOn(false);
-        if (`${width}x${height}` !== size) {
-          size = `${width}x${height}`;
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        }
-        gl.texElementSubImage2D(gl.TEXTURE_2D, 0, 0, 0, inner);
-        canvas.updateElementGeometry(inner, { canvasTransform: new DOMMatrix() });
-      }
-      const now = performance.now();
+    const frame = (now: number) => {
       const dt = Math.min(0.033, last ? (now - last) / 1000 : 0.016);
       last = now;
-      vel += (170 * (target - d) - (target ? 16 : 9) * vel) * dt;
+      vel += (150 * (target - d) - (target ? 15 : 9) * vel) * dt;
       d += vel * dt;
-      const settled = Math.abs(d - target) < 0.001 && Math.abs(vel) < 0.001;
+      const settled = Math.abs(d - target) < 0.002 && Math.abs(vel) < 0.002;
+      if (settled) d = target;
+
+      // Corrimiento máximo: la mitad de la escala. Un 4% del radio: la tela se estira sin torcer el texto.
+      disp.setAttribute('scale', String(d * R * 0.08));
+      wrap.style.filter = d ? `url(#${id})` : '';
+      shade.style.opacity = String(Math.max(0, Math.min(1, d)));
+
       if (settled) {
-        d = target;
-        vel = last = 0;
+        raf = last = 0;
+        return;
       }
-
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-      gl.uniform2f(uP, press.x, press.y);
-      gl.uniform2f(uAsp, 1, canvas.height / canvas.width);
-      gl.uniform1f(uD, d);
-      gl.uniform1f(uR, 0.3);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-      painted = true;
-      if (!settled) canvas.requestPaint();
+      raf = requestAnimationFrame(frame);
     };
-    // Si algo de la API falla a mitad de camino, la sección quedaría sin contenido: se vuelve al render normal.
-    canvas.onpaint = e => {
-      try {
-        paint(e);
-      } catch {
-        setOn(false);
-      }
-    };
+    const run = () => raf || (raf = requestAnimationFrame(frame));
 
-    // El canvas no toma el alto de su contenido: lo copia, y en el mismo paso ajusta la grilla a píxeles físicos.
-    // Un solo observer sobre inner: dos (canvas e inner) entran en loop y la grilla queda un cuadro atrasada.
-    let tallest = inner.offsetHeight;
-    canvas.style.height = `${tallest}px`;
-    const fit = new ResizeObserver(([entry]) => {
-      const { inlineSize: w, blockSize: h } = entry.borderBoxSize[0];
-      canvas.style.height = `${h}px`;
-      // Si cambia el alto (fuentes, SplitText), los pines de abajo quedan corridos: ScrollTrigger vuelve a medir.
-      if (Math.abs(h - tallest) > 1) ScrollTrigger.refresh();
-      tallest = h;
-      canvas.width = Math.round(w * devicePixelRatio);
-      canvas.height = Math.round(h * devicePixelRatio);
-      // ponytail: si el navegador achica el buffer (canvas más alto que el máximo), se vuelve al render normal.
-      if (gl.drawingBufferHeight < canvas.height) return setOn(false);
-      dirty = true;
-      canvas.requestPaint();
-    });
-    fit.observe(inner);
-
-    let id = -1;
     const down = (e: PointerEvent) => {
-      // Un solo dedo y solo el botón principal.
-      if (e.button !== 0 || target) return;
-      id = e.pointerId;
-      const r = canvas.getBoundingClientRect();
-      press.x = (e.clientX - r.left) / r.width;
-      press.y = 1 - (e.clientY - r.top) / r.height;
+      // Un solo dedo, botón principal, y no sobre algo que se puede clickear.
+      if (e.button !== 0 || target || (e.target as Element).closest('a, button, input, textarea, select, label')) return;
+      const s = section.getBoundingClientRect();
+      const w = wrap.getBoundingClientRect();
+      R = Math.min(Math.max(s.width, s.height) * 0.32, 420);
+      press.id = e.pointerId;
       press.sx = e.clientX;
       press.sy = e.clientY;
+      fe.setAttribute('href', pitMap(w.width, w.height, e.clientX - w.left, e.clientY - w.top, R));
+      shade.style.setProperty('--x', `${e.clientX - s.left}px`);
+      shade.style.setProperty('--y', `${e.clientY - s.top}px`);
+      shade.style.setProperty('--r', `${R}px`);
       target = 1;
-      canvas.requestPaint();
+      run();
     };
     const up = (e?: Event) => {
-      if (!target || (e instanceof PointerEvent && e.pointerId !== id)) return;
+      if (!target || (e instanceof PointerEvent && e.pointerId !== press.id)) return;
       target = 0;
-      canvas.requestPaint();
+      run();
     };
     // Si el dedo arrastra, es scroll: se suelta.
-    const move = (e: PointerEvent) => target && e.pointerId === id && Math.hypot(e.clientX - press.sx, e.clientY - press.sy) > 8 && up();
-    canvas.addEventListener('pointerdown', down, { passive: true });
-    canvas.addEventListener('pointermove', move, { passive: true });
-    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) canvas.addEventListener(ev, up, { passive: true });
+    const move = (e: PointerEvent) =>
+      target && e.pointerId === press.id && Math.hypot(e.clientX - press.sx, e.clientY - press.sy) > 8 && up();
+
+    section.addEventListener('pointerdown', down, { passive: true });
+    section.addEventListener('pointermove', move, { passive: true });
+    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) section.addEventListener(ev, up, { passive: true });
     window.addEventListener('scroll', up, { passive: true });
-    const lost = () => setOn(false);
-    canvas.addEventListener('webglcontextlost', lost);
-    canvas.requestPaint();
-
-    // Si el navegador no pinta el canvas, la sección quedaría en blanco: se vuelve al render normal.
-    // Una pestaña oculta no pinta: el plazo corre desde que se ve.
-    let guard = 0;
-    const arm = () => {
-      if (document.visibilityState !== 'visible' || guard) return;
-      guard = window.setTimeout(() => !painted && setOn(false), 1000);
-    };
-    arm();
-    document.addEventListener('visibilitychange', arm);
     return () => {
-      window.clearTimeout(guard);
-      document.removeEventListener('visibilitychange', arm);
-      fit.disconnect();
-      canvas.onpaint = null;
-      canvas.removeEventListener('pointerdown', down);
-      canvas.removeEventListener('pointermove', move);
-      for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) canvas.removeEventListener(ev, up);
-      canvas.removeEventListener('webglcontextlost', lost);
+      cancelAnimationFrame(raf);
+      section.removeEventListener('pointerdown', down);
+      section.removeEventListener('pointermove', move);
+      for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) section.removeEventListener(ev, up);
       window.removeEventListener('scroll', up);
-      gl.deleteTexture(tex);
-      gl.deleteBuffer(buf);
-      gl.deleteProgram(prog);
     };
-  }, [on]);
+  }, [id]);
 
-  if (!on) return <>{children}</>;
   return (
-    <Canvas ref={canvasRef} {...CANVAS_ATTRS} data-almohada="">
-      <Inner ref={innerRef} {...DRAWABLE}>
-        {children}
-      </Inner>
-    </Canvas>
+    <>
+      <Defs aria-hidden="true" focusable="false">
+        {/* sRGB: el mapa se lee tal cual, sin pasarlo a lineal. */}
+        <filter id={id} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
+          <feImage ref={imgRef} preserveAspectRatio="none" result="pit" />
+          <feDisplacementMap ref={dispRef} in="SourceGraphic" in2="pit" scale="0" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </Defs>
+      <Wrap ref={wrapRef}>{children}</Wrap>
+      <Shade ref={shadeRef} />
+    </>
   );
 };
 
-// Atributos de HTML-in-Canvas que React todavía no tipa.
-const CANVAS_ATTRS = { content: 'drawable' } as Record<string, string>;
-const DRAWABLE = { drawable: '' } as Record<string, string>;
-
-const Canvas = styled.canvas`
-  display: block;
-  width: 100%;
-  border-radius: inherit;
+const Defs = styled.svg`
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
 `;
 
-const Inner = styled.div.withConfig({ shouldForwardProp: () => true })`
-  box-sizing: border-box;
-  width: 100%;
-  padding: var(--section-pad);
-  background: var(--poster-ground, transparent);
+const Wrap = styled.div`
+  position: relative;
+  touch-action: pan-y;
+`;
+
+/* El pozo con la luz de arriba a la izquierda: la ladera de arriba queda en sombra y la de abajo a la derecha, que mira
+   a la luz, brilla. Alrededor, la tela tirante hace un anillo apenas más claro. */
+const Shade = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background:
+    radial-gradient(
+      circle at calc(var(--x) - var(--r) * 0.1) calc(var(--y) - var(--r) * 0.12),
+      rgba(0, 0, 0, 0.42) 0,
+      rgba(0, 0, 0, 0.3) calc(var(--r) * 0.16),
+      rgba(0, 0, 0, 0.12) calc(var(--r) * 0.36),
+      rgba(0, 0, 0, 0.03) calc(var(--r) * 0.52),
+      transparent calc(var(--r) * 0.62)
+    ),
+    radial-gradient(
+      circle at calc(var(--x) + var(--r) * 0.16) calc(var(--y) + var(--r) * 0.18),
+      transparent calc(var(--r) * 0.3),
+      rgba(255, 253, 235, 0.32) calc(var(--r) * 0.42),
+      rgba(255, 253, 235, 0.08) calc(var(--r) * 0.52),
+      transparent calc(var(--r) * 0.62)
+    ),
+    radial-gradient(
+      circle at calc(var(--x) - var(--r) * 0.06) calc(var(--y) - var(--r) * 0.06),
+      transparent calc(var(--r) * 0.64),
+      rgba(0, 0, 0, 0.04) calc(var(--r) * 0.74),
+      transparent calc(var(--r) * 0.9)
+    );
 `;
 
 export default Almohada;
