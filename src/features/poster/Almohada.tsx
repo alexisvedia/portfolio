@@ -69,15 +69,15 @@ const shadeMap = (light: number) => {
   return `url(${c.toDataURL()})`;
 };
 
-// Sobre un fondo oscuro la sombra no se ve: la luz de la ladera queda más tenue para no leerse como un halo.
+// Sobre un fondo oscuro la ladera iluminada se lee como una mancha gris: ahí el pozo es solo sombra.
 const lightFor = (el: Element) => {
   for (let n: Element | null = el; n; n = n!.parentElement) {
     const m = getComputedStyle(n).backgroundColor.match(/[\d.]+/g);
     if (!m || (m.length > 3 && +m[3] === 0)) continue;
     const [r, g, b] = m.map(Number);
-    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.35 ? 0.55 : 0.2;
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 > 0.35 ? 0.55 : 0;
   }
-  return 0.2;
+  return 0;
 };
 
 // El dedo (o el mouse apretado) es uno solo para toda la página: cada sección mira si está debajo.
@@ -175,7 +175,7 @@ const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const disp = dispRef.current!;
 
     // Resorte: d va hacia `target` (1 apretado, 0 suelto). Al soltar pasa de largo y se infla un poco antes de quedar.
-    let d = 0, vel = 0, target = 0, last = 0, raf = 0, R = 0;
+    let d = 0, vel = 0, target = 0, last = 0, raf = 0, R = 0, pressed = false;
     // Lo que se deforma: el envoltorio, o el bloque fijado por un pin de ScrollTrigger si hay uno activo. Un filtro en
     // un ancestro de un elemento `position: fixed` lo vuelve relativo a ese ancestro y lo haría saltar de lugar.
     let skin: HTMLElement = wrap;
@@ -200,8 +200,8 @@ const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       const settled = Math.abs(d - target) < 0.002 && Math.abs(vel) < 0.002;
       if (settled) d = target;
 
-      // Corrimiento máximo: la mitad de la escala. Un 4% del radio: la tela se estira sin torcer el texto.
-      disp.setAttribute('scale', String(d * R * 0.08));
+      // Corrimiento máximo: la mitad de la escala. Un 2,5% del radio: más, y el texto chico se desgarra.
+      disp.setAttribute('scale', String(d * R * 0.05));
       skin.style.filter = d ? `url(#${id})` : '';
       patch.style.opacity = String(Math.max(0, Math.min(1, d)));
 
@@ -233,15 +233,20 @@ const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       const s = section.getBoundingClientRect();
       const over = finger.down && finger.x >= s.left && finger.x <= s.right && finger.y >= s.top && finger.y <= s.bottom;
       if (over) {
-        if (target) follow();
+        if (pressed) follow();
         else press();
-        const depth = finger.scrolling ? 0.4 : 1;
-        if (target !== depth) {
+        pressed = true;
+        // Cerca del borde de arriba o de abajo el pozo se aplana: la sección no se deforma más allá de su borde y el
+        // pozo quedaría cortado en línea recta.
+        const edge = Math.min(1, Math.min(finger.y - s.top, s.bottom - finger.y) / (PATCH * R));
+        const depth = (finger.scrolling ? 0.4 : 1) * edge;
+        if (Math.abs(target - depth) > 0.01) {
           target = depth;
           run();
         }
-      } else if (target) {
+      } else if (pressed) {
         // El dedo salió de esta sección (o se levantó): rebota, con el pozo quieto donde estaba.
+        pressed = false;
         target = 0;
         run();
       }
