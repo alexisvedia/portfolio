@@ -81,14 +81,19 @@ const lightFor = (el: Element) => {
 };
 
 // El dedo (o el mouse apretado) es uno solo para toda la página: cada sección mira si está debajo.
-const finger = { x: 0, y: 0, down: false };
+const finger = { x: 0, y: 0, down: false, scrolling: false };
 const listeners = new Set<() => void>();
+let locked = false;
 const notify = () => {
   // Apoyar el dedo quieto es lo que hunde la tela: sin esto el celular lo toma como long-press y selecciona el texto.
-  const st = document.documentElement.style;
-  const v = finger.down ? 'none' : '';
-  st.userSelect = st.webkitUserSelect = v;
-  st.setProperty('-webkit-touch-callout', v);
+  // Se escribe solo al apoyar y al soltar: tocar el estilo de `html` en cada movimiento recalcula toda la página.
+  if (locked !== finger.down) {
+    locked = finger.down;
+    const st = document.documentElement.style;
+    const v = locked ? 'none' : '';
+    st.userSelect = st.webkitUserSelect = v;
+    st.setProperty('-webkit-touch-callout', v);
+  }
   listeners.forEach(fn => fn());
 };
 // Los campos de un formulario no se hunden: ahí apretar es escribir o elegir.
@@ -114,7 +119,7 @@ const wire = () => {
   }, opts);
   const lift = (e: TouchEvent) => {
     if (e.touches.length) return;
-    finger.down = false;
+    finger.down = finger.scrolling = false;
     notify();
   };
   window.addEventListener('touchend', lift, opts);
@@ -136,8 +141,19 @@ const wire = () => {
     finger.down = false;
     notify();
   }, opts);
-  // Con el dedo quieto en la pantalla, el scroll mueve la página debajo: el pozo queda donde está el dedo.
-  window.addEventListener('scroll', () => finger.down && notify(), opts);
+  // Con el dedo quieto en la pantalla, el scroll mueve la página debajo: el pozo queda donde está el dedo. Mientras la
+  // página corre, el pozo es playo: hondo, todo el texto que pasa por debajo se ondula. Al frenar se vuelve a hundir.
+  let still = 0;
+  window.addEventListener('scroll', () => {
+    if (!finger.down) return;
+    finger.scrolling = true;
+    clearTimeout(still);
+    still = window.setTimeout(() => {
+      finger.scrolling = false;
+      notify();
+    }, 150);
+    notify();
+  }, opts);
 };
 
 const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -203,23 +219,28 @@ const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       skin =
         Array.from(wrap.querySelectorAll<HTMLElement>('.pin-spacer > *')).find(el => getComputedStyle(el).position === 'fixed') ?? wrap;
       const k = skin.getBoundingClientRect();
-      R = Math.min(Math.max(s.width, Math.min(s.height, innerHeight)) * 0.32, 420);
+      // Del ancho de la sección: en el celular es la yema del dedo y no media pantalla.
+      R = Math.min(s.width * 0.32, 420);
       pit.x = finger.x - k.left;
       pit.y = finger.y - k.top;
       fe.setAttribute('href', pitMap(k.width, k.height, pit.x, pit.y, R));
       patch.style.width = patch.style.height = `${2 * PATCH * R}px`;
       patch.style.backgroundImage = shadeMap(lightFor(section));
       follow();
-      target = 1;
-      run();
     };
 
     const update = () => {
       const s = section.getBoundingClientRect();
       const over = finger.down && finger.x >= s.left && finger.x <= s.right && finger.y >= s.top && finger.y <= s.bottom;
-      if (over && !target) press();
-      else if (over) follow();
-      else if (target) {
+      if (over) {
+        if (target) follow();
+        else press();
+        const depth = finger.scrolling ? 0.4 : 1;
+        if (target !== depth) {
+          target = depth;
+          run();
+        }
+      } else if (target) {
         // El dedo salió de esta sección (o se levantó): rebota, con el pozo quieto donde estaba.
         target = 0;
         run();
