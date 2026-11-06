@@ -1,4 +1,5 @@
 import React, { useLayoutEffect, useRef } from 'react';
+import Almohada from './Almohada';
 import styled, { css, keyframes } from 'styled-components';
 import { Link } from 'react-router-dom';
 import gsap from 'gsap';
@@ -232,7 +233,6 @@ const WorkGallery: React.FC = () => {
         };
         drift('[data-wg-num]', { xPercent: 28 }, { xPercent: -28 });
         drift('[data-wg-shot]', { xPercent: -3 }, { xPercent: 3 });
-        drift('[data-wg-glow]', { xPercent: -10 }, { xPercent: 10 });
         drift(
           '[data-wg-float]',
           { xPercent: 30, yPercent: 10, rotation: 4 },
@@ -325,6 +325,7 @@ const WorkGallery: React.FC = () => {
 
   return (
     <Section ref={root} id="casos" aria-labelledby="work-title">
+      <Almohada>
       <Pin data-wg-pin="">
         <Slider data-wg-slider="">
           <Intro>
@@ -388,18 +389,6 @@ const WorkGallery: React.FC = () => {
                   </Meta>
 
                   <Stage data-wg-stage="">
-                    <Glow aria-hidden="true" data-wg-glow="" $art={!work.main}>
-                      {work.main && (
-                        <img
-                          src={work.main.src}
-                          width={work.main.w}
-                          height={work.main.h}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      )}
-                    </Glow>
                     {work.main ? (
                       <Frame>
                         <Bar aria-hidden="true">
@@ -453,6 +442,7 @@ const WorkGallery: React.FC = () => {
           <span />
         </Rail>
       </Pin>
+      </Almohada>
     </Section>
   );
 };
@@ -812,29 +802,6 @@ const Stage = styled.div`
   }
 `;
 
-const Glow = styled.div<{ $art?: boolean }>`
-  position: absolute;
-  inset: 10% 6% 4%;
-  border-radius: 2rem;
-  opacity: 0.7;
-  filter: blur(42px) saturate(1.8);
-  pointer-events: none;
-  background: ${({ $art }) =>
-    $art
-      ? `radial-gradient(circle at 30% 40%, ${INK.red}, transparent 55%),
-         radial-gradient(circle at 70% 60%, ${INK.teal}, transparent 55%),
-         radial-gradient(circle at 50% 80%, ${INK.lime}, transparent 50%)`
-      : 'var(--wg-accent)'};
-
-  img {
-    width: 100%;
-    height: 100%;
-    max-width: none;
-    object-fit: cover;
-    border-radius: inherit;
-  }
-`;
-
 const Frame = styled.div<{ $art?: boolean }>`
   position: absolute;
   top: 4%;
@@ -844,9 +811,11 @@ const Frame = styled.div<{ $art?: boolean }>`
   /* clip y no hidden: hidden lo vuelve contenedor de scroll y ata ahí el view(inline) de la captura. */
   overflow: clip;
   background: #1a1816;
+  /* Placa plana del color del caso, corrida abajo a la derecha como pieza de papel aparte: sin blur, como el resto
+     del sitio (docs/estilo-recorte.md). */
   box-shadow:
     0 0 0 1.5px ${cream(0.14)},
-    0 34px 70px -24px rgba(0, 0, 0, 0.85);
+    clamp(0.6rem, 1.2vw, 1rem) clamp(0.6rem, 1.2vw, 1rem) 0 var(--wg-accent);
 
   ${({ $art }) =>
     $art &&

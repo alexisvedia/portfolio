@@ -1,7 +1,8 @@
 import React, { useEffect, useId, useRef } from 'react';
 import styled from 'styled-components';
 
-/* Efecto almohada: donde se aprieta, la sección se hunde como una tela rellena y rebota con un resorte al soltar.
+/* Efecto almohada: donde se apoya el dedo, la sección se hunde como una tela rellena, y el pozo sigue al dedo mientras
+   se scrollea; al levantarlo rebota con un resorte.
    Funciona en cualquier navegador: el contenido se deforma con un filtro SVG (feDisplacementMap) y el pozo se
    sombrea con una capa de degradados, con la luz de arriba a la izquierda como en el resto del sitio.
    El filtro se aplica solo mientras se mueve: en reposo la sección se pinta normal. */
@@ -33,24 +34,95 @@ const pitMap = (w: number, h: number, px: number, py: number, R: number) => {
   return c.toDataURL();
 };
 
+// El dedo (o el mouse apretado) es uno solo para toda la página: cada sección mira si está debajo.
+const finger = { x: 0, y: 0, down: false };
+const listeners = new Set<() => void>();
+const notify = () => listeners.forEach(fn => fn());
+// Los campos de un formulario no se hunden: ahí apretar es escribir o elegir.
+const isField = (t: EventTarget | null) => t instanceof Element && !!t.closest('input, textarea, select');
+let wired = false;
+const wire = () => {
+  if (wired) return;
+  wired = true;
+  const opts = { passive: true, capture: true } as const;
+  // En el celular, el navegador cancela los pointer events cuando arranca el scroll; los touch events siguen llegando.
+  window.addEventListener('touchstart', e => {
+    if (isField(e.target)) return;
+    const t = e.touches[0];
+    Object.assign(finger, { x: t.clientX, y: t.clientY, down: e.touches.length === 1 });
+    notify();
+  }, opts);
+  window.addEventListener('touchmove', e => {
+    const t = e.touches[0];
+    if (!finger.down || !t) return;
+    finger.x = t.clientX;
+    finger.y = t.clientY;
+    notify();
+  }, opts);
+  const lift = (e: TouchEvent) => {
+    if (e.touches.length) return;
+    finger.down = false;
+    notify();
+  };
+  window.addEventListener('touchend', lift, opts);
+  window.addEventListener('touchcancel', lift, opts);
+  // Mouse: apretado con el botón principal, sin contar links ni botones, que se clickean.
+  window.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'touch' || e.button !== 0 || isField(e.target) || (e.target as Element).closest?.('a, button, label')) return;
+    Object.assign(finger, { x: e.clientX, y: e.clientY, down: true });
+    notify();
+  }, opts);
+  window.addEventListener('pointermove', e => {
+    if (e.pointerType === 'touch' || !finger.down) return;
+    finger.x = e.clientX;
+    finger.y = e.clientY;
+    notify();
+  }, opts);
+  window.addEventListener('pointerup', e => {
+    if (e.pointerType === 'touch' || !finger.down) return;
+    finger.down = false;
+    notify();
+  }, opts);
+  // Con el dedo quieto en la pantalla, el scroll mueve la página debajo: el pozo queda donde está el dedo.
+  window.addEventListener('scroll', () => finger.down && notify(), opts);
+};
+
 const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const id = `almohada${useId().replace(/:/g, '')}`;
   const wrapRef = useRef<HTMLDivElement>(null);
   const shadeRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<SVGFEImageElement>(null);
+  const offRef = useRef<SVGFEOffsetElement>(null);
   const dispRef = useRef<SVGFEDisplacementMapElement>(null);
 
   useEffect(() => {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    wire();
     const wrap = wrapRef.current!;
     const shade = shadeRef.current!;
     const section = wrap.parentElement!;
     const fe = imgRef.current!;
+    const off = offRef.current!;
     const disp = dispRef.current!;
 
     // Resorte: d va hacia `target` (1 apretado, 0 suelto). Al soltar pasa de largo y se infla un poco antes de quedar.
     let d = 0, vel = 0, target = 0, last = 0, raf = 0, R = 0;
-    const press = { x: 0, y: 0, sx: 0, sy: 0, id: -1 };
+    // Lo que se deforma: el envoltorio, o el bloque fijado por un pin de ScrollTrigger si hay uno activo. Un filtro en
+    // un ancestro de un elemento `position: fixed` lo vuelve relativo a ese ancestro y lo haría saltar de lugar.
+    let skin: HTMLElement = wrap;
+    // Dónde quedó el pozo en el mapa, relativo a `skin`, y dónde está ahora el dedo: el mapa se corre con feOffset
+    // en vez de volver a dibujarse en cada cuadro de scroll.
+    const pit = { x: 0, y: 0 };
+
+    // Lleva el pozo y la sombra al lugar del dedo.
+    const follow = () => {
+      const k = skin.getBoundingClientRect();
+      off.setAttribute('dx', String(finger.x - k.left - pit.x));
+      off.setAttribute('dy', String(finger.y - k.top - pit.y));
+      const s = section.getBoundingClientRect();
+      shade.style.setProperty('--x', `${finger.x - s.left}px`);
+      shade.style.setProperty('--y', `${finger.y - s.top}px`);
+    };
 
     const frame = (now: number) => {
       const dt = Math.min(0.033, last ? (now - last) / 1000 : 0.016);
@@ -62,7 +134,7 @@ const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       // Corrimiento máximo: la mitad de la escala. Un 4% del radio: la tela se estira sin torcer el texto.
       disp.setAttribute('scale', String(d * R * 0.08));
-      wrap.style.filter = d ? `url(#${id})` : '';
+      skin.style.filter = d ? `url(#${id})` : '';
       shade.style.opacity = String(Math.max(0, Math.min(1, d)));
 
       if (settled) {
@@ -73,50 +145,54 @@ const Almohada: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     };
     const run = () => raf || (raf = requestAnimationFrame(frame));
 
-    const down = (e: PointerEvent) => {
-      // Un solo dedo, botón principal, y no sobre algo que se puede clickear.
-      if (e.button !== 0 || target || (e.target as Element).closest('a, button, input, textarea, select, label')) return;
+    const press = () => {
       const s = section.getBoundingClientRect();
-      const w = wrap.getBoundingClientRect();
-      R = Math.min(Math.max(s.width, s.height) * 0.32, 420);
-      press.id = e.pointerId;
-      press.sx = e.clientX;
-      press.sy = e.clientY;
-      fe.setAttribute('href', pitMap(w.width, w.height, e.clientX - w.left, e.clientY - w.top, R));
-      shade.style.setProperty('--x', `${e.clientX - s.left}px`);
-      shade.style.setProperty('--y', `${e.clientY - s.top}px`);
+      skin.style.filter = '';
+      skin =
+        Array.from(wrap.querySelectorAll<HTMLElement>('.pin-spacer > *')).find(el => getComputedStyle(el).position === 'fixed') ?? wrap;
+      const k = skin.getBoundingClientRect();
+      R = Math.min(Math.max(s.width, Math.min(s.height, innerHeight)) * 0.32, 420);
+      pit.x = finger.x - k.left;
+      pit.y = finger.y - k.top;
+      fe.setAttribute('href', pitMap(k.width, k.height, pit.x, pit.y, R));
       shade.style.setProperty('--r', `${R}px`);
+      follow();
       target = 1;
       run();
     };
-    const up = (e?: Event) => {
-      if (!target || (e instanceof PointerEvent && e.pointerId !== press.id)) return;
-      target = 0;
-      run();
-    };
-    // Si el dedo arrastra, es scroll: se suelta.
-    const move = (e: PointerEvent) =>
-      target && e.pointerId === press.id && Math.hypot(e.clientX - press.sx, e.clientY - press.sy) > 8 && up();
 
-    section.addEventListener('pointerdown', down, { passive: true });
-    section.addEventListener('pointermove', move, { passive: true });
-    for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) section.addEventListener(ev, up, { passive: true });
-    window.addEventListener('scroll', up, { passive: true });
+    const update = () => {
+      const s = section.getBoundingClientRect();
+      const over = finger.down && finger.x >= s.left && finger.x <= s.right && finger.y >= s.top && finger.y <= s.bottom;
+      if (over && !target) press();
+      else if (over) follow();
+      else if (target) {
+        // El dedo salió de esta sección (o se levantó): rebota, con el pozo quieto donde estaba.
+        target = 0;
+        run();
+      }
+    };
+    listeners.add(update);
     return () => {
+      listeners.delete(update);
       cancelAnimationFrame(raf);
-      section.removeEventListener('pointerdown', down);
-      section.removeEventListener('pointermove', move);
-      for (const ev of ['pointerup', 'pointercancel', 'pointerleave']) section.removeEventListener(ev, up);
-      window.removeEventListener('scroll', up);
+      skin.style.filter = '';
     };
   }, [id]);
 
   return (
     <>
       <Defs aria-hidden="true" focusable="false">
-        {/* sRGB: el mapa se lee tal cual, sin pasarlo a lineal. */}
+        {/* sRGB: el mapa se lee tal cual, sin pasarlo a lineal. Lo que el corrimiento deja afuera del mapa se rellena
+            con gris 128, que no desplaza. */}
         <filter id={id} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-          <feImage ref={imgRef} preserveAspectRatio="none" result="pit" />
+          <feFlood floodColor="rgb(128,128,128)" result="flat" />
+          <feImage ref={imgRef} preserveAspectRatio="none" result="map" />
+          <feOffset ref={offRef} in="map" dx="0" dy="0" result="moved" />
+          <feMerge result="pit">
+            <feMergeNode in="flat" />
+            <feMergeNode in="moved" />
+          </feMerge>
           <feDisplacementMap ref={dispRef} in="SourceGraphic" in2="pit" scale="0" xChannelSelector="R" yChannelSelector="G" />
         </filter>
       </Defs>
@@ -157,18 +233,28 @@ const Shade = styled.div`
       transparent calc(var(--r) * 0.62)
     ),
     radial-gradient(
-      circle at calc(var(--x) + var(--r) * 0.16) calc(var(--y) + var(--r) * 0.18),
-      transparent calc(var(--r) * 0.3),
-      rgba(255, 253, 235, 0.32) calc(var(--r) * 0.42),
-      rgba(255, 253, 235, 0.08) calc(var(--r) * 0.52),
-      transparent calc(var(--r) * 0.62)
-    ),
-    radial-gradient(
       circle at calc(var(--x) - var(--r) * 0.06) calc(var(--y) - var(--r) * 0.06),
       transparent calc(var(--r) * 0.64),
       rgba(0, 0, 0, 0.04) calc(var(--r) * 0.74),
       transparent calc(var(--r) * 0.9)
     );
+
+  /* La luz va en su propia capa, recortada con una máscara cónica a la ladera de abajo a la derecha: sobre un fondo
+     oscuro, donde la sombra no se ve, un anillo de luz entero se lee como un halo y no como un pozo. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      circle at calc(var(--x) + var(--r) * 0.16) calc(var(--y) + var(--r) * 0.18),
+      transparent calc(var(--r) * 0.3),
+      rgba(255, 253, 235, 0.32) calc(var(--r) * 0.42),
+      rgba(255, 253, 235, 0.08) calc(var(--r) * 0.52),
+      transparent calc(var(--r) * 0.62)
+    );
+    mask-image: conic-gradient(from 0deg at var(--x) var(--y), transparent 0 50deg, #000 115deg 155deg, transparent 220deg);
+    -webkit-mask-image: conic-gradient(from 0deg at var(--x) var(--y), transparent 0 50deg, #000 115deg 155deg, transparent 220deg);
+  }
 `;
 
 export default Almohada;

@@ -195,15 +195,13 @@ interface PosterProps {
   art?: string;
   /** La palabra se centra en el alto bajo la nav, a la par de un bloque pineado centrado. */
   centerWord?: boolean;
-  /** Efecto almohada al apretar (ver Almohada.tsx). */
-  pillow?: boolean;
   /** Borde de arriba cortado a tijera sobre la sección anterior (ver ScissorEdge.tsx). */
   edge?: React.ComponentProps<typeof ScissorEdge>;
   children: React.ReactNode;
 }
 
 const Poster = forwardRef<HTMLElement, PosterProps>(
-  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, pillow, edge, children }, ref) => {
+  ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, edge, children }, ref) => {
     const grid = (
       <Grid $flip={flip}>
         <WordCol $center={centerWord}>
@@ -232,7 +230,7 @@ const Poster = forwardRef<HTMLElement, PosterProps>(
         style={bg ? ({ background: bg, color: fg, '--poster-ground': bg, '--focus': fg } as React.CSSProperties) : undefined}
       >
         {edge && <ScissorEdge {...edge} />}
-        {pillow ? <Almohada>{grid}</Almohada> : grid}
+        <Almohada>{grid}</Almohada>
       </Section>
     );
   }
@@ -325,7 +323,7 @@ const PosterHome = forwardRef<HTMLElement>((_, contactRef) => {
           </HeroCopy>
         </Hero>
 
-        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap pillow edge={{ color: INK.lime, light: '#e8ec5c', seed: 11 }}>
+        <Poster id="about" label="Manifiesto" word="IDEA" cols={2} ink={INK.ground} accent={INK.red} flip bg={INK.lime} fg={INK.ground} overlap edge={{ color: INK.lime, light: '#e8ec5c', seed: 11 }}>
           <Lead data-split="">{t('landing.lead')}</Lead>
         </Poster>
 
