@@ -51,6 +51,7 @@ uniform float uFlip;
 uniform float uCurl;
 uniform float uZ;
 uniform float uMirror;
+uniform float uLift;
 varying vec2 vUv;
 varying float vS;
 varying vec3 vN;
@@ -66,6 +67,8 @@ void main() {
   vec3 p = abs(k) < 1e-4
     ? vec3(s * cos(a0), position.y, s * sin(a0))
     : vec3((sin(a) - sin(a0)) / k, position.y, (cos(a0) - cos(a)) / k);
+  // Las caras de la tapa dura se separan del cartón hacia afuera, una por lado.
+  p += vec3(-sin(a), 0.0, cos(a)) * uLift;
   p.z += uZ;
   vN = normalize(normalMatrix * vec3(-sin(a), 0.0, cos(a)));
   vS = uv.x;
@@ -179,7 +182,12 @@ export function mountBook(
   }
   const faces: { u: FaceUniforms; leaf: number; back: boolean }[] = [];
 
-  const faceMaterial = (face: Face, shared: Record<string, Three.IUniform>, back: boolean) => {
+  const faceMaterial = (
+    face: Face,
+    shared: Record<string, Three.IUniform>,
+    back: boolean,
+    lift: number
+  ) => {
     const layers = face.layers.slice(0, MAX_LAYERS);
     const off = Array.from({ length: MAX_LAYERS }, () => new THREE.Vector2());
     const material = new THREE.ShaderMaterial({
@@ -189,6 +197,7 @@ export function mountBook(
       uniforms: {
         ...shared,
         uMirror: { value: back ? 1 : 0 },
+        uLift: { value: back ? -lift : lift },
         uPaper: { value: rgb(THREE, face.paper) },
         uGrid: { value: face.grid ? 1 : 0 },
         uLine: { value: rgb(THREE, '#efe6c8') },
@@ -216,34 +225,42 @@ export function mountBook(
 
   // La hoja de arriba de la pila es la 0. A la derecha se apilan al revés de como quedan a la izquierda.
   const EPS = 0.004;
+  // La hoja 0 es la tapa: un cartón rígido con grosor, que no se curva y lleva una cara de cada lado.
+  const THICK = 0.006;
   const n = leaves.length;
   const leafUniforms = leaves.map((leaf, i) => {
     const shared = {
       uFlip: { value: 0 },
-      uCurl: { value: 0.85 },
+      uCurl: { value: i === 0 ? 0 : 0.85 },
       uZ: { value: (n - i) * EPS },
     };
-    const front = faceMaterial(leaf.front, shared, false);
+    const lift = i === 0 ? THICK / 2 + 0.0005 : 0;
+    const front = faceMaterial(leaf.front, shared, false, lift);
     book.add(new THREE.Mesh(geometry, front.material));
     faces.push({ u: front.u, leaf: i, back: false });
     if (leaf.back) {
-      const back = faceMaterial(leaf.back, shared, true);
+      const back = faceMaterial(leaf.back, shared, true, lift);
       book.add(new THREE.Mesh(geometry, back.material));
       faces.push({ u: back.u, leaf: i, back: true });
     }
     return shared;
   });
 
-  // Tapas duras: un poco más grandes que la hoja. La de la izquierda aparece cuando la tapa ya pasó.
+  // Tapas duras, un poco más grandes que la hoja: la de atrás queda quieta y la de adelante gira con la hoja 0.
   const M = 0.025;
   const boardGeometry = new THREE.PlaneGeometry(PAGE_W + M, PAGE_H + 2 * M);
+  const coverGeometry = new THREE.BoxGeometry(PAGE_W + M, PAGE_H + 2 * M, THICK).translate(
+    (PAGE_W + M) / 2,
+    0,
+    0
+  );
   const boardMaterial = new THREE.MeshBasicMaterial({ color: '#1f1c19' });
   materials.push(boardMaterial);
   const rightBoard = new THREE.Mesh(boardGeometry, boardMaterial);
   rightBoard.position.set((PAGE_W + M) / 2, 0, -EPS);
-  const leftBoard = rightBoard.clone();
-  leftBoard.position.x = -(PAGE_W + M) / 2;
-  book.add(rightBoard, leftBoard);
+  const coverPivot = new THREE.Group();
+  coverPivot.add(new THREE.Mesh(coverGeometry, boardMaterial));
+  book.add(rightBoard, coverPivot);
 
   // Sombra apoyada debajo del libro: un degradé suave, sin luces de verdad.
   const shadowCanvas = document.createElement('canvas');
@@ -302,7 +319,9 @@ export function mountBook(
         );
       });
       const open = s.flips[0] ?? 0;
-      leftBoard.visible = open > 0.5;
+      // Mismo giro que el shader con curva 0: rotar -a sobre y lleva (s, 0, 0) a (s cos a, 0, s sin a).
+      coverPivot.rotation.y = -open * Math.PI;
+      coverPivot.position.z = leafUniforms[0]?.uZ.value ?? 0;
       shadow.position.x = THREE.MathUtils.lerp(PAGE_W / 2, 0, open);
       shadow.scale.set(THREE.MathUtils.lerp(PAGE_W, 2 * PAGE_W, open) * 1.25, PAGE_H * 1.2, 1);
       book.position.x = -s.focus;
@@ -316,6 +335,7 @@ export function mountBook(
       blank.dispose();
       geometry.dispose();
       boardGeometry.dispose();
+      coverGeometry.dispose();
       shadowGeometry.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
