@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import Almohada from './Almohada';
 import styled, { css, keyframes } from 'styled-components';
 import { Link } from 'react-router-dom';
@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ConstructedWord from './ConstructedWord';
 import { FONT, INK, ROUTE } from './content';
+import type { Book, BookState } from './caseBook';
 import xconsHome from '@/assets/poster/xcons-home.webp';
 import xconsComercial from '@/assets/poster/xcons-comercial.webp';
 import fusionApp from '@/assets/poster/fusion-app.webp';
@@ -18,12 +19,14 @@ import banditLogo from '@/assets/images/projects/Bandit.svg';
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* Desktop con movimiento: sección pineada que traslada el track. En cualquier otro caso, carrusel nativo. */
-/** Con esta media query la galería se pinea y muestra el rail de avance. */
+/* Con movimiento y WebGL, los casos son un libro 3D que pasa las hojas con el scroll. En cualquier otro caso, carrusel nativo. */
+/** Con esta media query el libro muestra el rail de avance, del que nace el hilo de abajo (Stitch). */
 export const PIN = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)';
-const TILT = '(pointer: fine) and (prefers-reduced-motion: no-preference)';
+const BOOK = '(prefers-reduced-motion: no-preference)';
+// Ancho de página del libro (PAGE_W en caseBook, que se carga aparte con three).
+const PAGE_W = 1;
 
-interface Shot {
+export interface Shot {
   src: string;
   alt: string;
   w: number;
@@ -31,7 +34,7 @@ interface Shot {
   pos?: string;
 }
 
-interface Work {
+export interface Work {
   accent: string;
   logo?: { src: string; w: number; h: number };
   main?: Shot;
@@ -148,8 +151,18 @@ const Nodes: React.FC = () => (
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
+/** Contexto WebGL de prueba, que se suelta enseguida. Sin él queda la galería de tarjetas. */
+const hasWebGL = () => {
+  const gl = document.createElement('canvas').getContext('webgl2');
+  gl?.getExtension('WEBGL_lose_context')?.loseContext();
+  return !!gl;
+};
+
 const WorkGallery: React.FC = () => {
   const root = useRef<HTMLElement>(null);
+  const ctaRef = useRef<HTMLAnchorElement>(null);
+  // Caso abierto en el libro: -1 con la tapa cerrada.
+  const [active, setActive] = useState(-1);
 
   useLayoutEffect(() => {
     const section = root.current;
@@ -157,48 +170,94 @@ const WorkGallery: React.FC = () => {
     const one = (sel: string) => section.querySelector<HTMLElement>(sel);
     const pin = one('[data-wg-pin]');
     const slider = one('[data-wg-slider]');
-    const track = one('[data-wg-track]');
+    const host = one('[data-wg-book]');
     const rail = one('[data-wg-rail]');
-    if (!pin || !slider || !track || !rail) return;
-    const cards = gsap.utils.toArray<HTMLElement>('[data-wg-card]', section);
+    if (!pin || !slider || !host || !rail) return;
+    const word = section.querySelector<SVGSVGElement>('[data-wg-word] svg');
     const mm = gsap.matchMedia(section);
+    let noBook = false;
 
-    mm.add(PIN, () => {
-      // Un solo aro a la vista: el del rail mientras avanza, el del hilo (Stitch fromRail) cuando terminó.
+    // Libro de casos con Three.js. Con reduced motion o sin WebGL quedan las tarjetas.
+    mm.add({ desk: '(min-width: 1024px)', motion: BOOK }, ctx => {
+      const { desk, motion } = ctx.conditions as { desk: boolean; motion: boolean };
+      if (!motion || noBook || !hasWebGL()) return;
+
+      const single = !desk;
+      const half = PAGE_W / 2;
+      // Una hoja por caso: la tapa deja ver el caso 1 y cada hoja siguiente, el próximo.
+      const flips = ROUTE.map(() => 0);
+      const state: BookState = { flips, focus: half, px: 0, py: 0 };
+      let dirty = true;
+      let last = -1;
+      const onUpdate = () => {
+        dirty = true;
+        // Caso abierto: el de la última hoja que ya pasó la mitad.
+        const open = flips.filter(f => f > 0.5).length - 1;
+        if (open !== last) setActive((last = open));
+      };
+
+      // Desktop: se abre la tapa y pasan las hojas. Mobile, una página por vez: la cámara va de la izquierda
+      // (los datos del caso) a la derecha (las capturas) y la hoja pasa mientras vuelve a la izquierda.
+      const HOLD = 0.7;
+      const PAN = 0.8;
+      const tl = gsap.timeline({ defaults: { ease: 'power1.inOut' }, onUpdate });
+      let t = 0;
+      ROUTE.forEach((_, i) => {
+        tl.to(flips, { [i]: 1, duration: 1 }, t).to(
+          state,
+          { focus: single ? -half : 0, duration: 1 },
+          t
+        );
+        t += 1;
+        tl.addLabel(`case${i}`, t + (single ? 0 : HOLD / 2));
+        t += HOLD;
+        if (single) {
+          tl.to(state, { focus: half, duration: PAN }, t);
+          t += PAN + HOLD;
+        }
+      });
+      const total = t;
+
       const syncRing = (s: ScrollTrigger) => {
         rail.toggleAttribute('data-done', s.progress === 1);
         document.documentElement.toggleAttribute('data-rail-done', s.progress === 1);
       };
-      // El atributo cambia el layout a fila pineada: va antes de medir.
       section.dataset.pinned = '';
-      track.removeAttribute('tabindex');
-      const distance = () => Math.max(0, slider.offsetWidth - pin.clientWidth);
-
-      // ease none en todo el timeline: containerAnimation necesita un avance lineal.
-      const tl = gsap.timeline({
-        defaults: { ease: 'none' },
-        scrollTrigger: {
-          trigger: pin,
-          pin: true,
-          scrub: 0.8,
-          start: 'top top',
-          end: () => `+=${distance()}`,
-          invalidateOnRefresh: true,
-          refreshPriority: 3,
-          anticipatePin: 1,
-          // Al terminar la galería, el aro del hilo de abajo toma el lugar del aro del rail.
-          // Va por el scroll real (no por el scrub, que llega tarde) para que no se vean los dos.
-          // onRefresh cubre el pin creado o recalculado con el scroll ya pasado el final.
-          onLeave: syncRing,
-          onEnterBack: syncRing,
-          onRefresh: syncRing,
-        },
+      ScrollTrigger.create({
+        animation: tl,
+        trigger: pin,
+        pin: true,
+        scrub: 0.8,
+        start: 'top top',
+        end: () => `+=${total * window.innerHeight * (single ? 0.42 : 0.55)}`,
+        invalidateOnRefresh: true,
+        refreshPriority: 3,
+        anticipatePin: 1,
+        // Al terminar el libro, el aro del hilo de abajo toma el lugar del aro del rail (solo desktop, ver Stitch).
+        onLeave: syncRing,
+        onEnterBack: syncRing,
+        onRefresh: syncRing,
       });
-      tl.to(slider, { x: () => -distance() }, 0)
-        .fromTo(rail.firstElementChild, { scaleX: 0 }, { scaleX: 1 }, 0)
-        .fromTo(rail.lastElementChild, { x: 0 }, { x: () => rail.offsetWidth }, 0)
-        // Último tramo: la línea se pone roja y el aro crece hasta el tamaño del aro del hilo que sigue.
-        .fromTo(rail.firstElementChild, { backgroundColor: INK.cream }, { backgroundColor: INK.red, duration: 0.06 }, 0.44)
+
+      // Rail de avance: la línea se llena con todo el libro y en el último tramo se pone roja y el aro crece.
+      tl.fromTo(
+        rail.firstElementChild,
+        { scaleX: 0 },
+        { scaleX: 1, ease: 'none', duration: total },
+        0
+      )
+        .fromTo(
+          rail.lastElementChild,
+          { x: 0 },
+          { x: () => rail.offsetWidth, ease: 'none', duration: total },
+          0
+        )
+        .fromTo(
+          rail.firstElementChild,
+          { backgroundColor: INK.cream },
+          { backgroundColor: INK.red, ease: 'none', duration: total * 0.12 },
+          total * 0.88
+        )
         .fromTo(
           rail.lastElementChild,
           { scale: 1 },
@@ -207,241 +266,276 @@ const WorkGallery: React.FC = () => {
             scale: () => {
               const ring = rail.lastElementChild as HTMLElement;
               const bead = document.querySelector('[data-from-rail] [data-bead] circle');
-              return bead && ring.offsetWidth ? bead.getBoundingClientRect().width / ring.offsetWidth : 2;
+              return bead && ring.offsetWidth
+                ? bead.getBoundingClientRect().width / ring.offsetWidth
+                : 2;
             },
-            duration: 0.06,
-          },
-          0.44
-        );
-
-      // Parallax dentro de cada card: cada capa viaja a otra velocidad que el track.
-      cards.forEach(card => {
-        const drift = (sel: string, from: gsap.TweenVars, to: gsap.TweenVars) => {
-          const el = card.querySelectorAll(sel);
-          if (!el.length) return;
-          gsap.fromTo(el, from, {
-            ...to,
             ease: 'none',
-            scrollTrigger: {
-              trigger: card,
-              containerAnimation: tl,
-              start: 'left right',
-              end: 'right left',
-              scrub: true,
-            },
-          });
-        };
-        drift('[data-wg-num]', { xPercent: 28 }, { xPercent: -28 });
-        drift('[data-wg-shot]', { xPercent: -3 }, { xPercent: 3 });
-        drift(
-          '[data-wg-float]',
-          { xPercent: 30, yPercent: 10, rotation: 4 },
-          { xPercent: -30, yPercent: -10, rotation: -3 }
+            duration: total * 0.12,
+          },
+          total * 0.88
         );
 
-        const lines = card.querySelectorAll('[data-wg-line]');
-        if (lines.length) {
-          gsap.fromTo(
-            lines,
-            { strokeDashoffset: 1 },
-            {
-              strokeDashoffset: 0,
-              ease: 'none',
-              stagger: 0.06,
-              scrollTrigger: {
-                trigger: card,
-                containerAnimation: tl,
-                start: 'left 90%',
-                end: 'center 55%',
-                scrub: true,
-              },
-            }
-          );
+      // El puntero inclina el libro y corre las capas; se suaviza en el ticker.
+      const aim = { x: 0, y: 0 };
+      const move = (e: PointerEvent) => {
+        if (e.pointerType !== 'mouse') return;
+        const r = pin.getBoundingClientRect();
+        aim.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+        aim.y = ((e.clientY - r.top) / r.height) * 2 - 1;
+      };
+      const leave = () => {
+        aim.x = aim.y = 0;
+      };
+      pin.addEventListener('pointermove', move);
+      pin.addEventListener('pointerleave', leave);
+
+      let book: Book | null = null;
+      let cancelled = false;
+      const tick = () => {
+        const dx = aim.x - state.px;
+        const dy = aim.y - state.py;
+        if (Math.abs(dx) + Math.abs(dy) > 1e-4) {
+          state.px += dx * 0.08;
+          state.py += dy * 0.08;
+          dirty = true;
         }
+        if (book && dirty) {
+          dirty = false;
+          book.render(state);
+        }
+      };
+      // Solo dibuja con la sección a la vista.
+      const visible = ScrollTrigger.create({
+        trigger: section,
+        start: 'top bottom',
+        end: 'bottom top',
+        onToggle: s => (s.isActive ? gsap.ticker.add(tick) : gsap.ticker.remove(tick)),
       });
 
-      // Con el track trasladado, el foco por teclado puede caer fuera de vista: se scrollea hasta la card.
+      const resize = () => {
+        // Franjas que tapan la nav con la pista de arriba y el botón con el rail de abajo.
+        const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        book?.resize(
+          host.clientWidth,
+          host.clientHeight,
+          single,
+          8 * rem,
+          (desk ? 6.5 : 5) * rem
+        );
+        dirty = true;
+      };
+      const ro = new ResizeObserver(resize);
+      ro.observe(host);
+
+      // Three, las páginas y sus imágenes se piden una pantalla antes de llegar.
+      const io = new IntersectionObserver(
+        entries => {
+          if (!entries.some(en => en.isIntersecting)) return;
+          io.disconnect();
+          // Alto de página en px de textura: el de pantalla con el pixel ratio, con piso y techo.
+          const pageH = gsap.utils.clamp(
+            900,
+            1600,
+            host.clientHeight * 0.85 * Math.min(window.devicePixelRatio, 2)
+          );
+          Promise.all([import('three'), import('./caseBook'), import('./bookPages')])
+            .then(async ([THREE, { mountBook }, { buildLeaves }]) => {
+              const leaves = await buildLeaves(WORK, word, pageH);
+              if (cancelled) return;
+              book = mountBook(THREE, host, leaves, INK.ground);
+              if (!book) throw new Error('webgl');
+              section.dataset.book = 'ready';
+              resize();
+            })
+            .catch(() => {
+              // Sin libro vuelven las tarjetas.
+              if (cancelled) return;
+              noBook = true;
+              mm.revert();
+              ScrollTrigger.refresh();
+            });
+        },
+        { rootMargin: '100% 0px' }
+      );
+      io.observe(section);
+
+      // Las tarjetas quedan para teclado y lectores de pantalla: el foco lleva el libro hasta ese caso.
       const onFocus = (e: FocusEvent) => {
         const target = e.target as HTMLElement;
         const card = target.closest<HTMLElement>('[data-wg-card]');
         const st = tl.scrollTrigger;
-        if (!card || !st || !target.matches(':focus-visible')) return;
-        const x = gsap.utils.clamp(
-          0,
-          distance(),
-          card.offsetLeft - (pin.clientWidth - card.offsetWidth) / 2
-        );
-        window.scrollTo({ top: st.start + x, behavior: 'auto' });
+        if (!card || !st) return;
+        const i = [...slider.querySelectorAll('[data-wg-card]')].indexOf(card);
+        const at = tl.labels[`case${i}`] ?? 0;
+        window.scrollTo({
+          top: st.start + (at / tl.duration()) * (st.end - st.start),
+          behavior: 'auto',
+        });
+        ctaRef.current?.toggleAttribute('data-kbd', target.matches(':focus-visible'));
       };
+      const onBlur = () => ctaRef.current?.removeAttribute('data-kbd');
       slider.addEventListener('focusin', onFocus);
+      slider.addEventListener('focusout', onBlur);
+      const open = () => ctaRef.current?.click();
+      host.addEventListener('click', open);
 
       return () => {
+        cancelled = true;
+        io.disconnect();
+        ro.disconnect();
+        visible.kill();
+        gsap.ticker.remove(tick);
+        pin.removeEventListener('pointermove', move);
+        pin.removeEventListener('pointerleave', leave);
         slider.removeEventListener('focusin', onFocus);
+        slider.removeEventListener('focusout', onBlur);
+        host.removeEventListener('click', open);
+        book?.dispose();
         delete section.dataset.pinned;
+        delete section.dataset.book;
         rail.removeAttribute('data-done');
         document.documentElement.removeAttribute('data-rail-done');
-        track.setAttribute('tabindex', '0');
+        setActive(-1);
       };
-    });
-
-    // Tilt 3D con el puntero. Rota el escenario, que no lleva parallax: así no pelean por el transform.
-    mm.add(TILT, () => {
-      const offs = cards.map(card => {
-        const stage = card.querySelector<HTMLElement>('[data-wg-stage]');
-        const glare = card.querySelector<HTMLElement>('[data-wg-glare]');
-        if (!stage || !glare) return () => {};
-        gsap.set(stage, { transformPerspective: 1100 });
-        const rx = gsap.quickTo(stage, 'rotationX', { duration: 0.6, ease: 'power3' });
-        const ry = gsap.quickTo(stage, 'rotationY', { duration: 0.6, ease: 'power3' });
-        const shine = gsap.quickTo(glare, 'opacity', { duration: 0.4, ease: 'power2' });
-
-        const move = (e: PointerEvent) => {
-          const r = stage.getBoundingClientRect();
-          const px = (e.clientX - r.left) / r.width;
-          const py = (e.clientY - r.top) / r.height;
-          ry((px - 0.5) * 14);
-          rx((0.5 - py) * 10);
-          shine(1);
-          glare.style.setProperty('--gx', `${px * 100}%`);
-          glare.style.setProperty('--gy', `${py * 100}%`);
-        };
-        const leave = () => {
-          rx(0);
-          ry(0);
-          shine(0);
-        };
-        card.addEventListener('pointermove', move);
-        card.addEventListener('pointerleave', leave);
-        return () => {
-          card.removeEventListener('pointermove', move);
-          card.removeEventListener('pointerleave', leave);
-        };
-      });
-      return () => offs.forEach(off => off());
     });
 
     return () => mm.revert();
   }, []);
 
+  const stop = ROUTE[active];
+
   return (
     <Section ref={root} id="casos" aria-labelledby="work-title">
       <Almohada>
-      <Pin data-wg-pin="">
-        <Slider data-wg-slider="">
-          <Intro>
-            <WordBox>
-              <ConstructedWord
-                word="CASOS"
-                cols={3}
-                ink={INK.cream}
-                accent={INK.red}
-                accentGlyphs={[3]}
-              />
-            </WordBox>
-            <Title id="work-title">Lo que construí</Title>
-            <Hint>
-              <span data-wg-when="pin">Seguí bajando: los casos pasan de costado.</span>
-              <span data-wg-when="swipe">Deslizá para ver más.</span>
-            </Hint>
-          </Intro>
+        <Pin data-wg-pin="">
+          <Slider data-wg-slider="">
+            <Intro>
+              <WordBox data-wg-word="">
+                <ConstructedWord
+                  word="CASOS"
+                  cols={3}
+                  ink={INK.cream}
+                  accent={INK.red}
+                  accentGlyphs={[3]}
+                />
+              </WordBox>
+              <Title id="work-title">Lo que construí</Title>
+              <Hint>Deslizá para ver más.</Hint>
+            </Intro>
 
-          <Track data-wg-track="" tabIndex={0} aria-label="Casos de trabajo">
-            {ROUTE.map((stop, i) => {
-              const work = WORK[stop.company] ?? { accent: INK.cream };
-              return (
-                <Card
-                  key={stop.company}
-                  data-wg-card=""
-                  style={{ '--wg-accent': work.accent } as React.CSSProperties}
-                >
-                  <Meta>
-                    <Num aria-hidden="true" data-wg-num="">
-                      {pad2(i + 1)}
-                    </Num>
-                    {work.logo ? (
-                      <Logo
-                        src={work.logo.src}
-                        width={work.logo.w}
-                        height={work.logo.h}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ) : (
-                      <Wordmark aria-hidden="true">
-                        Cubiq
-                        <Dot />
-                      </Wordmark>
-                    )}
-                    <Years>{stop.years}</Years>
-                    <Company>{stop.company}</Company>
-                    <Role>{stop.role}</Role>
-                    {stop.to ? (
-                      <CardLink as={Link} to={stop.to}>
-                        {stop.linkLabel}
-                      </CardLink>
-                    ) : (
-                      <CardLink href={`#${stop.anchor ?? ''}`}>
-                        {stop.linkLabel}
-                        <SrOnly> de {stop.company}</SrOnly>
-                      </CardLink>
-                    )}
-                  </Meta>
+            <Track data-wg-track="" tabIndex={0} aria-label="Casos de trabajo">
+              {ROUTE.map((stop, i) => {
+                const work = WORK[stop.company] ?? { accent: INK.cream };
+                return (
+                  <Card
+                    key={stop.company}
+                    data-wg-card=""
+                    style={{ '--wg-accent': work.accent } as React.CSSProperties}
+                  >
+                    <Meta>
+                      <Num aria-hidden="true">{pad2(i + 1)}</Num>
+                      {work.logo ? (
+                        <Logo
+                          src={work.logo.src}
+                          width={work.logo.w}
+                          height={work.logo.h}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      ) : (
+                        <Wordmark aria-hidden="true">
+                          Cubiq
+                          <Dot />
+                        </Wordmark>
+                      )}
+                      <Years>{stop.years}</Years>
+                      <Company>{stop.company}</Company>
+                      <Role>{stop.role}</Role>
+                      {stop.to ? (
+                        <CardLink as={Link} to={stop.to}>
+                          {stop.linkLabel}
+                        </CardLink>
+                      ) : (
+                        <CardLink href={`#${stop.anchor ?? ''}`}>
+                          {stop.linkLabel}
+                          <SrOnly> de {stop.company}</SrOnly>
+                        </CardLink>
+                      )}
+                    </Meta>
 
-                  <Stage data-wg-stage="">
-                    {work.main ? (
-                      <Frame>
-                        <Bar aria-hidden="true">
-                          <i />
-                          <i />
-                          <i />
-                          <b />
-                        </Bar>
-                        <ShotBox style={{ aspectRatio: `${work.main.w} / ${work.main.h}` }}>
-                          <img
-                            data-wg-shot=""
-                            src={work.main.src}
-                            alt={work.main.alt}
-                            width={work.main.w}
-                            height={work.main.h}
-                            loading="lazy"
-                            decoding="async"
-                            style={{ objectPosition: work.main.pos ?? '50% 0%' }}
-                          />
-                        </ShotBox>
-                      </Frame>
-                    ) : (
-                      <Frame $art>
-                        <Nodes />
-                      </Frame>
-                    )}
-                    {work.float && (
-                      <FloatWrap data-wg-float="">
-                        <Float style={{ aspectRatio: `${work.float.w} / ${work.float.h}` }}>
-                          <img
-                            src={work.float.src}
-                            alt={work.float.alt}
-                            width={work.float.w}
-                            height={work.float.h}
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </Float>
-                      </FloatWrap>
-                    )}
-                    <Glare aria-hidden="true" data-wg-glare="" />
-                  </Stage>
-                </Card>
-              );
-            })}
-          </Track>
-        </Slider>
+                    <Stage>
+                      {work.main ? (
+                        <Frame>
+                          <Bar aria-hidden="true">
+                            <i />
+                            <i />
+                            <i />
+                            <b />
+                          </Bar>
+                          <ShotBox style={{ aspectRatio: `${work.main.w} / ${work.main.h}` }}>
+                            <img
+                              src={work.main.src}
+                              alt={work.main.alt}
+                              width={work.main.w}
+                              height={work.main.h}
+                              loading="lazy"
+                              decoding="async"
+                              style={{ objectPosition: work.main.pos ?? '50% 0%' }}
+                            />
+                          </ShotBox>
+                        </Frame>
+                      ) : (
+                        <Frame $art>
+                          <Nodes />
+                        </Frame>
+                      )}
+                      {work.float && (
+                        <FloatWrap>
+                          <Float style={{ aspectRatio: `${work.float.w} / ${work.float.h}` }}>
+                            <img
+                              src={work.float.src}
+                              alt={work.float.alt}
+                              width={work.float.w}
+                              height={work.float.h}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </Float>
+                        </FloatWrap>
+                      )}
+                    </Stage>
+                  </Card>
+                );
+              })}
+            </Track>
+          </Slider>
 
-        <Rail aria-hidden="true" data-wg-rail="">
-          <span />
-          <span />
-        </Rail>
-      </Pin>
+          {/* El libro es decorativo: el contenido accesible son las tarjetas, ocultas a la vista mientras está el libro. */}
+          <BookHost data-wg-book="" aria-hidden="true" />
+          <BookHint aria-hidden="true">Seguí bajando: las páginas pasan solas.</BookHint>
+          {stop?.to ? (
+            <Cta ref={ctaRef} as={Link} to={stop.to} tabIndex={-1} aria-hidden="true">
+              {stop.linkLabel}
+            </Cta>
+          ) : (
+            <Cta
+              ref={ctaRef}
+              href={`#${stop?.anchor ?? ''}`}
+              data-hidden={stop ? undefined : ''}
+              tabIndex={-1}
+              aria-hidden="true"
+            >
+              {stop?.linkLabel}
+            </Cta>
+          )}
+
+          <Rail aria-hidden="true" data-wg-rail="">
+            <span />
+            <span />
+          </Rail>
+        </Pin>
       </Almohada>
     </Section>
   );
@@ -499,16 +593,6 @@ const Section = styled.section`
   &[data-pinned] {
     padding-block: 0;
   }
-
-  [data-wg-when='pin'] {
-    display: none;
-  }
-  &[data-pinned] [data-wg-when='pin'] {
-    display: inline;
-  }
-  &[data-pinned] [data-wg-when='swipe'] {
-    display: none;
-  }
 `;
 
 const Pin = styled.div`
@@ -531,24 +615,27 @@ const Pin = styled.div`
   }
 
   ${pinned} {
-    position: relative;
-    height: 100vh;
+    height: 100svh;
     overflow: clip;
-    display: flex;
-    align-items: center;
-    padding-top: 4.5rem;
+  }
+  ${desktop} {
+    ${pinned} {
+      height: 100vh;
+    }
   }
 `;
 
 const Slider = styled.div`
   position: relative;
 
+  /* Con el libro, las tarjetas siguen ahí para teclado y lectores de pantalla, fuera de la vista. */
   ${pinned} {
-    display: flex;
-    align-items: center;
-    width: max-content;
-    padding-inline: ${pad} clamp(4rem, 14vw, 12rem);
-    will-change: transform;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 `;
 
@@ -556,21 +643,10 @@ const Intro = styled.div`
   display: grid;
   gap: 1.1rem;
   padding: 0 ${pad} clamp(1.5rem, 4vh, 2.5rem);
-
-  ${pinned} {
-    flex: none;
-    width: clamp(17rem, 24vw, 24rem);
-    margin-right: clamp(3rem, 6vw, 6rem);
-    padding: 0;
-  }
 `;
 
 const WordBox = styled.div`
   width: min(56vw, 15rem);
-
-  ${pinned} {
-    width: 100%;
-  }
 
   svg {
     display: block;
@@ -611,13 +687,6 @@ const Track = styled.ol`
   scroll-padding-inline: ${pad};
   scrollbar-width: thin;
   scrollbar-color: ${cream(0.3)} transparent;
-
-  ${pinned} {
-    gap: clamp(4rem, 8vw, 8rem);
-    padding: 0;
-    overflow: visible;
-    scroll-snap-type: none;
-  }
 `;
 
 const Card = styled.li`
@@ -935,23 +1004,6 @@ const Float = styled.div`
   }
 `;
 
-const Glare = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border-radius: 1rem;
-  opacity: 0;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  /* Borde difuso: con el tilt, el overlay dejaba ver el rectángulo del escenario como una caja. */
-  mask-image: radial-gradient(closest-side, #000 55%, transparent);
-  background: radial-gradient(
-    circle at var(--gx, 50%) var(--gy, 50%),
-    rgba(255, 255, 255, 0.4),
-    transparent 45%
-  );
-`;
-
 const NodeArt = styled.svg`
   display: block;
   width: 92%;
@@ -994,15 +1046,17 @@ const NodeArt = styled.svg`
 const Rail = styled.div`
   display: none;
 
-  ${pinned} {
-    display: block;
-    position: absolute;
-    left: ${pad};
-    right: ${pad};
-    bottom: clamp(1.25rem, 4vh, 2.5rem);
-    height: 3px;
-    border-radius: 3px;
-    background: ${cream(0.12)};
+  ${desktop} {
+    ${pinned} {
+      display: block;
+      position: absolute;
+      left: ${pad};
+      right: ${pad};
+      bottom: clamp(1.25rem, 4vh, 2.5rem);
+      height: 3px;
+      border-radius: 3px;
+      background: ${cream(0.12)};
+    }
   }
 
   &[data-done] span:last-child {
@@ -1036,5 +1090,84 @@ const Rail = styled.div`
     width: 1.1rem;
     height: 1.1rem;
     margin: -0.55rem 0 0 -0.55rem;
+  }
+`;
+
+/* ---------- libro ---------- */
+
+const BookHost = styled.div`
+  display: none;
+
+  ${pinned} {
+    display: block;
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  [data-book='ready'] & {
+    opacity: 1;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const BookHint = styled.p`
+  display: none;
+
+  && {
+    margin: 0;
+    font-size: 0.95rem;
+    color: ${cream(0.6)};
+  }
+  ${pinned} {
+    display: block;
+    position: absolute;
+    top: 5rem;
+    left: ${pad};
+  }
+`;
+
+const Cta = styled.a`
+  display: none;
+
+  ${pinned} {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+    left: 50%;
+    bottom: 2.25rem;
+    transform: translateX(-50%);
+    padding: 0.8rem 1.4rem;
+    border-radius: 999px;
+    background: ${INK.cream};
+    color: ${INK.ground};
+    font-size: 1rem;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+  }
+  ${desktop} {
+    ${pinned} {
+      bottom: 3.75rem;
+    }
+  }
+  &::after {
+    content: '→';
+  }
+  &[data-hidden] {
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* El foco real está en la tarjeta oculta: el anillo se dibuja acá, donde se ve. */
+  &[data-kbd] {
+    outline: 3px solid ${INK.red};
+    outline-offset: 4px;
   }
 `;
