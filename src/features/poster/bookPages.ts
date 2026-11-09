@@ -16,6 +16,11 @@ const PARTNER: Record<string, string> = {
   [INK.red]: INK.teal,
 };
 const partnerOf = (accent: string) => PARTNER[accent] ?? INK.violet;
+/** Colores del pliego: los de la marca si están cargados; si no (Cubiq), el acento del sitio y su pareja. */
+const inks = (w: Work) => ({
+  ink: w.brand?.color ?? w.accent,
+  partner: w.brand?.partner ?? partnerOf(w.accent),
+});
 
 const load = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
@@ -70,6 +75,13 @@ export async function buildLeaves(
       [w.main, w.float]
         .filter((s): s is Shot => !!s)
         .map(s => load(s.src).then(img => shots.set(s.src, img)))
+    )
+  );
+  // Los logos vienen en blanco: van tal cual sobre la etiqueta del color de la marca.
+  const logos = new Map<string, HTMLImageElement>();
+  await Promise.all(
+    Object.values(work).map(w =>
+      w.logo ? load(w.logo.src).then(img => logos.set(w.logo!.src, img)).catch(() => null) : null
     )
   );
 
@@ -283,14 +295,14 @@ export async function buildLeaves(
   const metaFace = (i: number): Face => {
     const stop = ROUTE[i];
     const w = work[stop.company] ?? { accent: INK.cream };
-    const partner = partnerOf(w.accent);
-    const sticker = w.accent === INK.red ? INK.ground : INK.red;
+    const { ink, partner } = inks(w);
+    const logo = w.logo && logos.get(w.logo.src);
     return {
       paper: INK.cream,
       layers: [
         // El círculo cruza el lomo y sigue en la página derecha, a la misma profundidad. Abajo, un bloque del color pareja.
         shapes(0.15, c => {
-          disc(c, 0.99, 0.565, 0.435, w.accent);
+          disc(c, 0.99, 0.565, 0.435, ink);
           c.fillStyle = partner;
           c.beginPath();
           c.roundRect(-0.1, 1.04, 0.73, 0.45, [0, 0.37, 0, 0]);
@@ -322,7 +334,7 @@ export async function buildLeaves(
           c.textBaseline = 'top';
           const head = `${stop.years} · ${stop.role}`.toUpperCase();
           fit(c, head, 800, headH, cw - 2 * p);
-          c.fillStyle = w.accent;
+          c.fillStyle = ink;
           c.fillText(head, p, p);
           let y = p + headH + 0.022 * U;
           c.font = text(0.027 * U);
@@ -334,20 +346,45 @@ export async function buildLeaves(
           y += 0.026 * U;
           const cta = `${stop.linkLabel} →`;
           c.font = text(0.031 * U);
-          c.fillStyle = w.accent;
+          c.fillStyle = INK.cream;
           c.fillText(cta, p, y);
-          c.fillRect(p, y + 0.042 * U, c.measureText(cta).width, 0.004 * U);
+          c.fillStyle = ink;
+          c.fillRect(p, y + 0.042 * U, c.measureText(cta).width, 0.006 * U);
           c.restore();
         }),
         piece(0.05, 0.05, 0.27, 0.27, 1.15, c => {
           c.translate(0.185 * U, 0.185 * U);
           c.rotate(-0.17);
-          disc(c, 0, 0, 0.104 * U, sticker);
+          disc(c, 0, 0, 0.104 * U, INK.ground);
           c.fillStyle = INK.cream;
           c.font = display(900, 0.13 * U);
           c.textAlign = 'center';
           c.textBaseline = 'middle';
           c.fillText(pad2(i + 1), 0, 0.01 * U);
+        }),
+        // Etiqueta de la marca: el logo blanco sobre su color. Cubiq no tiene SVG: va su nombre en la tipografía del sitio.
+        piece(0.36, 0.04, 0.62, 0.24, 0.8, c => {
+          const lh = 0.064 * U;
+          const lw = logo && w.logo ? Math.min(0.34 * U, (lh * w.logo.w) / w.logo.h) : 0;
+          const h = logo && w.logo ? (lw * w.logo.h) / w.logo.w : lh;
+          c.font = display(900, 0.09 * U);
+          const tw = logo ? lw : c.measureText(stop.company.toUpperCase()).width;
+          const pad = 0.04 * U;
+          const bw = tw + 2 * pad;
+          const bh = h + 2 * pad;
+          c.translate(0.93 * U - bw / 2, 0.16 * U);
+          c.rotate(0.06);
+          c.fillStyle = INK.ground;
+          c.fillRect(-bw / 2 + 0.014 * U, -bh / 2 + 0.014 * U, bw, bh);
+          c.fillStyle = ink;
+          c.fillRect(-bw / 2, -bh / 2, bw, bh);
+          if (logo) c.drawImage(logo, -tw / 2, -h / 2, tw, h);
+          else {
+            c.fillStyle = INK.cream;
+            c.textAlign = 'center';
+            c.textBaseline = 'middle';
+            c.fillText(stop.company.toUpperCase(), 0, 0.006 * U);
+          }
         }),
       ],
     };
@@ -357,7 +394,7 @@ export async function buildLeaves(
   const workFace = (i: number): Face => {
     const stop = ROUTE[i];
     const w = work[stop.company] ?? { accent: INK.cream };
-    const partner = partnerOf(w.accent);
+    const { ink, partner } = inks(w);
     const main = w.main && shots.get(w.main.src);
     const float = w.float && shots.get(w.float.src);
     const SHOT = 9 / 16;
@@ -366,7 +403,7 @@ export async function buildLeaves(
     const cy = solo ? 0.6 : 0.37;
     const layers: Layer[] = [
       shapes(0.15, c => {
-        disc(c, -0.01, 0.565, 0.435, w.accent);
+        disc(c, -0.01, 0.565, 0.435, ink);
         if (!solo) return;
         c.fillStyle = partner;
         c.beginPath();
@@ -410,13 +447,13 @@ export async function buildLeaves(
           w.main?.label ?? 'Cinco canales, un solo nodo',
           0.95 * U,
           (cy + 0.23) * U,
-          INK.red,
+          ink,
           INK.cream,
           true
         );
         if (!w.float?.label) return;
         // Flecha a mano alzada del rótulo a la segunda captura.
-        c.strokeStyle = INK.red;
+        c.strokeStyle = ink;
         c.lineWidth = 0.007 * U;
         c.lineCap = 'round';
         c.lineJoin = 'round';
@@ -429,7 +466,7 @@ export async function buildLeaves(
         c.lineTo(0.73 * U, 0.772 * U);
         c.lineTo(0.765 * U, 0.748 * U);
         c.stroke();
-        pill(c, w.float.label, 0.5 * U, 1.17 * U, w.accent, INK.ground);
+        pill(c, w.float.label, 0.5 * U, 1.17 * U, INK.ground, INK.cream);
       })
     );
     return { paper: INK.cream, layers };
