@@ -16,6 +16,7 @@ import banditHome from '@/assets/poster/bandit-home.webp';
 import xconsLogo from '@/assets/images/projects/XCONS.svg';
 import fusionLogo from '@/assets/images/projects/Fusionads.svg';
 import banditLogo from '@/assets/images/projects/Bandit.svg';
+import cubiqLogo from '@/assets/images/projects/Cubiq.svg';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,8 +37,12 @@ export interface Shot {
   label?: string;
 }
 
+export type Glow = [number, number, number, string];
+
 export interface Work {
   accent: string;
+  /** Solo en el libro: luces de color sobre el campo de cada página, [x, y, radio, color] en anchos de página. */
+  glows?: { left: Glow[]; right: Glow[] };
   logo?: { src: string; w: number; h: number };
   main?: Shot;
   float?: Shot;
@@ -100,7 +105,25 @@ const WORK: Record<string, Work> = {
       label: 'Home de la agencia',
     },
   },
-  'Cubiq Digital': { accent: INK.red },
+  // Colores del logo de Cubiq (el del chat interno): rojo y naranja en la b, azul y menta en la q.
+  'Cubiq Digital': {
+    accent: '#cb2026',
+    // Las luces cruzan el lomo: el naranja y el azul de una página siguen en la otra.
+    glows: {
+      left: [
+        [0.95, 0.2, 0.65, '#f26722'],
+        [0.15, 1.2, 0.6, '#7a0f14'],
+        [1.05, 1.15, 0.5, '#4890cd'],
+      ],
+      right: [
+        [-0.05, 0.2, 0.6, '#f26722'],
+        [0.75, 0.15, 0.6, '#77c9b4'],
+        [0.05, 1.15, 0.55, '#4890cd'],
+        [0.95, 1.25, 0.6, '#cb2026'],
+      ],
+    },
+    logo: { src: cubiqLogo, w: 108, h: 39 },
+  },
 };
 
 /* ---------- galería ---------- */

@@ -281,7 +281,8 @@ export async function buildLeaves(
           g.addColorStop(1, tone(-0.4));
           c.fillStyle = g;
           c.fillRect(-0.1, -0.1, 1.2, H + 0.2);
-          glow(c, 0.85, 0.2, 0.5, tone(0.8, 0.75));
+          if (w.glows) w.glows.left.forEach(([gx, gy, r, col]) => glow(c, gx, gy, r * 1.5, shade(col)(0, 0.7)));
+          else glow(c, 0.85, 0.2, 0.5, tone(0.8, 0.75));
           glow(c, 0.1, H + 0.1, 0.8, tone(-0.6, 0.8));
         }),
         piece(0, 0, 1, H, 0.45, c => {
@@ -369,6 +370,7 @@ export async function buildLeaves(
     const w = work[stop.company] ?? { accent: INK.red };
     const tone = shade(w.accent);
     const main = w.main && shots.get(w.main.src);
+    const logo = !main && w.logo ? logos.get(w.logo.src) : undefined;
     const sw = 0.877;
     const sh = sw * (9 / 16) * (w.main ? Math.min(1.2, w.main.h / w.main.w / (9 / 16)) : 1);
     const sy = 0.333;
@@ -380,17 +382,19 @@ export async function buildLeaves(
         g.addColorStop(1, w.accent);
         c.fillStyle = g;
         c.fillRect(-0.1, -0.1, 1.2, H + 0.2);
+        w.glows?.right.forEach(([gx, gy, r, col]) => glow(c, gx, gy, r * 1.5, shade(col)(0, 0.7)));
       }),
     ];
     // Copia barrida: el canvas sin `filter` (Safari viejo) la saltea y queda el campo liso.
-    if (main) {
+    if (main || logo) {
       const probe = document.createElement('canvas').getContext('2d');
       if (probe && 'filter' in probe)
         layers.push(
           piece(0, 0, 1, H, 0.25, c => {
             c.filter = `blur(${Math.round(0.04 * U)}px) saturate(130%)`;
             c.globalAlpha = 0.8;
-            c.drawImage(main, 0.1 * U, (sy + 0.03) * U, 1.1 * U, sh * U);
+            if (main) c.drawImage(main, 0.1 * U, (sy + 0.03) * U, 1.1 * U, sh * U);
+            else if (logo) c.drawImage(logo, 0.25 * U, (sy + sh * 0.3) * U, 0.9 * U, sh * 0.45 * U);
           })
         );
     }
@@ -419,7 +423,7 @@ export async function buildLeaves(
         c.shadowOffsetY = 0.04 * U;
         c.beginPath();
         c.roundRect(x, y, sw * U, sh * U, r);
-        c.fillStyle = main ? '#fff' : 'rgba(255,255,255,0.16)';
+        c.fillStyle = main ? '#fff' : INK.ground;
         c.fill();
         c.restore();
         if (w.main && main) {
@@ -429,21 +433,18 @@ export async function buildLeaves(
           c.restore();
           return;
         }
-        // Sin capturas (Cubiq, trabajo confidencial): una placa de vidrio con lo que hice, sin mostrar sistemas.
-        c.strokeStyle = 'rgba(255,255,255,0.4)';
-        c.lineWidth = Math.max(1, 0.002 * U);
-        c.stroke();
-        c.fillStyle = '#fff';
-        c.textBaseline = 'middle';
-        c.font = text(0.045 * U);
-        const items = stop.text.split(':')[1]?.replace(/\.$/, '').split(/, | y /) ?? [];
-        items.forEach((it, k) => {
-          const ty = y + ((k + 1) * sh * U) / (items.length + 1);
-          c.globalAlpha = 0.5;
-          c.fillText(pad2(k + 1), x + 0.06 * U, ty);
-          c.globalAlpha = 1;
-          c.fillText(it.trim().replace(/^./, m => m.toUpperCase()), x + 0.16 * U, ty);
-        });
+        // Sin capturas (Cubiq, trabajo confidencial): el logo como sujeto, sobre una placa oscura.
+        c.save();
+        c.clip();
+        c.fillStyle = INK.ground;
+        c.fillRect(x, y, sw * U, sh * U);
+        glow(c, x + sw * U * 0.5, y + sh * U * 0.5, sw * U * 0.5, 'rgba(255,255,255,0.08)');
+        if (logo && w.logo) {
+          const lw = sw * U * 0.62;
+          const lh = (lw * w.logo.h) / w.logo.w;
+          c.drawImage(logo, x + (sw * U - lw) / 2, y + (sh * U - lh) / 2, lw, lh);
+        }
+        c.restore();
       }),
       piece(0, H - 0.25, 1, 0.25, 0.6, c => {
         c.fillStyle = '#fff';
