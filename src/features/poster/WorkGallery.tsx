@@ -17,6 +17,7 @@ import xconsLogo from '@/assets/images/projects/XCONS.svg';
 import fusionLogo from '@/assets/images/projects/Fusionads.svg';
 import banditLogo from '@/assets/images/projects/Bandit.svg';
 import cubiqLogo from '@/assets/images/projects/Cubiq.svg';
+import cubiqPanel from '@/assets/poster/cubiq-panel.webp';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -48,7 +49,7 @@ export interface Work {
   float?: Shot;
 }
 
-// Por nombre de empresa en ROUTE. Cubiq no lleva capturas: es confidencial.
+// Por nombre de empresa en ROUTE. Cubiq lleva una maqueta con datos ficticios: sus clientes son confidenciales.
 const WORK: Record<string, Work> = {
   XCONS: {
     accent: '#108048', // color de la marca, medido en sus capturas
@@ -123,6 +124,14 @@ const WORK: Record<string, Work> = {
       ],
     },
     logo: { src: cubiqLogo, w: 108, h: 39 },
+    // Maqueta con los estilos reales de los tableros y datos inventados: el producto del cliente es confidencial.
+    main: {
+      src: cubiqPanel,
+      w: 1400,
+      h: 788,
+      alt: 'Maqueta de un tablero de ventas por sucursal para retail, con datos ficticios',
+      label: 'Tablero de ventas · maqueta',
+    },
   },
 };
 
