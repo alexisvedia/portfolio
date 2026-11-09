@@ -30,8 +30,8 @@ export const CUBE = `${STACK} and ${MOTION}`;
  * debajo del Portal, que termina de apagarse justo ahí.
  */
 export const cubeTop = (section: Element) => {
-  const spacer = section.firstElementChild;
-  const grid = (spacer?.classList.contains('pin-spacer') ? spacer.firstElementChild : spacer) as HTMLElement | null;
+  // Por atributo y no por posición: Almohada pone su SVG de filtro antes de la grilla.
+  const grid = section.querySelector<HTMLElement>('[data-poster-grid]');
   if (!grid) return 0;
   const center = (parseFloat(getComputedStyle(document.documentElement).fontSize) * 6 + window.innerHeight) / 2;
   return Math.min(center - parseFloat(getComputedStyle(section).paddingTop) - grid.offsetHeight / 2, 0);
@@ -122,7 +122,7 @@ const ServiceDeck: React.FC = () => {
       setHalf();
       gsap.set(wrap, { perspective: 2400 });
       const section = wrap.closest('section');
-      const grid = (section?.firstElementChild as HTMLElement | null) ?? wrap;
+      const grid = section?.querySelector<HTMLElement>('[data-poster-grid]') ?? wrap;
 
       // z negativo: la cara de frente queda en el plano de la página y no se agranda con la perspectiva.
       const tl = gsap.timeline({

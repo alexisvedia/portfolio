@@ -5,7 +5,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import type * as Three from 'three';
 import { INK } from './content';
 import { GLYPHS, STROKE } from './glyphs';
-import { cut, SHADOW } from './cut';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,16 +23,7 @@ const ZOOM_START = 0.06;
 const COVER = 0.88;
 /* Desde acá el escenario se apaga y deja ver la sección siguiente, que ya está en su lugar debajo. */
 const REVEAL = 0.9;
-/* Iris de papel recortado (docs/estilo-recorte.md): un corte a mano de radio 1 que se escala en px alrededor del centro.
-   IRIS_IN es su inradio medido (0,658 para la semilla 7, ninguna de 1 a 20 baja de 0,65): al dividir por él el corte
-   tapa todo el agujero, y su vértice más lejano (1,56) queda bajo el trazo, que llega a 1,67 veces el agujero. */
-const IRIS_CUT = cut(0, 0, 1, 7);
-const IRIS_IN = 0.65;
-/* Poses del iris: crece a saltos, como stop motion, y gira un poco en cada pose. */
-const IRIS_POSES = 7;
-const IRIS_TURN = 0.07;
-/* La astilla negra se corre abajo a la derecha en proporción al radio (mínimo 3 px para que se lea de chica): entra bajo el trazo con el iris abierto. */
-const IRIS_SHADOW = 0.05;
+/* Iris circular y continuo. Alexis (2026-11-08) descartó el corte poligonal en poses: "debe ser circular y ya". */
 
 const clamp01 = gsap.utils.clamp(0, 1);
 
@@ -207,7 +197,6 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
       const core = part('core');
       const rim = part('rim');
       const iris = part('iris');
-      const sliver = part('sliver');
       const stroke = part<SVGPathElement>('stroke');
       const disc = part<SVGGElement>('disc');
       const zoomEase = gsap.parseEase('sine.inOut');
@@ -248,21 +237,9 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
 
         core.style.transform = rim.style.transform = `scale(${s})`;
         const covered = d >= COVER;
-        // El progreso se cuantiza antes de suavizar: cada pose dura el mismo tramo de scroll. El tamaño entre poses
-        // igual acompaña el zoom de la O (s), que es continuo, para que el corte no se despegue del anillo.
-        const pose = Math.floor(clamp01(d / IRIS_END) * IRIS_POSES);
-        const r = hole * s * irisEase(pose / IRIS_POSES);
-        // +2 px: el iris queda apenas debajo del trazo y no se ve la costura.
-        const k = r ? (r + 2) / IRIS_IN : 0;
-        const turn = pose * IRIS_TURN;
-        const [cos, sin] = [Math.cos(turn), Math.sin(turn)];
-        const shape = (off: number) =>
-          `polygon(${IRIS_CUT.map(
-            ([x, y]) => `calc(50% + ${((x * cos - y * sin) * k + off).toFixed(1)}px) calc(50% + ${((x * sin + y * cos) * k + off).toFixed(1)}px)`
-          ).join(', ')})`;
-        iris.style.clipPath = covered ? 'none' : shape(0);
-        sliver.style.visibility = covered || !r ? 'hidden' : '';
-        if (r && !covered) sliver.style.clipPath = shape(Math.max(3, r * IRIS_SHADOW));
+        // El radio acompaña el zoom de la O (s); +2 px deja el borde del iris apenas debajo del trazo, sin costura.
+        const r = hole * s * irisEase(clamp01(d / IRIS_END));
+        iris.style.clipPath = covered ? 'none' : `circle(${r ? (r + 2).toFixed(1) : 0}px at 50% 50%)`;
 
         // Mientras sube, el borde de arriba del escenario se funde con la sección anterior: sin línea de corte.
         stage.style.setProperty('--fade', `${(1 - e) * 40}vh`);
@@ -347,7 +324,7 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
         io.disconnect();
         ro.disconnect();
         depth?.dispose();
-        [track, stage, far, mid, near, core, rim, sliver, iris, stroke, disc].forEach(el => el.removeAttribute('style'));
+        [track, stage, far, mid, near, core, rim, iris, stroke, disc].forEach(el => el.removeAttribute('style'));
       };
     });
 
@@ -376,7 +353,6 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
             </g>
           </svg>
         </OBox>
-        <Sliver data-part="sliver" />
         <Iris data-part="iris" $to={to} />
         <OBox data-part="rim">
           <svg viewBox="0 0 100 100" focusable="false">
@@ -496,19 +472,7 @@ const OBox = styled.div`
   }
 `;
 
-/* La sombra del iris: el mismo corte en negro, detrás y corrido abajo a la derecha. Sin JS o con reduced motion no existe. */
-const Sliver = styled.div`
-  position: absolute;
-  inset: 0;
-  background: ${SHADOW};
-  clip-path: circle(0px at 50% 50%);
-
-  @media (prefers-reduced-motion: reduce) {
-    display: none;
-  }
-`;
-
-/* El otro lado: arranca cerrado en el centro del agujero y se abre como un corte a mano. Con reduced motion es un corte plano abajo. */
+/* El otro lado: arranca cerrado en el centro del agujero y se abre en círculo. Con reduced motion es un corte plano abajo. */
 const Iris = styled.div<{ $to: string }>`
   position: absolute;
   inset: 0;

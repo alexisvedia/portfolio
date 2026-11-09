@@ -203,7 +203,7 @@ interface PosterProps {
 const Poster = forwardRef<HTMLElement, PosterProps>(
   ({ id, label, word, cols, ink, accent, accentGlyphs, flip, bg, fg, overlap, art, centerWord, edge, children }, ref) => {
     const grid = (
-      <Grid $flip={flip}>
+      <Grid $flip={flip} data-poster-grid="">
         <WordCol $center={centerWord}>
           <WordWrap data-word="">
             <ConstructedWord word={word} cols={cols} ink={ink} accent={accent} accentGlyphs={accentGlyphs} guides />
