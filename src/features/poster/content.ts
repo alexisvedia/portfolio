@@ -74,7 +74,7 @@ export const ROUTE: Stop[] = [
     years: 'Desde 2025',
     company: 'Cubiq Digital',
     role: 'AI Engineer',
-    text: 'Automatización con IA para productos B2B: workflows de n8n en producción, agentes y frontend en React. Y el sistema que conecta todo eso, contado más abajo.',
+    text: 'Automatización con IA para productos B2B: workflows de n8n en producción, agentes y frontend en React.',
     anchor: 'cubiq',
     linkLabel: 'Leer la historia',
   },

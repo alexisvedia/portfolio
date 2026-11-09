@@ -4,7 +4,7 @@ import type { Shot, Work } from './WorkGallery';
 
 type Ctx = CanvasRenderingContext2D;
 
-const DARK = '#141210';
+const CONFIDENTIAL = 'Trabajo confidencial';
 const COVER = '#171513';
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
@@ -319,7 +319,7 @@ export async function buildLeaves(
           c.globalAlpha = 1;
           // Fila de vidrio con el rótulo y el botón blanco, el único elemento sólido del pliego.
           y += 0.05 * U;
-          const label = w.main?.label ?? 'Cinco canales, un solo nodo';
+          const label = w.main?.label ?? CONFIDENTIAL;
           c.font = text(0.026 * U);
           const lw = c.measureText(label).width;
           const cta = `${stop.linkLabel} →`;
@@ -419,19 +419,31 @@ export async function buildLeaves(
         c.shadowOffsetY = 0.04 * U;
         c.beginPath();
         c.roundRect(x, y, sw * U, sh * U, r);
-        c.fillStyle = '#fff';
+        c.fillStyle = main ? '#fff' : 'rgba(255,255,255,0.16)';
         c.fill();
         c.restore();
-        c.save();
-        c.clip();
-        if (w.main && main) cover(c, main, x, y, sw * U, sh * U, w.main.pos);
-        else {
-          c.fillStyle = INK.ground;
-          c.fillRect(x, y, sw * U, sh * U);
-          c.translate(x, y);
-          nodes(c, sw * U, sh * U);
+        if (w.main && main) {
+          c.save();
+          c.clip();
+          cover(c, main, x, y, sw * U, sh * U, w.main.pos);
+          c.restore();
+          return;
         }
-        c.restore();
+        // Sin capturas (Cubiq, trabajo confidencial): una placa de vidrio con lo que hice, sin mostrar sistemas.
+        c.strokeStyle = 'rgba(255,255,255,0.4)';
+        c.lineWidth = Math.max(1, 0.002 * U);
+        c.stroke();
+        c.fillStyle = '#fff';
+        c.textBaseline = 'middle';
+        c.font = text(0.045 * U);
+        const items = stop.text.split(':')[1]?.replace(/\.$/, '').split(/, | y /) ?? [];
+        items.forEach((it, k) => {
+          const ty = y + ((k + 1) * sh * U) / (items.length + 1);
+          c.globalAlpha = 0.5;
+          c.fillText(pad2(k + 1), x + 0.06 * U, ty);
+          c.globalAlpha = 1;
+          c.fillText(it.trim().replace(/^./, m => m.toUpperCase()), x + 0.16 * U, ty);
+        });
       }),
       piece(0, H - 0.25, 1, 0.25, 0.6, c => {
         c.fillStyle = '#fff';
@@ -439,7 +451,7 @@ export async function buildLeaves(
         c.font = text(0.03 * U);
         c.globalAlpha = 0.75;
         const y = (H - M) * U;
-        c.fillText(w.main?.label ?? 'Cinco canales, un solo nodo', M * U, y);
+        c.fillText(w.main?.label ?? CONFIDENTIAL, M * U, y);
         c.globalAlpha = 0.92;
         c.font = text(0.024 * U);
         (c as Ctx & { letterSpacing?: string }).letterSpacing = `${0.004 * U}px`;
@@ -455,45 +467,4 @@ export async function buildLeaves(
     leaves.push({ front: workFace(i), back: ROUTE[i + 1] ? metaFace(i + 1) : undefined })
   );
   return leaves;
-}
-
-/** Red de nodos de Cubiq, la misma del SVG de la galería: cinco canales entran a un nodo y salen a tres destinos. */
-function nodes(c: Ctx, w: number, h: number) {
-  const k = Math.min(w / 400, h / 260);
-  c.save();
-  c.translate((w - 400 * k) / 2, (h - 260 * k) / 2);
-  c.scale(k, k);
-  const IN = [46, 88, 130, 172, 214];
-  const OUT = [72, 130, 188];
-  const colors = [INK.lime, INK.orange, INK.teal, INK.violet, INK.blue];
-  c.lineCap = 'round';
-  c.lineWidth = 4;
-  IN.forEach((y, i) => {
-    c.strokeStyle = colors[i];
-    c.beginPath();
-    c.moveTo(48, y);
-    c.bezierCurveTo(128, y, 120, 130, 200, 130);
-    c.stroke();
-  });
-  c.strokeStyle = INK.cream;
-  OUT.forEach(y => {
-    c.beginPath();
-    c.moveTo(200, 130);
-    c.bezierCurveTo(280, 130, 272, y, 352, y);
-    c.stroke();
-  });
-  const ring = (x: number, y: number, r: number, col: string) => {
-    c.fillStyle = col;
-    c.beginPath();
-    c.arc(x, y, r, 0, Math.PI * 2);
-    c.fill();
-    c.fillStyle = DARK;
-    c.beginPath();
-    c.arc(x, y, r * 0.36, 0, Math.PI * 2);
-    c.fill();
-  };
-  IN.forEach((y, i) => ring(48, y, 12, colors[i]));
-  OUT.forEach(y => ring(352, y, 12, INK.cream));
-  ring(200, 130, 30, INK.red);
-  c.restore();
 }

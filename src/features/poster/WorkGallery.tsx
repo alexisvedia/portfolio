@@ -103,58 +103,6 @@ const WORK: Record<string, Work> = {
   'Cubiq Digital': { accent: INK.red },
 };
 
-/* ---------- Cubiq: red de nodos ---------- */
-
-// Cinco canales entran a un nodo central y salen repartidos en tres destinos.
-const CHANNELS = [INK.lime, INK.orange, INK.teal, INK.violet, INK.blue];
-const IN_Y = [46, 88, 130, 172, 214];
-const OUT_Y = [72, 130, 188];
-const PATHS = [
-  ...IN_Y.map(y => `M48,${y} C128,${y} 120,130 200,130`),
-  ...OUT_Y.map(y => `M200,130 C280,130 272,${y} 352,${y}`),
-];
-
-const Ring: React.FC<{ x: number; y: number; r: number; color: string }> = ({ x, y, r, color }) => (
-  <g>
-    <circle cx={x} cy={y} r={r} fill={color} />
-    <circle cx={x} cy={y} r={r * 0.36} fill={INK.ground} />
-  </g>
-);
-
-const Nodes: React.FC = () => (
-  <NodeArt viewBox="0 0 400 260" aria-hidden="true" focusable="false">
-    {PATHS.map((d, i) => (
-      <path key={i} d={d} pathLength={1} data-wg-line="" />
-    ))}
-    {PATHS.map((d, i) => (
-      <path
-        key={`f${i}`}
-        d={d}
-        pathLength={1}
-        data-wg-flow=""
-        stroke={CHANNELS[i] ?? INK.cream}
-        style={{ animationDelay: `${i * -0.37}s` }}
-      />
-    ))}
-    {IN_Y.map((y, i) => (
-      <Ring key={y} x={48} y={y} r={12} color={CHANNELS[i]} />
-    ))}
-    {OUT_Y.map(y => (
-      <Ring key={y} x={352} y={y} r={12} color={INK.cream} />
-    ))}
-    <circle
-      cx={200}
-      cy={130}
-      r={30}
-      fill="none"
-      stroke={INK.red}
-      strokeWidth={4}
-      data-wg-pulse=""
-    />
-    <Ring x={200} y={130} r={30} color={INK.red} />
-  </NodeArt>
-);
-
 /* ---------- galería ---------- */
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -498,7 +446,15 @@ const WorkGallery: React.FC = () => {
                         </Frame>
                       ) : (
                         <Frame $art>
-                          <Nodes />
+                          {/* Cubiq no lleva capturas ni el sistema propio de Alexis: solo lo que hizo. */}
+                          <Doing>
+                            {(stop.text.split(':')[1] ?? '')
+                              .replace(/\.$/, '')
+                              .split(/, | y /)
+                              .map(it => (
+                                <li key={it}>{it.trim()}</li>
+                              ))}
+                          </Doing>
                         </Frame>
                       )}
                       {work.float && (
@@ -576,14 +532,6 @@ const shotDrift = keyframes`
 const floatDrift = keyframes`
   from { transform: translateX(16%) rotate(3deg); }
   to { transform: translateX(-16%) rotate(-2deg); }
-`;
-const flow = keyframes`
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
-`;
-const pulse = keyframes`
-  from { transform: scale(1); opacity: 0.8; }
-  to { transform: scale(2.1); opacity: 0; }
 `;
 
 const SrOnly = styled.span`
@@ -1014,42 +962,24 @@ const Float = styled.div`
   }
 `;
 
-const NodeArt = styled.svg`
-  display: block;
-  width: 92%;
-  height: auto;
-  max-height: 92%;
-  overflow: visible;
+const Doing = styled.ol`
+  display: grid;
+  gap: 0.8em;
+  margin: 0;
+  padding: 0 8%;
+  width: 100%;
+  list-style: none;
+  counter-reset: doing;
+  color: ${INK.cream};
+  font-size: clamp(1rem, 1.6vw, 1.35rem);
 
-  path {
-    fill: none;
-    stroke-linecap: round;
+  li::first-letter {
+    text-transform: uppercase;
   }
-  [data-wg-line] {
-    stroke: ${cream(0.32)};
-    stroke-width: 4;
-    stroke-dasharray: 1;
-  }
-  [data-wg-flow] {
-    display: none;
-    stroke-width: 8;
-    stroke-dasharray: 0.001 0.999;
-  }
-  [data-wg-pulse] {
-    display: none;
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    [data-wg-flow] {
-      display: inline;
-      animation: ${flow} 2.6s linear infinite;
-    }
-    [data-wg-pulse] {
-      display: inline;
-      animation: ${pulse} 2.2s ease-out infinite;
-    }
+  li::before {
+    counter-increment: doing;
+    content: counter(doing, decimal-leading-zero) '  ';
+    opacity: 0.5;
   }
 `;
 
