@@ -231,7 +231,7 @@ export async function buildLeaves(
         wrap(c, ROUTE_LEAD, 0, 110 * u, w * 0.9, 44 * u);
       })
     );
-    return { paper: COVER, grid: true, layers };
+    return { paper: COVER, layers };
   };
 
   /* ---------- izquierda: el caso en el color de acento ---------- */
@@ -253,15 +253,27 @@ export async function buildLeaves(
           disc(c, 0, H, 0.34, shade);
         }),
         // El número con su sombra plana corrida, en el tono oscuro: el recorte de papel del resto del sitio.
-        layer(0.06, 0.02, 0.9, 0.46, 0.7, (c, cw, ch) => {
+        // Se mide el glifo y se ajusta al lienzo con lugar para la sombra: lo que sale del lienzo se corta.
+        layer(0.06, 0.035, 0.64, 0.36, 0.5, (c, cw, ch) => {
+          const str = pad2(i + 1);
+          const sx = 16 * u;
+          const sy = 12 * u;
+          const m0 = 4 * u;
           c.textBaseline = 'alphabetic';
-          c.font = display(900, ch * 1.12);
+          c.font = display(900, 100);
+          const m = c.measureText(str);
+          const gw = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+          const gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
+          const k = Math.min((cw - sx - 2 * m0) / gw, (ch - sy - 2 * m0) / gh);
+          c.font = display(900, 100 * k);
+          const x = m0 + m.actualBoundingBoxLeft * k;
+          const y = m0 + m.actualBoundingBoxAscent * k;
           c.fillStyle = shade;
-          c.fillText(pad2(i + 1), -0.02 * cw + 16 * u, ch * 0.98 + 12 * u);
+          c.fillText(str, x + sx, y + sy);
           c.fillStyle = ink;
-          c.fillText(pad2(i + 1), -0.02 * cw, ch * 0.98);
+          c.fillText(str, x, y);
         }),
-        layer(0.08, 0.5, 0.84, 0.46, 0.22, (c, cw) => {
+        layer(0.08, 0.43, 0.84, 0.55, 0.22, (c, cw) => {
           c.fillStyle = ink;
           c.textBaseline = 'top';
           let y = 0;
@@ -281,11 +293,17 @@ export async function buildLeaves(
           c.font = display(800, 60 * u);
           c.fillText(stop.years.toUpperCase(), 0, y);
           y += 64 * u;
-          const size = fit(c, stop.company.toUpperCase(), 900, 190 * u, cw);
+          const size = fit(c, stop.company.toUpperCase(), 900, 150 * u, cw);
           c.fillText(stop.company.toUpperCase(), 0, y);
           y += size * 0.9;
           c.font = text(34 * u);
-          y = wrap(c, stop.role, 0, y, cw, 44 * u) + 20 * u;
+          y = wrap(c, stop.role, 0, y, cw, 44 * u) + 18 * u;
+          // Resumen breve del caso: el mismo texto de la Trayectoria.
+          c.font = text(29 * u);
+          c.globalAlpha = 0.82;
+          y = wrap(c, stop.text, 0, y, cw * 0.96, 41 * u) + 22 * u;
+          c.globalAlpha = 1;
+          c.font = text(34 * u);
           const cta = `${stop.linkLabel} →`;
           c.fillText(cta, 0, y);
           c.fillRect(0, y + 44 * u, c.measureText(cta).width, 3 * u);
@@ -293,8 +311,8 @@ export async function buildLeaves(
         // Adelante, en el color pareja: cuarto de disco en la esquina y un aro chico que pisa el número.
         shapes(1.2, c => {
           disc(c, 1, 0, 0.26, partner);
-          disc(c, 0.74, H * 0.4, 0.05, partner);
-          disc(c, 0.74, H * 0.4, 0.018, w.accent);
+          disc(c, 0.82, H * 0.26, 0.05, partner);
+          disc(c, 0.82, H * 0.26, 0.018, w.accent);
         }),
       ],
     };
@@ -353,11 +371,11 @@ export async function buildLeaves(
     );
     if (w.main && main) {
       const shot = w.main;
-      const fw = 0.86 * pw;
+      const fw = 0.88 * pw;
       const off = 22 * u;
       const fh = 54 * u + fw * (shot.h / shot.w);
       layers.push(
-        layer(0.05, 0.08, (fw + off) / pw + 0.01, (fh + off) / ph + 0.01, 0.45, c => {
+        layer(0.04, 0.08, (fw + off) / pw + 0.01, (fh + off) / ph + 0.01, 0.45, c => {
           // Placa plana del color del caso corrida abajo a la derecha, como en el resto del sitio: sin blur.
           c.fillStyle = w.accent;
           c.beginPath();
@@ -370,35 +388,43 @@ export async function buildLeaves(
       layers.push(layer(0.06, 0.14, 0.88, 0.58, 0.35, (c, cw, ch) => nodes(c, cw, ch)));
     }
     if (float) {
-      const fw = 0.54 * pw;
+      // Tarjeta de papel: borde crema, placa plana del color pareja corrida y un giro leve, como pegada encima.
+      const fw = 0.6 * pw;
       const fh = fw * (10 / 16);
-      const b = 6 * u;
-      const off = 16 * u;
+      const b = 10 * u;
+      const off = 18 * u;
+      const turn = -0.07;
+      const bw = fw + 2 * b;
+      const bh = fh + 2 * b;
+      const cw = bw * Math.cos(-turn) + bh * Math.sin(-turn) + off + 8 * u;
+      const ch = bw * Math.sin(-turn) + bh * Math.cos(-turn) + off + 8 * u;
       layers.push(
-        layer(0.42, 0.5, (fw + off + b * 2) / pw, (fh + off + b * 2) / ph, 0.95, c => {
-          c.fillStyle = 'rgba(0,0,0,0.55)';
+        layer(0.36, 0.5, cw / pw, ch / ph, 0.95, c => {
+          c.translate((cw - off) / 2, (ch - off) / 2);
+          c.rotate(turn);
+          c.fillStyle = partner;
           c.beginPath();
-          c.roundRect(off, off, fw + b * 2, fh + b * 2, 18 * u);
+          c.roundRect(-bw / 2 + off, -bh / 2 + off, bw, bh, 16 * u);
           c.fill();
-          c.fillStyle = w.accent;
+          c.fillStyle = INK.cream;
           c.beginPath();
-          c.roundRect(0, 0, fw + b * 2, fh + b * 2, 18 * u);
+          c.roundRect(-bw / 2, -bh / 2, bw, bh, 16 * u);
           c.fill();
-          c.save();
           c.beginPath();
-          c.roundRect(b, b, fw, fh, 14 * u);
+          c.roundRect(-fw / 2, -fh / 2, fw, fh, 9 * u);
           c.clip();
-          cover(c, float, b, b, fw, fh);
-          c.restore();
+          cover(c, float, -fw / 2, -fh / 2, fw, fh);
         })
       );
     }
     // Adelante: recortes chicos que pisan el borde de las capturas, con el rótulo del caso al pie.
     layers.push(
       shapes(1.4, c => {
-        disc(c, 0.03, H * 0.07, 0.09, tint);
-        disc(c, 0.93, H * 0.5, 0.05, partner);
-        disc(c, 0.93, H * 0.5, 0.018, deep);
+        disc(c, 0.98, H * 0.05, 0.08, tint);
+        // Sin tarjeta (Cubiq) el aro va a la derecha: abajo a la izquierda pisaría la red de nodos.
+        const [dx, dy] = float ? [0.2, H * 0.6] : [0.9, H * 0.66];
+        disc(c, dx, dy, 0.05, partner);
+        disc(c, dx, dy, 0.018, deep);
       }),
       layer(0.06, 0.9, 0.6, 0.06, 0.12, (c, _cw, ch) => {
         c.fillStyle = INK.cream;
@@ -408,7 +434,7 @@ export async function buildLeaves(
         c.fillText(`${pad2(i + 1)} · ${stop.company}`, 0, ch / 2);
       })
     );
-    return { paper: deep, grid: true, layers };
+    return { paper: deep, layers };
   };
 
   // Tapa con el caso 1 al dorso; después cada hoja lleva la derecha de un caso y la izquierda del siguiente.
