@@ -8,6 +8,27 @@ const DARK = '#141210';
 const COVER = '#171513';
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
+/** Mezcla dos hex en sRGB: t=0 da a, t=1 da b. Así salen los tonos claros y oscuros de cada acento. */
+const mix = (a: string, b: string, t: number) => {
+  const ch = (hex: string, k: number) => parseInt(hex.slice(1 + k * 2, 3 + k * 2), 16);
+  return `#${[0, 1, 2]
+    .map(k =>
+      Math.round(ch(a, k) + (ch(b, k) - ch(a, k)) * t)
+        .toString(16)
+        .padStart(2, '0')
+    )
+    .join('')}`;
+};
+
+/* Color pareja de cada acento para los recortes que contrastan: teal y violet no son acento de ningún caso. */
+const PARTNER: Record<string, string> = {
+  [INK.lime]: INK.violet,
+  [INK.orange]: INK.teal,
+  [INK.blue]: INK.orange,
+  [INK.red]: INK.teal,
+};
+const partnerOf = (accent: string) => PARTNER[accent] ?? INK.violet;
+
 const load = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
@@ -36,11 +57,12 @@ export async function buildLeaves(
     w: number,
     h: number,
     depth: number,
-    draw: (c: Ctx, w: number, h: number) => void
+    draw: (c: Ctx, w: number, h: number) => void,
+    res = 1
   ): Layer => {
     const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1, Math.round(w * pw));
-    canvas.height = Math.max(1, Math.round(h * ph));
+    canvas.width = Math.max(1, Math.round(w * pw * res));
+    canvas.height = Math.max(1, Math.round(h * ph * res));
     const c = canvas.getContext('2d');
     if (c) draw(c, canvas.width, canvas.height);
     return { canvas, x, y, w, h, depth };
@@ -132,6 +154,41 @@ export async function buildLeaves(
     );
   };
 
+  /**
+   * Capa de recortes planos que pasa un poco el borde de la página, para que al correrse con el parallax no se vea su
+   * corte. Se dibuja en unidades de ancho de página (x de 0 a 1, y de 0 a 4/3) y a media resolución: son colores planos.
+   */
+  const BLEED = 0.05;
+  const shapes = (depth: number, draw: (c: Ctx) => void) =>
+    layer(
+      -BLEED,
+      -BLEED,
+      1 + 2 * BLEED,
+      1 + 2 * BLEED,
+      depth,
+      (c, w) => {
+        const s = w / (1 + 2 * BLEED);
+        c.scale(s, s);
+        c.translate(BLEED, BLEED * (ph / pw));
+        draw(c);
+      },
+      0.5
+    );
+  const H = ph / pw;
+  const disc = (c: Ctx, x: number, y: number, r: number, color: string) => {
+    c.fillStyle = color;
+    c.beginPath();
+    c.arc(x, y, r, 0, Math.PI * 2);
+    c.fill();
+  };
+  const ring = (c: Ctx, x: number, y: number, r: number, width: number, color: string) => {
+    c.strokeStyle = color;
+    c.lineWidth = width;
+    c.beginPath();
+    c.arc(x, y, r - width / 2, 0, Math.PI * 2);
+    c.stroke();
+  };
+
   const ringDot = (c: Ctx, x: number, y: number, r: number, color: string, hole: string) => {
     c.fillStyle = color;
     c.beginPath();
@@ -184,13 +241,24 @@ export async function buildLeaves(
     const w = work[stop.company] ?? { accent: INK.cream };
     const ink = INK.ground;
     const logo = w.logo && logos.get(w.logo.src);
+    const tint = mix(w.accent, INK.cream, 0.38);
+    const shade = mix(w.accent, INK.ground, 0.32);
+    const partner = partnerOf(w.accent);
     return {
       paper: w.accent,
       layers: [
+        // Fondo: aro grande en el tono claro que entra desde abajo y medio disco en el tono oscuro.
+        shapes(0.15, c => {
+          ring(c, 0.98, H * 0.86, 0.62, 0.22, tint);
+          disc(c, 0, H, 0.34, shade);
+        }),
+        // El número con su sombra plana corrida, en el tono oscuro: el recorte de papel del resto del sitio.
         layer(0.06, 0.02, 0.9, 0.46, 0.7, (c, cw, ch) => {
-          c.fillStyle = ink;
           c.textBaseline = 'alphabetic';
           c.font = display(900, ch * 1.12);
+          c.fillStyle = shade;
+          c.fillText(pad2(i + 1), -0.02 * cw + 16 * u, ch * 0.98 + 12 * u);
+          c.fillStyle = ink;
           c.fillText(pad2(i + 1), -0.02 * cw, ch * 0.98);
         }),
         layer(0.08, 0.5, 0.84, 0.46, 0.22, (c, cw) => {
@@ -221,6 +289,12 @@ export async function buildLeaves(
           const cta = `${stop.linkLabel} →`;
           c.fillText(cta, 0, y);
           c.fillRect(0, y + 44 * u, c.measureText(cta).width, 3 * u);
+        }),
+        // Adelante, en el color pareja: cuarto de disco en la esquina y un aro chico que pisa el número.
+        shapes(1.2, c => {
+          disc(c, 1, 0, 0.26, partner);
+          disc(c, 0.74, H * 0.4, 0.05, partner);
+          disc(c, 0.74, H * 0.4, 0.018, w.accent);
         }),
       ],
     };
@@ -266,13 +340,24 @@ export async function buildLeaves(
     const layers: Layer[] = [];
     const main = w.main && shots.get(w.main.src);
     const float = w.float && shots.get(w.float.src);
+    const deep = mix(w.accent, INK.ground, 0.8);
+    const mid = mix(w.accent, INK.ground, 0.55);
+    const tint = mix(w.accent, INK.cream, 0.38);
+    const partner = partnerOf(w.accent);
+    // Fondo: disco en el tono medio detrás de la captura y un arco del color pareja que entra desde abajo.
+    layers.push(
+      shapes(0.18, c => {
+        disc(c, 0.6, H * 0.36, 0.44, mid);
+        ring(c, 0.06, H * 0.97, 0.34, 0.1, partner);
+      })
+    );
     if (w.main && main) {
       const shot = w.main;
       const fw = 0.86 * pw;
       const off = 22 * u;
       const fh = 54 * u + fw * (shot.h / shot.w);
       layers.push(
-        layer(0.05, 0.08, (fw + off) / pw + 0.01, (fh + off) / ph + 0.01, 0.3, c => {
+        layer(0.05, 0.08, (fw + off) / pw + 0.01, (fh + off) / ph + 0.01, 0.45, c => {
           // Placa plana del color del caso corrida abajo a la derecha, como en el resto del sitio: sin blur.
           c.fillStyle = w.accent;
           c.beginPath();
@@ -290,7 +375,7 @@ export async function buildLeaves(
       const b = 6 * u;
       const off = 16 * u;
       layers.push(
-        layer(0.42, 0.5, (fw + off + b * 2) / pw, (fh + off + b * 2) / ph, 1, c => {
+        layer(0.42, 0.5, (fw + off + b * 2) / pw, (fh + off + b * 2) / ph, 0.95, c => {
           c.fillStyle = 'rgba(0,0,0,0.55)';
           c.beginPath();
           c.roundRect(off, off, fw + b * 2, fh + b * 2, 18 * u);
@@ -308,16 +393,22 @@ export async function buildLeaves(
         })
       );
     }
+    // Adelante: recortes chicos que pisan el borde de las capturas, con el rótulo del caso al pie.
     layers.push(
+      shapes(1.4, c => {
+        disc(c, 0.03, H * 0.07, 0.09, tint);
+        disc(c, 0.93, H * 0.5, 0.05, partner);
+        disc(c, 0.93, H * 0.5, 0.018, deep);
+      }),
       layer(0.06, 0.9, 0.6, 0.06, 0.12, (c, _cw, ch) => {
         c.fillStyle = INK.cream;
-        c.globalAlpha = 0.6;
+        c.globalAlpha = 0.75;
         c.font = text(28 * u);
         c.textBaseline = 'middle';
         c.fillText(`${pad2(i + 1)} · ${stop.company}`, 0, ch / 2);
       })
     );
-    return { paper: DARK, grid: true, layers };
+    return { paper: deep, grid: true, layers };
   };
 
   // Tapa con el caso 1 al dorso; después cada hoja lleva la derecha de un caso y la izquierda del siguiente.

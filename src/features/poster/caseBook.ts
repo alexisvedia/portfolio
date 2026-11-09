@@ -44,7 +44,7 @@ export interface Book {
   dispose: () => void;
 }
 
-const MAX_LAYERS = 3;
+const MAX_LAYERS = 5;
 
 const VERT = /* glsl */ `
 uniform float uFlip;
@@ -315,7 +315,7 @@ export function mountBook(
       faces.forEach(({ u, leaf, back }) => {
         const lift = Math.sin((s.flips[leaf] ?? 0) * Math.PI) * (back ? -1 : 1);
         u.layers.forEach((l, i) =>
-          u.off[i].set((s.px * 0.012 - lift * 0.035) * l.depth, -s.py * 0.01 * l.depth)
+          u.off[i].set((s.px * 0.02 - lift * 0.05) * l.depth, -s.py * 0.016 * l.depth)
         );
       });
       const open = s.flips[0] ?? 0;
