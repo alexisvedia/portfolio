@@ -323,7 +323,9 @@ const Portal: React.FC<{ to: string }> = ({ to }) => {
         cancelled = true;
         io.disconnect();
         ro.disconnect();
+        // Revertir los triggers puede llamar a apply otra vez: sin escena no dibuja sobre un contexto ya perdido.
         depth?.dispose();
+        depth = null;
         [track, stage, far, mid, near, core, rim, iris, stroke, disc].forEach(el => el.removeAttribute('style'));
       };
     });

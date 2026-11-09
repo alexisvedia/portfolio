@@ -391,7 +391,9 @@ const WorkGallery: React.FC = () => {
         slider.removeEventListener('focusin', onFocus);
         slider.removeEventListener('focusout', onBlur);
         host.removeEventListener('click', open);
+        // Al revertir el pin el ticker puede volver a llamar a tick: sin libro no dibuja sobre un contexto ya perdido.
         book?.dispose();
+        book = null;
         delete section.dataset.pinned;
         delete section.dataset.book;
         rail.removeAttribute('data-done');
