@@ -32,6 +32,8 @@ export interface Shot {
   w: number;
   h: number;
   pos?: string;
+  /** Rótulo corto para el collage del libro. */
+  label?: string;
 }
 
 export interface Work {
@@ -51,12 +53,14 @@ const WORK: Record<string, Work> = {
       w: 1400,
       h: 788,
       alt: 'Home del e-commerce de XCONS con el cotizador que consulta varios corralones a la vez',
+      label: 'Cotizador multi corralón',
     },
     float: {
       src: xconsComercial,
       w: 1400,
       h: 788,
       alt: 'Landing comercial de XCONS: software para vender materiales de construcción en todos los canales',
+      label: 'Landing comercial',
     },
   },
   'FusionAds.ai': {
@@ -67,12 +71,14 @@ const WORK: Record<string, Work> = {
       w: 1400,
       h: 788,
       alt: 'Galería de plantillas de FusionAds.ai para elegir los diseños de una campaña',
+      label: 'Galería de plantillas',
     },
     float: {
       src: fusionDirections,
       w: 1400,
       h: 783,
       alt: 'Paso de FusionAds.ai que genera dos opciones de anuncio para la campaña',
+      label: 'Opciones de anuncio',
     },
   },
   Bandit: {
@@ -84,12 +90,14 @@ const WORK: Record<string, Work> = {
       h: 963,
       pos: '50% 40%',
       alt: 'Onboarding de Bandit: elección de rol junto a la foto de un músico con su guitarra',
+      label: 'Onboarding por rol',
     },
     float: {
       src: banditHome,
       w: 1400,
       h: 1011,
       alt: 'Home de Bandit con los artistas fijados y el listado de la agencia',
+      label: 'Home de la agencia',
     },
   },
   'Cubiq Digital': { accent: INK.red },

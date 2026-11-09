@@ -8,18 +8,6 @@ const DARK = '#141210';
 const COVER = '#171513';
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
-/** Mezcla dos hex en sRGB: t=0 da a, t=1 da b. Así salen los tonos claros y oscuros de cada acento. */
-const mix = (a: string, b: string, t: number) => {
-  const ch = (hex: string, k: number) => parseInt(hex.slice(1 + k * 2, 3 + k * 2), 16);
-  return `#${[0, 1, 2]
-    .map(k =>
-      Math.round(ch(a, k) + (ch(b, k) - ch(a, k)) * t)
-        .toString(16)
-        .padStart(2, '0')
-    )
-    .join('')}`;
-};
-
 /* Color pareja de cada acento para los recortes que contrastan: teal y violet no son acento de ningún caso. */
 const PARTNER: Record<string, string> = {
   [INK.lime]: INK.violet,
@@ -39,8 +27,9 @@ const load = (src: string) =>
   });
 
 /**
- * Arma las hojas del libro: tapa, y por cada caso una página de color con los datos (izquierda) y una oscura con las
- * capturas (derecha). La izquierda de un caso es el dorso de la hoja con la derecha del anterior.
+ * Arma las hojas del libro: tapa, y por cada caso un pliego en collage de papel recortado (Alexis eligió la opción B,
+ * 2026-11-08): los datos a la izquierda y las capturas pegadas a la derecha. La izquierda de un caso es el dorso de la
+ * hoja con la derecha del anterior.
  */
 export async function buildLeaves(
   work: Record<string, Work>,
@@ -76,14 +65,12 @@ export async function buildLeaves(
   );
 
   const shots = new Map<string, HTMLImageElement>();
-  const logos = new Map<string, HTMLImageElement>();
   await Promise.all(
-    Object.values(work).flatMap(w => [
-      ...[w.main, w.float]
+    Object.values(work).flatMap(w =>
+      [w.main, w.float]
         .filter((s): s is Shot => !!s)
-        .map(s => load(s.src).then(img => shots.set(s.src, img))),
-      ...(w.logo ? [load(w.logo.src).then(img => logos.set(w.logo!.src, img))] : []),
-    ])
+        .map(s => load(s.src).then(img => shots.set(s.src, img)))
+    )
   );
 
   const display = (weight: number, size: number) => `${weight} ${size}px ${FONT.display}`;
@@ -111,21 +98,6 @@ export async function buildLeaves(
     const size = w > maxW ? (max * maxW) / w : max;
     c.font = display(weight, size);
     return size;
-  };
-
-  /** Logo blanco pintado del color de la tinta: dibujo y después source-in. */
-  const tinted = (img: HTMLImageElement, w: number, h: number, color: string) => {
-    const t = document.createElement('canvas');
-    t.width = Math.round(w);
-    t.height = Math.round(h);
-    const c = t.getContext('2d');
-    if (c) {
-      c.drawImage(img, 0, 0, t.width, t.height);
-      c.globalCompositeOperation = 'source-in';
-      c.fillStyle = color;
-      c.fillRect(0, 0, t.width, t.height);
-    }
-    return t;
   };
 
   const cover = (
@@ -181,25 +153,6 @@ export async function buildLeaves(
     c.arc(x, y, r, 0, Math.PI * 2);
     c.fill();
   };
-  const ring = (c: Ctx, x: number, y: number, r: number, width: number, color: string) => {
-    c.strokeStyle = color;
-    c.lineWidth = width;
-    c.beginPath();
-    c.arc(x, y, r - width / 2, 0, Math.PI * 2);
-    c.stroke();
-  };
-
-  const ringDot = (c: Ctx, x: number, y: number, r: number, color: string, hole: string) => {
-    c.fillStyle = color;
-    c.beginPath();
-    c.arc(x, y, r, 0, Math.PI * 2);
-    c.fill();
-    c.fillStyle = hole;
-    c.beginPath();
-    c.arc(x, y, r * 0.34, 0, Math.PI * 2);
-    c.fill();
-  };
-
   /* ---------- tapa ---------- */
 
   const coverFace = async (): Promise<Face> => {
@@ -234,207 +187,252 @@ export async function buildLeaves(
     return { paper: COVER, layers };
   };
 
-  /* ---------- izquierda: el caso en el color de acento ---------- */
+  /* ---------- pliego de cada caso: collage de papel recortado ---------- */
 
+  // Las piezas del collage se miden en anchos de página (y de 0 a H) y se dibujan en px de lienzo: U px por ancho.
+  const U = pw;
+
+  /** Pieza en un lienzo justo: (x, y, w, h) en anchos de página; adentro se dibuja con el origen de la página. */
+  const piece = (
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    depth: number,
+    draw: (c: Ctx) => void
+  ) =>
+    layer(x, y / H, w, h / H, depth, c => {
+      c.translate(-x * U, -y * U);
+      draw(c);
+    });
+
+  /** Parte un texto en líneas que entran en el ancho, con la fuente ya puesta. */
+  const lines = (c: Ctx, str: string, maxW: number) => {
+    const out: string[] = [];
+    let line = '';
+    for (const word of str.split(' ')) {
+      const next = line ? `${line} ${word}` : word;
+      if (c.measureText(next).width > maxW && line) {
+        out.push(line);
+        line = word;
+      } else line = next;
+    }
+    out.push(line);
+    return out;
+  };
+
+  /** Impresión pegada: borde blanco, sombra plana corrida (sin blur, como el sitio) y una cinta arriba. Centro en px. */
+  const pasted = (
+    c: Ctx,
+    cx: number,
+    cy: number,
+    w: number,
+    h: number,
+    turn: number,
+    shadow: string,
+    tape: [number, number],
+    fill: (x: number, y: number, w: number, h: number) => void
+  ) => {
+    const b = 0.016 * U;
+    const off = 0.022 * U;
+    c.save();
+    c.translate(cx, cy);
+    c.rotate(turn);
+    c.fillStyle = shadow;
+    c.fillRect(-w / 2 - b + off, -h / 2 - b + off, w + 2 * b, h + 2 * b);
+    c.fillStyle = '#ffffff';
+    c.fillRect(-w / 2 - b, -h / 2 - b, w + 2 * b, h + 2 * b);
+    c.save();
+    c.beginPath();
+    c.rect(-w / 2, -h / 2, w, h);
+    c.clip();
+    fill(-w / 2, -h / 2, w, h);
+    c.restore();
+    c.translate(tape[0] * w, -h / 2 - b);
+    c.rotate(tape[1]);
+    c.fillStyle = 'rgba(239,230,200,0.82)';
+    c.fillRect(-0.085 * U, -0.024 * U, 0.17 * U, 0.048 * U);
+    c.restore();
+  };
+
+  /** Rótulo en píldora; con `right`, x es el borde derecho. */
+  const pill = (
+    c: Ctx,
+    str: string,
+    x: number,
+    y: number,
+    bg: string,
+    fg: string,
+    right = false
+  ) => {
+    c.font = text(0.027 * U);
+    const pad = 0.022 * U;
+    const w = c.measureText(str).width + 2 * pad;
+    const h = 0.054 * U;
+    const left = right ? x - w : x;
+    c.fillStyle = bg;
+    c.beginPath();
+    c.roundRect(left, y, w, h, h / 2);
+    c.fill();
+    c.fillStyle = fg;
+    c.textBaseline = 'middle';
+    c.fillText(str, left + pad, y + h / 2 + 0.002 * U);
+  };
+
+  /* Izquierda: sticker con el número, el nombre grande sobre el círculo del caso y la tarjeta con el resumen. */
   const metaFace = (i: number): Face => {
     const stop = ROUTE[i];
     const w = work[stop.company] ?? { accent: INK.cream };
-    const ink = INK.ground;
-    const logo = w.logo && logos.get(w.logo.src);
-    const tint = mix(w.accent, INK.cream, 0.38);
-    const shade = mix(w.accent, INK.ground, 0.32);
     const partner = partnerOf(w.accent);
+    const sticker = w.accent === INK.red ? INK.ground : INK.red;
     return {
-      paper: w.accent,
+      paper: INK.cream,
       layers: [
-        // Fondo: aro grande en el tono claro que entra desde abajo y medio disco en el tono oscuro.
+        // El círculo cruza el lomo y sigue en la página derecha, a la misma profundidad. Abajo, un bloque del color pareja.
         shapes(0.15, c => {
-          ring(c, 0.98, H * 0.86, 0.62, 0.22, tint);
-          disc(c, 0, H, 0.34, shade);
+          disc(c, 0.99, 0.565, 0.435, w.accent);
+          c.fillStyle = partner;
+          c.beginPath();
+          c.roundRect(-0.1, 1.04, 0.73, 0.45, [0, 0.37, 0, 0]);
+          c.fill();
         }),
-        // El número con su sombra plana corrida, en el tono oscuro: el recorte de papel del resto del sitio.
-        // Se mide el glifo y se ajusta al lienzo con lugar para la sombra: lo que sale del lienzo se corta.
-        layer(0.06, 0.035, 0.64, 0.36, 0.5, (c, cw, ch) => {
-          const str = pad2(i + 1);
-          const sx = 16 * u;
-          const sy = 12 * u;
-          const m0 = 4 * u;
+        piece(0.04, 0.24, 0.92, 0.52, 0.55, c => {
+          const name = stop.company.toUpperCase();
+          const size = fit(c, name, 900, 0.43 * U, 0.86 * U);
+          c.fillStyle = INK.ground;
           c.textBaseline = 'alphabetic';
-          c.font = display(900, 100);
-          const m = c.measureText(str);
-          const gw = m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
-          const gh = m.actualBoundingBoxAscent + m.actualBoundingBoxDescent;
-          const k = Math.min((cw - sx - 2 * m0) / gw, (ch - sy - 2 * m0) / gh);
-          c.font = display(900, 100 * k);
-          const x = m0 + m.actualBoundingBoxLeft * k;
-          const y = m0 + m.actualBoundingBoxAscent * k;
-          c.fillStyle = shade;
-          c.fillText(str, x + sx, y + sy);
-          c.fillStyle = ink;
-          c.fillText(str, x, y);
+          c.fillText(name, 0.074 * U, 0.315 * U + size * 0.8);
         }),
-        layer(0.08, 0.43, 0.84, 0.55, 0.22, (c, cw) => {
-          c.fillStyle = ink;
+        piece(0.05, 0.69, 0.8, 0.62, 0.35, c => {
+          const cw = 0.667 * U;
+          const p = 0.042 * U;
+          const lh = 0.04 * U;
+          const headH = 0.056 * U;
+          c.font = text(0.027 * U);
+          const body = lines(c, stop.text, cw - 2 * p);
+          const ch = p + headH + 0.022 * U + body.length * lh + 0.026 * U + 0.042 * U + p;
+          c.save();
+          c.translate(0.104 * U + cw / 2, 0.74 * U + ch / 2);
+          c.rotate(0.026);
+          c.translate(-cw / 2, -ch / 2);
+          c.fillStyle = partner;
+          c.fillRect(0.016 * U, 0.016 * U, cw, ch);
+          c.fillStyle = INK.ground;
+          c.fillRect(0, 0, cw, ch);
           c.textBaseline = 'top';
-          let y = 0;
-          if (w.logo && logo) {
-            const h = 52 * u;
-            c.globalAlpha = 0.88;
-            c.drawImage(tinted(logo, (w.logo.w / w.logo.h) * h, h, ink), 0, y);
-            c.globalAlpha = 1;
-            y += h + 34 * u;
-          } else {
-            c.font = display(800, 76 * u);
-            c.fillText('CUBIQ', 0, y);
-            ringDot(c, c.measureText('CUBIQ').width + 34 * u, y + 30 * u, 22 * u, ink, w.accent);
-            c.fillStyle = ink;
-            y += 92 * u;
-          }
-          c.font = display(800, 60 * u);
-          c.fillText(stop.years.toUpperCase(), 0, y);
-          y += 64 * u;
-          const size = fit(c, stop.company.toUpperCase(), 900, 150 * u, cw);
-          c.fillText(stop.company.toUpperCase(), 0, y);
-          y += size * 0.9;
-          c.font = text(34 * u);
-          y = wrap(c, stop.role, 0, y, cw, 44 * u) + 18 * u;
-          // Resumen breve del caso: el mismo texto de la Trayectoria.
-          c.font = text(29 * u);
-          c.globalAlpha = 0.82;
-          y = wrap(c, stop.text, 0, y, cw * 0.96, 41 * u) + 22 * u;
-          c.globalAlpha = 1;
-          c.font = text(34 * u);
+          const head = `${stop.years} · ${stop.role}`.toUpperCase();
+          fit(c, head, 800, headH, cw - 2 * p);
+          c.fillStyle = w.accent;
+          c.fillText(head, p, p);
+          let y = p + headH + 0.022 * U;
+          c.font = text(0.027 * U);
+          c.fillStyle = INK.cream;
+          body.forEach(l => {
+            c.fillText(l, p, y);
+            y += lh;
+          });
+          y += 0.026 * U;
           const cta = `${stop.linkLabel} →`;
-          c.fillText(cta, 0, y);
-          c.fillRect(0, y + 44 * u, c.measureText(cta).width, 3 * u);
+          c.font = text(0.031 * U);
+          c.fillStyle = w.accent;
+          c.fillText(cta, p, y);
+          c.fillRect(p, y + 0.042 * U, c.measureText(cta).width, 0.004 * U);
+          c.restore();
         }),
-        // Adelante, en el color pareja: cuarto de disco en la esquina y un aro chico que pisa el número.
-        shapes(1.2, c => {
-          disc(c, 1, 0, 0.26, partner);
-          disc(c, 0.82, H * 0.26, 0.05, partner);
-          disc(c, 0.82, H * 0.26, 0.018, w.accent);
+        piece(0.05, 0.05, 0.27, 0.27, 1.15, c => {
+          c.translate(0.185 * U, 0.185 * U);
+          c.rotate(-0.17);
+          disc(c, 0, 0, 0.104 * U, sticker);
+          c.fillStyle = INK.cream;
+          c.font = display(900, 0.13 * U);
+          c.textAlign = 'center';
+          c.textBaseline = 'middle';
+          c.fillText(pad2(i + 1), 0, 0.01 * U);
         }),
       ],
     };
   };
 
-  /* ---------- derecha: las capturas sobre la plancha ---------- */
-
-  const frame = (
-    c: Ctx,
-    img: HTMLImageElement,
-    shot: Shot,
-    x: number,
-    y: number,
-    w: number,
-    accent: string
-  ) => {
-    const bar = 54 * u;
-    const h = w * (shot.h / shot.w);
-    const r = 22 * u;
-    c.save();
-    c.beginPath();
-    c.roundRect(x, y, w, bar + h, r);
-    c.clip();
-    c.fillStyle = '#221f1b';
-    c.fillRect(x, y, w, bar);
-    [accent, INK.cream, INK.cream].forEach((col, k) => {
-      c.globalAlpha = k ? 0.4 : 1;
-      ringDot(c, x + 30 * u + k * 30 * u, y + bar / 2, 9 * u, col, '#221f1b');
-    });
-    c.globalAlpha = 1;
-    c.fillStyle = 'rgba(239,230,200,0.08)';
-    c.beginPath();
-    c.roundRect(x + 140 * u, y + bar / 2 - 12 * u, w * 0.4, 24 * u, 12 * u);
-    c.fill();
-    cover(c, img, x, y + bar, w, h, shot.pos);
-    c.restore();
-    return bar + h;
-  };
-
+  /* Derecha: las capturas impresas y pegadas, con rótulos. Cubiq no tiene capturas: la red de nodos va como impresión. */
   const workFace = (i: number): Face => {
     const stop = ROUTE[i];
     const w = work[stop.company] ?? { accent: INK.cream };
-    const layers: Layer[] = [];
+    const partner = partnerOf(w.accent);
     const main = w.main && shots.get(w.main.src);
     const float = w.float && shots.get(w.float.src);
-    const deep = mix(w.accent, INK.ground, 0.8);
-    const mid = mix(w.accent, INK.ground, 0.55);
-    const tint = mix(w.accent, INK.cream, 0.38);
-    const partner = partnerOf(w.accent);
-    // Fondo: disco en el tono medio detrás de la captura y un arco del color pareja que entra desde abajo.
-    layers.push(
-      shapes(0.18, c => {
-        disc(c, 0.6, H * 0.36, 0.44, mid);
-        ring(c, 0.06, H * 0.97, 0.34, 0.1, partner);
-      })
-    );
-    if (w.main && main) {
-      const shot = w.main;
-      const fw = 0.88 * pw;
-      const off = 22 * u;
-      const fh = 54 * u + fw * (shot.h / shot.w);
-      layers.push(
-        layer(0.04, 0.08, (fw + off) / pw + 0.01, (fh + off) / ph + 0.01, 0.45, c => {
-          // Placa plana del color del caso corrida abajo a la derecha, como en el resto del sitio: sin blur.
-          c.fillStyle = w.accent;
-          c.beginPath();
-          c.roundRect(off, off, fw, fh, 22 * u);
-          c.fill();
-          frame(c, main, shot, 0, 0, fw, w.accent);
-        })
-      );
-    } else {
-      layers.push(layer(0.06, 0.14, 0.88, 0.58, 0.35, (c, cw, ch) => nodes(c, cw, ch)));
-    }
-    if (float) {
-      // Tarjeta de papel: borde crema, placa plana del color pareja corrida y un giro leve, como pegada encima.
-      const fw = 0.6 * pw;
-      const fh = fw * (10 / 16);
-      const b = 10 * u;
-      const off = 18 * u;
-      const turn = -0.07;
-      const bw = fw + 2 * b;
-      const bh = fh + 2 * b;
-      const cw = bw * Math.cos(-turn) + bh * Math.sin(-turn) + off + 8 * u;
-      const ch = bw * Math.sin(-turn) + bh * Math.cos(-turn) + off + 8 * u;
-      layers.push(
-        layer(0.36, 0.5, cw / pw, ch / ph, 0.95, c => {
-          c.translate((cw - off) / 2, (ch - off) / 2);
-          c.rotate(turn);
-          c.fillStyle = partner;
-          c.beginPath();
-          c.roundRect(-bw / 2 + off, -bh / 2 + off, bw, bh, 16 * u);
-          c.fill();
-          c.fillStyle = INK.cream;
-          c.beginPath();
-          c.roundRect(-bw / 2, -bh / 2, bw, bh, 16 * u);
-          c.fill();
-          c.beginPath();
-          c.roundRect(-fw / 2, -fh / 2, fw, fh, 9 * u);
-          c.clip();
-          cover(c, float, -fw / 2, -fh / 2, fw, fh);
-        })
-      );
-    }
-    // Adelante: recortes chicos que pisan el borde de las capturas, con el rótulo del caso al pie.
-    layers.push(
-      shapes(1.4, c => {
-        disc(c, 0.98, H * 0.05, 0.08, tint);
-        // Sin tarjeta (Cubiq) el aro va a la derecha: abajo a la izquierda pisaría la red de nodos.
-        const [dx, dy] = float ? [0.2, H * 0.6] : [0.9, H * 0.66];
-        disc(c, dx, dy, 0.05, partner);
-        disc(c, dx, dy, 0.018, deep);
+    const SHOT = 9 / 16;
+    // Sin segunda captura (Cubiq) la impresión baja al centro y un bloque del color pareja llena la esquina de abajo.
+    const solo = !(w.float && float);
+    const cy = solo ? 0.6 : 0.37;
+    const layers: Layer[] = [
+      shapes(0.15, c => {
+        disc(c, -0.01, 0.565, 0.435, w.accent);
+        if (!solo) return;
+        c.fillStyle = partner;
+        c.beginPath();
+        c.roundRect(0.45, 1.06, 0.7, 0.4, [0.35, 0, 0, 0]);
+        c.fill();
       }),
-      layer(0.06, 0.9, 0.6, 0.06, 0.12, (c, _cw, ch) => {
-        c.fillStyle = INK.cream;
-        c.globalAlpha = 0.75;
-        c.font = text(28 * u);
-        c.textBaseline = 'middle';
-        c.fillText(`${pad2(i + 1)} · ${stop.company}`, 0, ch / 2);
+      piece(0, cy - 0.35, 1, 0.72, 0.45, c => {
+        const fw = 0.86 * U;
+        pasted(c, 0.5 * U, cy * U, fw, fw * SHOT, 0.05, INK.ground, [0, -0.1], (x, y, sw, sh) => {
+          if (w.main && main) return cover(c, main, x, y, sw, sh, w.main.pos);
+          c.fillStyle = INK.ground;
+          c.fillRect(x, y, sw, sh);
+          c.translate(x, y);
+          nodes(c, sw, sh);
+        });
+      }),
+    ];
+    if (w.float && float) {
+      const shot = w.float;
+      layers.push(
+        piece(0.1, 0.64, 0.9, 0.58, 0.9, c => {
+          const fw = 0.68 * U;
+          pasted(
+            c,
+            0.56 * U,
+            0.93 * U,
+            fw,
+            fw * SHOT,
+            -0.07,
+            partner,
+            [-0.5, -0.7],
+            (x, y, sw, sh) => cover(c, float, x, y, sw, sh, shot.pos)
+          );
+        })
+      );
+    }
+    layers.push(
+      piece(0, 0.5, 1, 0.78, 1.3, c => {
+        pill(
+          c,
+          w.main?.label ?? 'Cinco canales, un solo nodo',
+          0.95 * U,
+          (cy + 0.23) * U,
+          INK.red,
+          INK.cream,
+          true
+        );
+        if (!w.float?.label) return;
+        // Flecha a mano alzada del rótulo a la segunda captura.
+        c.strokeStyle = INK.red;
+        c.lineWidth = 0.007 * U;
+        c.lineCap = 'round';
+        c.lineJoin = 'round';
+        c.beginPath();
+        c.moveTo(0.86 * U, 0.665 * U);
+        c.bezierCurveTo(0.8 * U, 0.675 * U, 0.75 * U, 0.7 * U, 0.73 * U, 0.765 * U);
+        c.stroke();
+        c.beginPath();
+        c.moveTo(0.7 * U, 0.738 * U);
+        c.lineTo(0.73 * U, 0.772 * U);
+        c.lineTo(0.765 * U, 0.748 * U);
+        c.stroke();
+        pill(c, w.float.label, 0.5 * U, 1.17 * U, w.accent, INK.ground);
       })
     );
-    return { paper: deep, layers };
+    return { paper: INK.cream, layers };
   };
 
   // Tapa con el caso 1 al dorso; después cada hoja lleva la derecha de un caso y la izquierda del siguiente.
