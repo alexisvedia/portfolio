@@ -1,17 +1,12 @@
 import React from 'react';
 import styled from 'styled-components';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FONT, INK } from './content';
 import { AI_AGENTS } from './aiAgents';
 import HiloMark from './HiloMark';
 
-/* Mismo corte que el hero mobile de PosterHome: abajo de este ancho los agentes van solo con el ícono. */
-const MOBILE = '(max-width: 860px)';
-/* Estacionado, el agente es solo el ícono (TAG px), corrido TAG_AT de la punta del cursor (estilos de Tag). */
-const TAG = 25;
-const TAG_AT = { x: 14, y: 20 };
-const ROW_SCALE = 0.85;
+/* Mismo corte que el hero mobile de PosterHome: abajo de este ancho no hay agentes, cada pieza entra sola. */
+export const HERO_MOBILE = '(max-width: 860px)';
 
 /* Caja de selección de un agente: borde punteado, cuatro manijas y la medida en vivo. */
 const Frame: React.FC<{ id: string; color: string; ink: string; children?: React.ReactNode }> = ({ id, color, ink, children }) => (
@@ -66,7 +61,6 @@ const HeroAgents: React.FC = () => (
 );
 
 type Rect = { x: number; y: number; w: number; h: number };
-type Point = { x: number; y: number };
 type Id = (typeof AI_AGENTS)[number]['id'];
 const ZERO: Rect = { x: 0, y: 0, w: 0, h: 0 };
 
@@ -74,11 +68,13 @@ const ZERO: Rect = { x: 0, y: 0, w: 0, h: 0 };
  * Entrada del hero. Arranca el logo Hilo en el centro y aparecen los siete agentes alrededor.
  * GLM se lleva el trazo del logo a la nav y DeepSeek arrastra el anillo hasta el círculo de la foto y lo traza.
  * Claude escribe el nombre, Gemini traza la grilla, ChatGPT sube la foto, Qwen suelta el texto y Grok los botones.
- * Al terminar se estacionan en fila debajo del texto, solo con el ícono en blanco.
+ * Al terminar se van: Alexis (2026-11-08) no quiere la fila de íconos en el hero.
  * Las posiciones se miden al arrancar (con las fuentes ya cargadas), relativas al hero.
+ * En mobile no hay agentes: cada pieza entra sola con su propia animación (softIntro).
  */
 /** `still`: con movimiento reducido no se anima la nav. */
 export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = false) => {
+  if (!still && window.matchMedia(HERO_MOBILE).matches) return softIntro(hero, nav);
   const q = gsap.utils.selector(hero);
   const name = q('[data-hero-name]')[0] as HTMLElement;
   const figure = q('[data-hero-portrait]')[0] as HTMLElement;
@@ -107,15 +103,13 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
   let lines = 1;
   let capH = 0;
   let capTops: number[] = [];
-  let parked: Record<Id, Point> | null = null;
   const measure = () => {
     const h = hero.getBoundingClientRect();
     // Medidas en px del hero sin escalar: el scrub del Manifiesto lo achica, y la nav es fixed (no se corre con el scroll).
     const k = h.width / hero.offsetWidth || 1;
     const rel = (r: DOMRect): Rect => ({ x: (r.left - h.left) / k, y: (r.top - h.top) / k, w: r.width / k, h: r.height / k });
     const fixed = (r: DOMRect): Rect => ({ x: r.left, y: r.top, w: r.width, h: r.height });
-    mobile = window.matchMedia(MOBILE).matches;
-    parked = null;
+    mobile = window.matchMedia(HERO_MOBILE).matches;
     const range = document.createRange();
     range.selectNodeContents(name);
     box.name = rel(range.getBoundingClientRect());
@@ -164,19 +158,6 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
     if (!first) steps.push({ x: box.name.x + box.name.w - box.h1.x, line: 0 });
   };
 
-  /* Al terminar quedan en fila, chicos y solo con el ícono, debajo del texto y alineados a su borde izquierdo:
-     arriba taparían la cara y a la derecha está el botón del chat. */
-  const spots = (): Record<Id, Point> => {
-    if (parked) return parked;
-    const size = TAG * ROW_SCALE;
-    const gap = 6;
-    const x0 = box.text.x;
-    const y = box.text.y + box.text.h + 10;
-    // La posición del agente es la punta del cursor: el ícono está corrido TAG_AT dentro, escalado desde la esquina.
-    parked = Object.fromEntries(AI_AGENTS.map(({ id }, i) => [id, { x: x0 + i * (size + gap) - TAG_AT.x * ROW_SCALE, y: y - TAG_AT.y * ROW_SCALE }])) as Record<Id, Point>;
-    return parked;
-  };
-
   /* Muestra las líneas de arriba enteras y la actual hasta x. La primera se abre hacia arriba y la última hacia abajo. */
   const clip = ({ x, line }: { x: number; line: number }) => {
     // Corta justo arriba de las mayúsculas de cada línea: con line-height 0.8 sobresalen del renglón.
@@ -208,13 +189,9 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
     tl
       .set(pulse[id], { x: () => Number(gsap.getProperty(agent[id], 'x')), y: () => Number(gsap.getProperty(agent[id], 'y')) }, t)
       .fromTo(pulse[id], { scale: 0.2, autoAlpha: 1 }, { scale: 1.6, autoAlpha: 0, duration: 0.45, ease: 'power2.out', immediateRender: false }, t);
-  // Al estacionar se achican, sueltan el cursor y la etiqueta pasa a ícono blanco (data-parked, estilos de Agent).
-  const arrow = (id: Id) => agent[id].querySelector(':scope > svg');
+  // Al terminar su parte, el agente se achica y se va donde está.
   const park = (id: Id, t: number) =>
-    tl
-      .to(agent[id], { x: () => spots()[id].x, y: () => spots()[id].y, scale: ROW_SCALE, transformOrigin: '0 0', duration: 0.6, ease: 'power3.inOut' }, t)
-      .to(arrow(id), { autoAlpha: 0, duration: 0.3 }, t + 0.3)
-      .set(agent[id], { attr: { 'data-parked': 1 } }, t + 0.3);
+    tl.to(agent[id], { autoAlpha: 0, scale: 0.6, transformOrigin: '0 0', duration: 0.4, ease: 'power2.in' }, t);
 
   const typing = { i: 0 };
   const orbit = { p: 0 };
@@ -349,28 +326,30 @@ export const heroIntro = (hero: HTMLElement, nav: HTMLElement | null, still = fa
   tl.to(photoBox, { autoAlpha: 0, duration: 0.3 }, O + 2.75);
   park('openai', O + 2.75);
 
-  // Al cambiar el tamaño se vuelven a ubicar.
-  let made = false;
-  tl.call(
-    () => {
-      if (made) return;
-      made = true;
-      ScrollTrigger.create({
-        trigger: hero,
-        onRefresh: () => {
-          measure();
-          const p = spots();
-          AI_AGENTS.forEach(({ id }) => {
-            gsap.set(agent[id], { ...p[id], scale: ROW_SCALE, transformOrigin: '0 0', attr: { 'data-parked': 1 } });
-            gsap.set(arrow(id), { autoAlpha: 0 });
-          });
-        },
-      });
-    },
-    [],
-    O + 3.4
-  );
+  return tl;
+};
 
+/**
+ * Entrada mobile: sin agentes ni cajas. Cada pieza entra sola y con su gesto: el nombre sube detrás de una máscara,
+ * la foto se asienta desde un zoom leve, la grilla se abre desde el centro, el aro se traza, el texto se enfoca y los
+ * botones caen con un rebote corto.
+ */
+const softIntro = (hero: HTMLElement, nav: HTMLElement | null) => {
+  const q = gsap.utils.selector(hero);
+  const name = q('[data-hero-name]')[0] as HTMLElement;
+  const img = (q('[data-hero-portrait]')[0] as HTMLElement).querySelector('img') as HTMLElement;
+  const text = q('[data-hero-text]')[0] as HTMLElement;
+  const ctas = q('[data-hero-ctas]')[0] as HTMLElement;
+  const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } });
+  // La máscara pasa los bordes de la caja: con line-height 0.8 las mayúsculas sobresalen del renglón.
+  tl.fromTo(name, { clipPath: 'inset(-30% -5% 100% -5%)', y: 28 }, { clipPath: 'inset(-30% -5% -30% -5%)', y: 0, duration: 1.2, clearProps: 'clipPath,transform' }, 0)
+    .fromTo(img, { scale: 1.12, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 1.5, ease: 'power3.out', clearProps: 'transform' }, 0.15)
+    .fromTo(q('[data-guide-v], [data-guide-h]'), { drawSVG: '50% 50%' }, { drawSVG: '0% 100%', duration: 1.1, ease: 'power2.inOut', stagger: 0.03 }, 0.3)
+    .fromTo(q('[data-guide-circle]'), { drawSVG: '0% 0%' }, { drawSVG: '0% 100%', duration: 1.2, ease: 'power2.inOut' }, 0.45)
+    .fromTo(q('[data-guide-dot]'), { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: 0.5, ease: 'back.out(3)' }, 1.4)
+    .from([...text.children].filter(c => c !== ctas), { autoAlpha: 0, y: 18, filter: 'blur(6px)', duration: 0.9, ease: 'power3.out', stagger: 0.12, clearProps: 'filter' }, 0.6)
+    .from(ctas.children, { autoAlpha: 0, y: 14, scale: 0.96, duration: 0.7, ease: 'back.out(1.6)', stagger: 0.1 }, 1.05);
+  if (nav) tl.from(nav, { autoAlpha: 0, y: -12, duration: 0.7 }, 0.2);
   return tl;
 };
 
@@ -409,17 +388,6 @@ const Agent = styled.div`
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.35));
   }
 
-  /* Estacionado: solo el ícono, en blanco. Los colores de la etiqueta van inline, por eso el !important. */
-  &[data-parked='1'] > span {
-    padding: 0.32rem;
-    background: transparent !important;
-    color: ${INK.cream} !important;
-    box-shadow: none;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  &[data-parked='1'] > span > span {
-    display: none;
-  }
 `;
 
 const Tag = styled.span`
@@ -442,15 +410,6 @@ const Tag = styled.span`
     width: 0.95rem;
     height: 0.95rem;
     filter: none;
-  }
-
-  /* En mobile, solo el ícono: el nombre ocuparía el hero entero. */
-  @media ${MOBILE} {
-    padding: 0.32rem;
-
-    span {
-      display: none;
-    }
   }
 `;
 

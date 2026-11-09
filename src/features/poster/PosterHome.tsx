@@ -10,7 +10,7 @@ import ConstructedWord from './ConstructedWord';
 import Portal from './Portal';
 import DepthField from './DepthField';
 import HiloMark from './HiloMark';
-import HeroAgents, { heroIntro } from './HeroAgents';
+import HeroAgents, { HERO_MOBILE, heroIntro } from './HeroAgents';
 import Stitch from './Stitch';
 import Almohada from './Almohada';
 import ScissorEdge from './ScissorEdge';
@@ -85,6 +85,9 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>) => {
       // Se mide al arrancar: sin Morganite cargada el nombre mide el doble y los cursores apuntan mal.
       // Con hash (/#contact) el hero no está en pantalla: la intro salta al final y la nav queda usable.
       (document.fonts?.ready ?? Promise.resolve()).then(() => { if (!alive) return; if (location.hash) tl.progress(1); else tl.play(); });
+      // Desktop: un clic en el hero corta la intro y la deja terminada. En mobile no: el toque para scrollear la cortaría.
+      const skip = () => tl.progress(1);
+      if (!window.matchMedia(HERO_MOBILE).matches) heroRoot.addEventListener('pointerdown', skip, { once: true });
 
       // Manifiesto: el texto se ilumina palabra por palabra.
       // SplitText instancia Intl.Segmenter al cargar: se importa aparte para que sin él no caiga todo el sitio.
@@ -143,6 +146,7 @@ const usePosterMotion = (root: React.RefObject<HTMLDivElement>) => {
 
       return () => {
         alive = false;
+        heroRoot.removeEventListener('pointerdown', skip);
       };
     });
 
