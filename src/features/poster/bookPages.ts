@@ -8,19 +8,15 @@ const DARK = '#141210';
 const COVER = '#171513';
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
-/* Color pareja de cada acento para los recortes que contrastan: teal y violet no son acento de ningún caso. */
-const PARTNER: Record<string, string> = {
-  [INK.lime]: INK.violet,
-  [INK.orange]: INK.teal,
-  [INK.blue]: INK.orange,
-  [INK.red]: INK.teal,
+/** Tonos de un color: t > 0 lo aclara hacia blanco, t < 0 lo oscurece hacia negro; `a` es la opacidad. */
+const shade = (hex: string) => {
+  const n = parseInt(hex.slice(1), 16);
+  const rgb = [n >> 16, (n >> 8) & 255, n & 255];
+  return (t: number, a = 1) => {
+    const [r, g, b] = rgb.map(v => Math.round(t > 0 ? v + (255 - v) * t : v * (1 + t)));
+    return `rgba(${r},${g},${b},${a})`;
+  };
 };
-const partnerOf = (accent: string) => PARTNER[accent] ?? INK.violet;
-/** Colores del pliego: los de la marca si están cargados; si no (Cubiq), el acento del sitio y su pareja. */
-const inks = (w: Work) => ({
-  ink: w.brand?.color ?? w.accent,
-  partner: w.brand?.partner ?? partnerOf(w.accent),
-});
 
 const load = (src: string) =>
   new Promise<HTMLImageElement>((resolve, reject) => {
@@ -85,7 +81,6 @@ export async function buildLeaves(
     )
   );
 
-  const display = (weight: number, size: number) => `${weight} ${size}px ${FONT.display}`;
   const text = (size: number) => `400 ${size}px ${FONT.text}`;
 
   /** Texto en varias líneas dentro de un ancho; devuelve la y donde terminó. */
@@ -101,15 +96,6 @@ export async function buildLeaves(
     }
     c.fillText(line, x, y);
     return y + lh;
-  };
-
-  /** Tamaño de fuente que entra en el ancho, sin pasar el máximo. */
-  const fit = (c: Ctx, str: string, weight: number, max: number, maxW: number) => {
-    c.font = display(weight, max);
-    const w = c.measureText(str).width;
-    const size = w > maxW ? (max * maxW) / w : max;
-    c.font = display(weight, size);
-    return size;
   };
 
   const cover = (
@@ -159,12 +145,6 @@ export async function buildLeaves(
       0.5
     );
   const H = ph / pw;
-  const disc = (c: Ctx, x: number, y: number, r: number, color: string) => {
-    c.fillStyle = color;
-    c.beginPath();
-    c.arc(x, y, r, 0, Math.PI * 2);
-    c.fill();
-  };
   /* ---------- tapa ---------- */
 
   const coverFace = async (): Promise<Face> => {
@@ -233,243 +213,240 @@ export async function buildLeaves(
     return out;
   };
 
-  /** Impresión pegada: borde blanco, sombra plana corrida (sin blur, como el sitio) y una cinta arriba. Centro en px. */
-  const pasted = (
-    c: Ctx,
-    cx: number,
-    cy: number,
-    w: number,
-    h: number,
-    turn: number,
-    shadow: string,
-    tape: [number, number],
-    fill: (x: number, y: number, w: number, h: number) => void
-  ) => {
-    const b = 0.016 * U;
-    const off = 0.022 * U;
-    c.save();
-    c.translate(cx, cy);
-    c.rotate(turn);
-    c.fillStyle = shadow;
-    c.fillRect(-w / 2 - b + off, -h / 2 - b + off, w + 2 * b, h + 2 * b);
-    c.fillStyle = '#ffffff';
-    c.fillRect(-w / 2 - b, -h / 2 - b, w + 2 * b, h + 2 * b);
-    c.save();
-    c.beginPath();
-    c.rect(-w / 2, -h / 2, w, h);
-    c.clip();
-    fill(-w / 2, -h / 2, w, h);
-    c.restore();
-    c.translate(tape[0] * w, -h / 2 - b);
-    c.rotate(tape[1]);
-    c.fillStyle = 'rgba(239,230,200,0.82)';
-    c.fillRect(-0.085 * U, -0.024 * U, 0.17 * U, 0.048 * U);
-    c.restore();
+  /** Impresión pegada: borde blanco y sombra plana corrida (sin blur, como el sitio). Centro en px. */
+  /** Glow, grano y vidrio: el pliego sigue el estilo "luz difusa" (Portfolio/estilo-luz-difusa.md, 2026-11-09). */
+  const grain = (() => {
+    const n = document.createElement('canvas');
+    n.width = n.height = 128;
+    const g = n.getContext('2d');
+    if (!g) return null;
+    const img = g.createImageData(128, 128);
+    for (let k = 0; k < img.data.length; k += 4) {
+      const v = Math.random() * 255;
+      img.data[k] = img.data[k + 1] = img.data[k + 2] = v;
+      img.data[k + 3] = 255;
+    }
+    g.putImageData(img, 0, 0);
+    return n;
+  })();
+
+  /** Campo de color con viñeta y grano; `draw` pinta el gradiente en unidades de ancho de página. */
+  const field = (draw: (c: Ctx) => void) =>
+    shapes(0.12, c => {
+      draw(c);
+      if (!grain) return;
+      c.setTransform(1, 0, 0, 1, 0, 0);
+      const pat = c.createPattern(grain, 'repeat');
+      if (!pat) return;
+      c.globalAlpha = 0.045; // la capa va a media resolución: más alto se ve manchado
+      c.globalCompositeOperation = 'overlay';
+      c.fillStyle = pat;
+      c.fillRect(0, 0, c.canvas.width, c.canvas.height);
+    });
+
+  const glow = (c: Ctx, x: number, y: number, r: number, color: string) => {
+    const g = c.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, color);
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    c.fillStyle = g;
+    c.fillRect(x - r, y - r, 2 * r, 2 * r);
   };
 
-  /** Rótulo en píldora; con `right`, x es el borde derecho. */
-  const pill = (
-    c: Ctx,
-    str: string,
-    x: number,
-    y: number,
-    bg: string,
-    fg: string,
-    right = false
-  ) => {
-    c.font = text(0.027 * U);
-    const pad = 0.022 * U;
-    const w = c.measureText(str).width + 2 * pad;
-    const h = 0.054 * U;
-    const left = right ? x - w : x;
-    c.fillStyle = bg;
+  /** Píldora de vidrio: relleno blanco translúcido y borde de 1 px, sin sombra. Devuelve el ancho. */
+  const glass = (c: Ctx, x: number, y: number, w: number, h: number) => {
     c.beginPath();
-    c.roundRect(left, y, w, h, h / 2);
+    c.roundRect(x, y, w, h, h / 2);
+    c.fillStyle = 'rgba(255,255,255,0.14)';
     c.fill();
-    c.fillStyle = fg;
-    c.textBaseline = 'middle';
-    c.fillText(str, left + pad, y + h / 2 + 0.002 * U);
+    c.strokeStyle = 'rgba(255,255,255,0.38)';
+    c.lineWidth = Math.max(1, 0.002 * U);
+    c.stroke();
   };
 
-  /* Izquierda: sticker con el número, el nombre grande sobre el círculo del caso y la tarjeta con el resumen. */
+  const M = 0.091; // margen de página, en anchos
+
+  /* Izquierda: campo del color de la empresa con un halo claro, datos en blanco y el único botón sólido. */
   const metaFace = (i: number): Face => {
     const stop = ROUTE[i];
-    const w = work[stop.company] ?? { accent: INK.cream };
-    const { ink, partner } = inks(w);
+    const w = work[stop.company] ?? { accent: INK.red };
+    const tone = shade(w.accent);
     const logo = w.logo && logos.get(w.logo.src);
     return {
-      paper: INK.cream,
+      paper: w.accent,
       layers: [
-        // El círculo cruza el lomo y sigue en la página derecha, a la misma profundidad. Abajo, un bloque del color pareja.
-        shapes(0.15, c => {
-          disc(c, 0.99, 0.565, 0.435, ink);
-          c.fillStyle = partner;
-          c.beginPath();
-          c.roundRect(-0.1, 1.04, 0.73, 0.45, [0, 0.37, 0, 0]);
-          c.fill();
+        field(c => {
+          const g = c.createLinearGradient(0, 0, 0.6, H);
+          g.addColorStop(0, tone(0.3));
+          g.addColorStop(0.45, w.accent);
+          g.addColorStop(1, tone(-0.4));
+          c.fillStyle = g;
+          c.fillRect(-0.1, -0.1, 1.2, H + 0.2);
+          glow(c, 0.85, 0.2, 0.5, tone(0.8, 0.75));
+          glow(c, 0.1, H + 0.1, 0.8, tone(-0.6, 0.8));
         }),
-        piece(0.04, 0.24, 0.92, 0.52, 0.55, c => {
-          const name = stop.company.toUpperCase();
-          const size = fit(c, name, 900, 0.43 * U, 0.86 * U);
-          c.fillStyle = INK.ground;
-          c.textBaseline = 'alphabetic';
-          c.fillText(name, 0.074 * U, 0.315 * U + size * 0.8);
-        }),
-        piece(0.05, 0.69, 0.8, 0.62, 0.35, c => {
-          const cw = 0.667 * U;
-          const p = 0.042 * U;
-          const lh = 0.04 * U;
-          const headH = 0.056 * U;
-          c.font = text(0.027 * U);
-          const body = lines(c, stop.text, cw - 2 * p);
-          const ch = p + headH + 0.022 * U + body.length * lh + 0.026 * U + 0.042 * U + p;
-          c.save();
-          c.translate(0.104 * U + cw / 2, 0.74 * U + ch / 2);
-          c.rotate(0.026);
-          c.translate(-cw / 2, -ch / 2);
-          c.fillStyle = partner;
-          c.fillRect(0.016 * U, 0.016 * U, cw, ch);
-          c.fillStyle = INK.ground;
-          c.fillRect(0, 0, cw, ch);
+        piece(0, 0, 1, H, 0.45, c => {
+          const x = M * U;
+          const maxW = (1 - 2 * M - 0.08) * U;
           c.textBaseline = 'top';
-          const head = `${stop.years} · ${stop.role}`.toUpperCase();
-          fit(c, head, 800, headH, cw - 2 * p);
-          c.fillStyle = ink;
-          c.fillText(head, p, p);
-          let y = p + headH + 0.022 * U;
-          c.font = text(0.027 * U);
-          c.fillStyle = INK.cream;
-          body.forEach(l => {
-            c.fillText(l, p, y);
-            y += lh;
+          c.fillStyle = '#fff';
+          // Chip con el número y los años.
+          c.font = text(0.026 * U);
+          const chip = `Caso ${pad2(i + 1)} · ${stop.years}`;
+          const ch = 0.062 * U;
+          const cw = c.measureText(chip).width + 0.064 * U;
+          glass(c, x, M * U, cw, ch);
+          c.fillStyle = '#fff';
+          c.fillText(chip, x + 0.032 * U, M * U + 0.018 * U);
+          // Nombre en la grotesca del sitio, regular y grande.
+          let size = 0.17 * U;
+          c.font = text(size);
+          const nw = c.measureText(stop.company).width;
+          if (nw > maxW) size = (size * maxW) / nw;
+          c.font = text(size);
+          let y = M * U + ch + 0.05 * U;
+          c.fillText(stop.company, x - size * 0.04, y);
+          y += size * 1.02;
+          c.font = text(0.032 * U);
+          c.globalAlpha = 0.6;
+          c.fillText(stop.role, x, y);
+          y += 0.075 * U;
+          c.globalAlpha = 0.82;
+          c.font = text(0.03 * U);
+          lines(c, stop.text, maxW).forEach(l => {
+            c.fillText(l, x, y);
+            y += 0.046 * U;
           });
-          y += 0.026 * U;
+          c.globalAlpha = 1;
+          // Fila de vidrio con el rótulo y el botón blanco, el único elemento sólido del pliego.
+          y += 0.05 * U;
+          const label = w.main?.label ?? 'Cinco canales, un solo nodo';
+          c.font = text(0.026 * U);
+          const lw = c.measureText(label).width;
           const cta = `${stop.linkLabel} →`;
-          c.font = text(0.031 * U);
-          c.fillStyle = INK.cream;
-          c.fillText(cta, p, y);
-          c.fillStyle = ink;
-          c.fillRect(p, y + 0.042 * U, c.measureText(cta).width, 0.006 * U);
-          c.restore();
-        }),
-        piece(0.05, 0.05, 0.27, 0.27, 1.15, c => {
-          c.translate(0.185 * U, 0.185 * U);
-          c.rotate(-0.17);
-          disc(c, 0, 0, 0.104 * U, INK.ground);
-          c.fillStyle = INK.cream;
-          c.font = display(900, 0.13 * U);
-          c.textAlign = 'center';
+          const tw = c.measureText(cta).width;
+          const p = 0.014 * U;
+          const bh = 0.082 * U;
+          const bw = tw + 0.07 * U;
+          const rw = 0.03 * U + lw + 0.03 * U + bw + p;
+          glass(c, x, y, rw, bh + 2 * p);
+          c.fillStyle = '#fff';
           c.textBaseline = 'middle';
-          c.fillText(pad2(i + 1), 0, 0.01 * U);
+          c.fillText(label, x + 0.03 * U, y + p + bh / 2);
+          const bx = x + rw - p - bw;
+          c.beginPath();
+          c.roundRect(bx, y + p, bw, bh, bh / 2);
+          c.fill();
+          c.fillStyle = tone(-0.55);
+          c.fillText(cta, bx + 0.035 * U, y + p + bh / 2);
+          // Línea de avance a la derecha, como la del reproductor.
+          const lx = (1 - M) * U;
+          c.fillStyle = 'rgba(255,255,255,0.55)';
+          c.fillRect(lx, M * U, Math.max(1, 0.002 * U), (H - 2 * M) * U);
+          c.font = text(0.024 * U);
+          c.textAlign = 'right';
+          c.textBaseline = 'top';
+          c.globalAlpha = 0.85;
+          c.fillText(pad2(i + 1), lx - 0.02 * U, M * U);
+          c.textBaseline = 'bottom';
+          c.fillText(pad2(ROUTE.length), lx - 0.02 * U, (H - M) * U);
         }),
-        // Etiqueta de la marca: el logo blanco sobre su color. Cubiq no tiene SVG: va su nombre en la tipografía del sitio.
-        piece(0.36, 0.04, 0.62, 0.24, 0.8, c => {
-          const lh = 0.064 * U;
-          const lw = logo && w.logo ? Math.min(0.34 * U, (lh * w.logo.w) / w.logo.h) : 0;
-          const h = logo && w.logo ? (lw * w.logo.h) / w.logo.w : lh;
-          c.font = display(900, 0.09 * U);
-          const tw = logo ? lw : c.measureText(stop.company.toUpperCase()).width;
-          const pad = 0.04 * U;
-          const bw = tw + 2 * pad;
-          const bh = h + 2 * pad;
-          c.translate(0.93 * U - bw / 2, 0.16 * U);
-          c.rotate(0.06);
-          c.fillStyle = INK.ground;
-          c.fillRect(-bw / 2 + 0.014 * U, -bh / 2 + 0.014 * U, bw, bh);
-          c.fillStyle = ink;
-          c.fillRect(-bw / 2, -bh / 2, bw, bh);
-          if (logo) c.drawImage(logo, -tw / 2, -h / 2, tw, h);
-          else {
-            c.fillStyle = INK.cream;
-            c.textAlign = 'center';
-            c.textBaseline = 'middle';
-            c.fillText(stop.company.toUpperCase(), 0, 0.006 * U);
-          }
-        }),
+        ...(logo && w.logo
+          ? [
+              piece(0, H - 0.25, 1, 0.25, 0.6, c => {
+                const lh = 0.06 * U;
+                const lw = Math.min(0.3 * U, (lh * w.logo!.w) / w.logo!.h);
+                c.drawImage(logo, M * U, (H - M) * U - (lw * w.logo!.h) / w.logo!.w, lw, (lw * w.logo!.h) / w.logo!.w);
+              }),
+            ]
+          : []),
       ],
     };
   };
 
-  /* Derecha: las capturas impresas y pegadas, con rótulos. Cubiq no tiene capturas: la red de nodos va como impresión. */
+  /* Derecha: la captura nítida adelante; detrás, una copia barrida que disuelven tres bandas de vidrio y un brillo. */
   const workFace = (i: number): Face => {
     const stop = ROUTE[i];
-    const w = work[stop.company] ?? { accent: INK.cream };
-    const { ink, partner } = inks(w);
+    const w = work[stop.company] ?? { accent: INK.red };
+    const tone = shade(w.accent);
     const main = w.main && shots.get(w.main.src);
-    const float = w.float && shots.get(w.float.src);
-    const SHOT = 9 / 16;
-    // Sin segunda captura (Cubiq) la impresión baja al centro y un bloque del color pareja llena la esquina de abajo.
-    const solo = !(w.float && float);
-    const cy = solo ? 0.6 : 0.37;
+    const sw = 0.877;
+    const sh = sw * (9 / 16) * (w.main ? Math.min(1.2, w.main.h / w.main.w / (9 / 16)) : 1);
+    const sy = 0.333;
     const layers: Layer[] = [
-      shapes(0.15, c => {
-        disc(c, -0.01, 0.565, 0.435, ink);
-        if (!solo) return;
-        c.fillStyle = partner;
-        c.beginPath();
-        c.roundRect(0.45, 1.06, 0.7, 0.4, [0.35, 0, 0, 0]);
-        c.fill();
-      }),
-      piece(0, cy - 0.35, 1, 0.72, 0.45, c => {
-        const fw = 0.86 * U;
-        pasted(c, 0.5 * U, cy * U, fw, fw * SHOT, 0.05, INK.ground, [0, -0.1], (x, y, sw, sh) => {
-          if (w.main && main) return cover(c, main, x, y, sw, sh, w.main.pos);
-          c.fillStyle = INK.ground;
-          c.fillRect(x, y, sw, sh);
-          c.translate(x, y);
-          nodes(c, sw, sh);
-        });
+      field(c => {
+        const g = c.createLinearGradient(1, 0, 0.3, H);
+        g.addColorStop(0, tone(0.85));
+        g.addColorStop(0.4, tone(0.45));
+        g.addColorStop(1, w.accent);
+        c.fillStyle = g;
+        c.fillRect(-0.1, -0.1, 1.2, H + 0.2);
       }),
     ];
-    if (w.float && float) {
-      const shot = w.float;
-      layers.push(
-        piece(0.1, 0.64, 0.9, 0.58, 0.9, c => {
-          const fw = 0.68 * U;
-          pasted(
-            c,
-            0.56 * U,
-            0.93 * U,
-            fw,
-            fw * SHOT,
-            -0.07,
-            partner,
-            [-0.5, -0.7],
-            (x, y, sw, sh) => cover(c, float, x, y, sw, sh, shot.pos)
-          );
-        })
-      );
+    // Copia barrida: el canvas sin `filter` (Safari viejo) la saltea y queda el campo liso.
+    if (main) {
+      const probe = document.createElement('canvas').getContext('2d');
+      if (probe && 'filter' in probe)
+        layers.push(
+          piece(0, 0, 1, H, 0.25, c => {
+            c.filter = `blur(${Math.round(0.04 * U)}px) saturate(130%)`;
+            c.globalAlpha = 0.8;
+            c.drawImage(main, 0.1 * U, (sy + 0.03) * U, 1.1 * U, sh * U);
+          })
+        );
     }
     layers.push(
-      piece(0, 0.5, 1, 0.78, 1.3, c => {
-        pill(
-          c,
-          w.main?.label ?? 'Cinco canales, un solo nodo',
-          0.95 * U,
-          (cy + 0.23) * U,
-          ink,
-          INK.cream,
-          true
-        );
-        if (!w.float?.label) return;
-        // Flecha a mano alzada del rótulo a la segunda captura.
-        c.strokeStyle = ink;
-        c.lineWidth = 0.007 * U;
-        c.lineCap = 'round';
-        c.lineJoin = 'round';
+      piece(0, 0, 1, H, 0.3, c => {
+        // Bandas cada vez más lavadas hacia el borde, con su filo claro.
+        [
+          [0.58, 0.16, 0.08],
+          [0.74, 0.14, 0.16],
+          [0.88, 0.14, 0.28],
+        ].forEach(([x, bw, a]) => {
+          c.fillStyle = `rgba(255,255,255,${a})`;
+          c.fillRect(x * U, 0, bw * U, H * U);
+          c.fillStyle = 'rgba(255,255,255,0.5)';
+          c.fillRect(x * U, 0, Math.max(1, 0.002 * U), H * U);
+        });
+        glow(c, 1.05 * U, 0.6 * U, 0.45 * U, 'rgba(255,255,255,0.75)');
+      }),
+      piece(0, sy - 0.1, 1, sh + 0.25, 0.5, c => {
+        const x = 0.06 * U;
+        const y = sy * U;
+        const r = 0.02 * U;
+        c.save();
+        c.shadowColor = tone(-0.7, 0.45);
+        c.shadowBlur = 0.1 * U;
+        c.shadowOffsetY = 0.04 * U;
         c.beginPath();
-        c.moveTo(0.86 * U, 0.665 * U);
-        c.bezierCurveTo(0.8 * U, 0.675 * U, 0.75 * U, 0.7 * U, 0.73 * U, 0.765 * U);
-        c.stroke();
-        c.beginPath();
-        c.moveTo(0.7 * U, 0.738 * U);
-        c.lineTo(0.73 * U, 0.772 * U);
-        c.lineTo(0.765 * U, 0.748 * U);
-        c.stroke();
-        pill(c, w.float.label, 0.5 * U, 1.17 * U, INK.ground, INK.cream);
+        c.roundRect(x, y, sw * U, sh * U, r);
+        c.fillStyle = '#fff';
+        c.fill();
+        c.restore();
+        c.save();
+        c.clip();
+        if (w.main && main) cover(c, main, x, y, sw * U, sh * U, w.main.pos);
+        else {
+          c.fillStyle = INK.ground;
+          c.fillRect(x, y, sw * U, sh * U);
+          c.translate(x, y);
+          nodes(c, sw * U, sh * U);
+        }
+        c.restore();
+      }),
+      piece(0, H - 0.25, 1, 0.25, 0.6, c => {
+        c.fillStyle = '#fff';
+        c.textBaseline = 'bottom';
+        c.font = text(0.03 * U);
+        c.globalAlpha = 0.75;
+        const y = (H - M) * U;
+        c.fillText(w.main?.label ?? 'Cinco canales, un solo nodo', M * U, y);
+        c.globalAlpha = 0.92;
+        c.font = text(0.024 * U);
+        (c as Ctx & { letterSpacing?: string }).letterSpacing = `${0.004 * U}px`;
+        c.fillText(`${stop.company} · ${stop.years}`.toUpperCase(), M * U, y - 0.05 * U);
       })
     );
-    return { paper: INK.cream, layers };
+    return { paper: w.accent, layers };
   };
 
   // Tapa con el caso 1 al dorso; después cada hoja lleva la derecha de un caso y la izquierda del siguiente.

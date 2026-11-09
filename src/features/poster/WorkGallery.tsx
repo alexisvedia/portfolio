@@ -38,8 +38,6 @@ export interface Shot {
 
 export interface Work {
   accent: string;
-  /** Colores de la marca, solo para el libro: color principal y uno que contrasta. Medidos en las capturas de cada producto. */
-  brand?: { color: string; partner: string };
   logo?: { src: string; w: number; h: number };
   main?: Shot;
   float?: Shot;
@@ -48,8 +46,7 @@ export interface Work {
 // Por nombre de empresa en ROUTE. Cubiq no lleva capturas: es confidencial.
 const WORK: Record<string, Work> = {
   XCONS: {
-    accent: INK.lime,
-    brand: { color: '#108048', partner: '#fcb418' },
+    accent: '#108048', // color de la marca, medido en sus capturas
     logo: { src: xconsLogo, w: 102, h: 32 },
     main: {
       src: xconsHome,
@@ -67,8 +64,7 @@ const WORK: Record<string, Work> = {
     },
   },
   'FusionAds.ai': {
-    accent: INK.orange,
-    brand: { color: '#f04810', partner: INK.violet },
+    accent: '#f04810', // color de la marca, medido en sus capturas
     logo: { src: fusionLogo, w: 108, h: 19 },
     main: {
       src: fusionApp,
@@ -86,8 +82,7 @@ const WORK: Record<string, Work> = {
     },
   },
   Bandit: {
-    accent: INK.blue,
-    brand: { color: '#f01040', partner: INK.teal },
+    accent: '#f01040', // color de la marca, medido en sus capturas
     logo: { src: banditLogo, w: 109, h: 40 },
     main: {
       src: banditOnboarding,
